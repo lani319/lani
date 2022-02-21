@@ -1,0 +1,44 @@
+
+<script type="text/javascript">
+function init()
+{
+	var f = document.form1;
+	f.txtUserName.focus();
+}
+function goSubmit()
+{
+	var f = document.form1;
+	f.submit();
+}
+</script>
+<body onload="init();">
+<form name="form1" method="POST" action="admin_addOk.php">
+<table width="300px" cellpadding="0" cellspacing="0" border="0">
+<tr>
+<td width="100px">이름 : </td>
+<td><input type="text" size="10" style="width:150px;height:21px" name="txtUserName" tabindex="1"></td>
+</tr>
+<tr><td height="10px"></td></tr>
+<tr>
+<td>아이디 : </td>
+<td><input type="text" size="20" style="width:150px;height:21px" name="txtUserID" tabindex="2"></td>
+</tr>
+<tr><td height="10px"></td></tr>
+<tr>
+<td>비밀번호 : </td>
+<td><input type="password" size="20" maxlength="20" style="width:150px;height:21px" name="txtUserPassword" tabindex="3"></td>
+</tr>
+<tr><td height="10px"></td></tr>
+<tr>
+<td></td>
+<td align="right">
+<input type="button" value="등 록" onclick="goSubmit();">
+</td>
+</tr>
+</table>
+</form>
+
+
+
+
+</body>

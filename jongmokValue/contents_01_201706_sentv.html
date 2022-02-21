@@ -1,0 +1,214 @@
+<?php
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+
+//스누피
+include 'rowDataManagement/Snoopy-1.2.4/Snoopy.class.php';
+
+/*
+업종별 적정주가
+width = 790 최대사이즈
+*/ 
+
+if(!$_COOKIE['_CKE_USER_ID']){
+	popupMsg("평택촌놈 적정주가는 로그인후 이용이 가능합니다. 회원가입 후 이용 바랍니다.");
+	echo "<script> top.location.href='http://www.502.co.kr/member' </script>";
+	exit();
+}
+
+
+if($searchKeyword==null || $searchKeyword==""){
+
+exit;
+
+}
+/*
+for($i = 1 ; $i < 1000 ; $i++)
+{
+  if($searchKeyword == $i)
+  {
+	echo "<script>alert('종목명 또는 종목코드를 확인해주세요');</script>";
+		exit;
+  }
+}
+
+
+if($searchKeyword == "00"
+|| $searchKeyword == "01"
+|| $searchKeyword == "02"
+|| $searchKeyword == "03"
+|| $searchKeyword == "04"
+|| $searchKeyword == "05"
+|| $searchKeyword == "06"
+|| $searchKeyword == "07"
+|| $searchKeyword == "08"
+|| $searchKeyword == "09"
+){
+echo "<script>alert('종목명 또는 종목코드를 확인해주세요');</script>";
+exit;
+}
+*/
+
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+
+
+?>
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="css/table02.css">
+</head>
+<body style="margin-left=0">
+<table width="600px" border="0" cellpadding="0" cellspacing="0" class="table01">
+<tr height="40px">
+<td><b>종목명</td>
+<td><b>종가</td>
+<td><b>적정주가</td>
+<td colspan="2"><b>비교값</td>
+</tr>
+<?php
+	$sql = "select name,value,currentValue,code,industry from jongmokValue where name like '%$searchKeyword%' or code like '%$searchKeyword%' and outFlag='F'  order by idx ASC ";
+	//echo $sql;	
+	
+	$tmpRs = mysql_query($sql);		
+	$cnt = mysql_num_rows($tmpRs);
+	if($cnt ==0){
+	echo "<script>alert('종목이 없습니다. 종목명 또는 종목코드를 다시 확인해주세요.');</script>";
+	exit;
+	}
+	while ($rs=mysql_fetch_array($tmpRs)) {		
+	
+	//업종찾기
+	$industryName = $rs[industry];
+	
+	//스누피
+	$code = $searchKeyword;
+
+	$s = new Snoopy;
+	
+	$s->fetch("http://stock.daum.net/item/main.daum?code=$code");
+	
+	$txt = $s->results;
+	
+	$txt=iconv("UTF-8","euc-kr",$txt);
+	
+
+	$txt = str_replace("<!--"," ",$txt);
+	$txt = str_replace("-->"," ",$txt);
+	$txt = "<!--".$txt."-->";
+	$txt =  str_replace('"',"'",$txt);
+	
+	
+	//종목명
+	$test = explode("document.title = '",$txt); //오리지날 코드	
+	
+	$txt = "<!--".$test[1]."-->";	
+	
+	$test = explode(".trim()",$txt);
+	
+	$jongmokNametmp = explode(":",$test[0]);
+	$jongmokName = str_replace("<!--","",$jongmokNametmp[0]);	
+	$curVal = str_replace("-->","",$jongmokNametmp[1]);
+	$curVal = str_replace("'","",$curVal);
+	$curVal = Trim(str_replace(",","",$curVal));
+	
+	//스누피 끝 / 실시간 종가 계산
+
+	
+		
+		$valueHighDown = number_format($curVal/$rs["value"],2);
+		if($valueHighDown > 1){
+			$imgUrl = "http://502.co.kr/upload_file/WImgPost/2017/12/1513132829109.gif";
+		
+			$colorUpDown = "red";
+			$comment = "<font color='red'><b>고평가</b></font>";
+		}
+		else{
+			$imgUrl = "http://502.co.kr/upload_file/WImgPost/2017/12/1513132838442.gif";
+			$colorUpDown = "blue";
+			$comment = "<font color='Blue'><b>저평가</b></font>";
+		}
+		?>		
+		<tr>
+		<td height="30px"><font size="4"><b><?=$rs[name]?></b></td>				
+		<td><b><font color="black" size="4"><?=number_format($curVal)?></td><!-- 종가 -->		
+		<td><b><font color="red" size="4"><?=number_format($rs[value])?></td><!-- 적정주가 -->
+		<td><b><font color="<?=$colorUpDown?>" size="4"><?=$valueHighDown?></td>
+		
+		<td><img src="<?=$imgUrl?>" width="40px"></td>		
+		</tr>
+		<?php
+	}
+	?>		
+</table>
+<!--
+<iframe width=1000px height=480px frameborder=0  src = "../2016jongmokValue/ptcn_chart2.php?code=<?=$searchKeyword?>"></iframe>
+-->
+<p><p><p><!-- 고평가 -->
+<table width="500px" border="0" cellpadding="0" cellspacing="0" class="table01">
+<tr height="20px">
+<td colspan="10" bgcolor="#CC3D3D"><b><font color='#FFFFFF'><?=$industryName?>업종 고평가 Top5 </td>
+</tr>
+<tr height="40px">
+<td><b>종목명</td>
+<td><b>종목코드</td>
+<td><b>비교값</td>
+<td><b>기준날짜</td>
+</tr>
+<?php
+$sql = "select name,code,currentValue/value as compareValue,currentDate from jongmokValue where industry = '$industryName' and outFlag='F'  order by currentValue/value DESC limit 0,5 ";
+//	echo $sql;	
+	
+	$tmpRs = mysql_query($sql);		
+	while ($rs=mysql_fetch_array($tmpRs)) {		
+	?>
+<tr height="40px">
+<td><b><?=$rs[name]?></td>
+<td><b><?=$rs[code]?></td>
+<td><b><?=$rs[compareValue]?></td>
+<td><b><?=$rs[currentDate]?></td>
+</tr>	
+	<?php	
+	}
+?>
+</table>
+<p><p><p>
+<p><p><p>
+<table width="500px" border="0" cellpadding="0" cellspacing="0" class="table01">
+<tr height="20px">
+<td colspan="10" bgcolor="#050099"><b><font color='#FFFFFF'><?=$industryName?>업종 저평가 Top5 </td>
+</tr>
+<tr height="40px">
+<td><b>종목명</td>
+<td><b>종목코드</td>
+<td><b>비교값</td>
+<td><b>기준날짜</td>
+</tr>
+<?php
+$sql = "select name,code,currentValue/value as compareValue,currentDate from jongmokValue where industry = '$industryName' and outFlag='F'   order by currentValue/value ASC limit 0,5 ";
+//	echo $sql;	
+	
+	$tmpRs = mysql_query($sql);		
+	while ($rs=mysql_fetch_array($tmpRs)) {		
+	?>
+<tr height="40px">
+<td><b><?=$rs[name]?></td>
+<td><b><?=$rs[code]?></td>
+<td><b><?=$rs[compareValue]?></td>
+<td><b><?=$rs[currentDate]?></td>
+</tr>	
+	<?php	
+	}
+?>
+</table>
+<p><p><p>
+
+<p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p>
+</body>
+</html>
+
+

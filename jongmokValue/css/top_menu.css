@@ -1,0 +1,119 @@
+body {
+    	
+	margin-left: 0px;
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+
+	scrollbar-face-color:#CFCFCF ;
+	scrollbar-highlight-color:#F6F6F6 ;
+	scrollbar-3dlight-color:#595959 ;
+	scrollbar-shadow-color:#595959 ;
+	scrollbar-darkshadow-color:#FFFFFF ;
+	scrollbar-track-color: #CFCFCF ;
+	scrollbar-arrow-color:#FFFFFF ;
+	FONT-FAMILY: ±¼¸²;
+}
+
+TD {
+	FONT-SIZE: 9pt; COLOR: #404040; FONT-FAMILY: ±¼¸²; word-spacing: 0; line-height: 17PX; letter-spacing: 0;
+}
+
+.table01 {
+	
+	border-collapse:collapse;
+	border:1px solid #FFCA5E;
+	FONT-FAMILY: ±¼¸²;
+}
+
+.thSearch01 {
+	height: 20px;	
+	font-size: 1.0em;
+	font-weight: bold;
+	padding: 0px 0px;
+	margin: 0px 0px 0px;
+	text-align: center;
+	border-right: 1px solid #FCF1D4;
+	background:#333 url(http://www.502.co.kr/lani/jongmokValue/img/menu_bg.jpg) repeat-x;
+	FONT-FAMILY: ±¼¸²;
+	
+}
+.white {
+	color : #FFFFFF;
+	FONT-FAMILY: ±¼¸²;
+}
+.brown {
+	color : #800000;
+	FONT-FAMILY: ±¼¸²;
+}
+.input05 {
+	height:39px; BORDER-RIGHT: #3D84F1 2px solid; BORDER-TOP: #3D84F1 2px solid; FONT-SIZE: 15pt; BORDER-LEFT: #3D84F1 2px solid; COLOR: #333333; BORDER-BOTTOM: #3D84F1 2px solid; FONT-FAMILY: '±¼¸²'; BACKGROUND-COLOR: #FFFFFF; 
+	FONT-WEIGHT:BOLD;		
+}
+
+.thRemain {	
+	font-size: 0.8em;	
+	padding: 0px 0px;
+	margin: 0px 0px 0px;	
+	FONT-FAMILY: ±¼¸²;
+}
+
+.btnSearch
+{
+	height:38px; 
+	width: 95px;	
+	FONT-SIZE: 15pt; 	
+	COLOR: #FFFFFF; 	
+	FONT-FAMILY: '±¼¸²'; 	
+	FONT-WEIGHT:BOLD;		
+	BORDER-RIGHT: #FF4500 0px solid;
+	BORDER-LEFT: #FF4500 0px solid;
+	BORDER-TOP: #FF4500 0px solid;
+	BORDER-BOTTOM: #FF4500 0px solid;
+	background:#333;
+}
+
+.btnRecharge
+{
+	height:34px; 
+	width: 140px;	
+	FONT-SIZE: 15pt; 	
+	COLOR: #FFFFFF; 	
+	FONT-FAMILY: '±¼¸²'; 	
+	FONT-WEIGHT:BOLD;		
+	background:#333 url(http://www.502.co.kr/lani/jongmokValue/img/btnRecharge.gif) repeat-x;		
+	
+}
+
+.trRight01
+{
+	height: 20px;	
+	font-size: 10pt;
+	font-weight: bold;
+	padding: 0px 0px;
+	margin: 0px 0px 0px;
+	text-align: center;	
+	background:#333 url(http://www.502.co.kr/lani/jongmokValue/img/menu_bg.jpg) repeat-x;	
+	FONT-FAMILY: ±¼¸²;
+}
+.tableMypage
+{
+	border-collapse:collapse;
+	border:3px solid #FFCA5E;
+	FONT-FAMILY: ±¼¸²;
+}
+
+tbody th{
+	FONT-SIZE: 10pt; COLOR: #404040; FONT-FAMILY: ±¼¸²; word-spacing: 0; line-height: 17PX; letter-spacing: 0;
+	
+}
+
+.tableTop
+{	
+	font-weight: bold;
+	padding: 0px 0px;
+	margin: 0px 0px 0px;
+	text-align: center;	
+	background:#333 url(http://www.502.co.kr/lani/jongmokValue/img/menu_bg.jpg) repeat-x;	
+	FONT-FAMILY: ±¼¸²;
+}

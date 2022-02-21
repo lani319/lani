@@ -1,0 +1,148 @@
+<?php
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+$memId = $_COOKIE['_CKE_USER_ID'];
+$memIdx = $_COOKIE['_CKE_USER_UID'];
+
+if($memId == "")
+{
+	echo "<script>alert('로그인 후 이용해주세요.');location.href='/index.html';</script>";
+}
+else 
+{
+	//상담관리자 체크(일반 관리자 랑 상담관리자 체크 병행)
+	if($memId == "ayh319" || $memId == "tndls5" || $memId == "jinsuk930") //부장님,오과장,이대리,나는 자유롭게 접근 가능
+	{
+		
+	}
+	else 
+	{
+		$sql2 = "select count(idx) as cnt from TM_admin where adminID='$memId'";
+//		echo $sql2;
+		$tmpRs2 = mysql_query($sql2);
+		$rs2 = mysql_fetch_array($tmpRs2);
+		if($rs2[cnt]<1)
+		{
+			echo "<script>alert('관리자만 이용 가능합니다.');location.href='/index.html';</script>";
+		}
+	}
+	/*
+	$sql = "select count(idx) as cnt from Member where Level < 1 and member_state='Y' and userId='$memId'";
+	$tmpRs = mysql_query($sql);
+	$rs = mysql_fetch_array($tmpRs);
+	if($rs[cnt]<1)
+	{
+		$sql2 = "select count(idx) as cnt from TM_admin where adminID='$memId'";
+		$tmpRs2 = mysql_query($sql2);
+		$rs2 = mysql_fetch_array($tmpRs2);
+		if($rs2[cnt]<1)
+		{
+			echo "<script>alert('관리자만 이용 가능합니다.');location.href='/index.html';</script>";
+		}
+	}
+	*/
+}
+
+?>
+
+
+<table cellpadding="0" cellspacing="0" width="100px" height="100%" style="padding-left:5px;">
+<tr valign="top">
+<td>
+<img src="images/titleCounselAdminList.gif"></td>
+</tr>
+
+<?php
+if($memId == "ayh319" || $memId == "tndls5" || $memId == "jinsuk930")
+{
+	$sql = "SELECT A.userName,A.userNickname,A.userId,A.idx FROM Member A INNER JOIN TM_admin B ON A.userId = B.adminId order by userId desc";
+?>
+	
+	<tr valign="top">
+	<td style="color:red;"><li><a href="TM_admin.html"><font color="Blue">전체보기</font></a></li></td>
+	</tr>
+<?php	
+}
+else 
+{
+	
+	$sql = "SELECT A.userName,A.userNickname,A.userId,A.idx FROM Member A INNER JOIN TM_admin B ON A.userId = B.adminId where B.adminId='$memId' order by userId desc";
+}
+$tmpRs = mysql_query($sql);
+while($rs = mysql_fetch_array($tmpRs))
+{
+	?>
+<tr>
+<td style="color:red;"><li><a href="TM_admin.html?admin=<?=$rs[idx]?>"><?php if($admin == $rs[idx]) echo "<font color='blue'>" ?><?=$rs[userName]?></a></li></td>
+</tr>	
+	<?php
+}
+?>
+<tr><td height="50px"></td></tr>
+
+<?php
+
+if($memId == "ayh319" || $memId == "seodh0070" || $memId == "tndls5" || $memId == "jinsuk930")
+{
+?>
+
+<tr valign="top">
+<td><img src="images/titleCounselStatistics.gif"></td>
+</tr>
+<tr valign="top">
+<td style="color:red;"><li><a href="TM_admin.html?mode=statistics"><font color="Blue">전체보기</font></a></li></td>
+</tr>
+<?php
+	$sql = "SELECT A.userName,A.userNickname,A.userId,A.idx FROM Member A INNER JOIN TM_admin B ON A.userId = B.adminId order by userId desc";
+	$tmpRs = mysql_query($sql);
+	while($rs = mysql_fetch_array($tmpRs))
+	{
+?>
+<tr>
+<td style="color:red;"><li><a href="TM_admin.html?admin=<?=$rs[idx]?>&mode=statistics"><?php if($admin == $rs[idx]) echo "<font color='red'>" ?><?=$rs[userName]?></a></li></td>
+</tr>
+
+<?php
+	}
+	?>
+<tr><td height="50px"></td></tr>	
+	<?php
+}
+?>
+<tr><td height="50px"></td></tr>	
+<!--
+<tr valign="top">
+<?php
+if($memId == "ayh319" || $memId == "tndls5" || $memId == "jinsuk930") //부장님,오과장,이대리,나는 자유롭게 접근 가능
+	{
+?>
+		<td><a href="TM_outbound_list.html"><img src="images/titleCounselTMList.gif" border="0"></a></td>
+<?php		
+	}
+	else 
+	{
+		?>
+		<td><a href="TM_outbound_list.html?selAdmin=<?=$memIdx?>"><img src="images/titleCounselTMList.gif" border="0"></a></td>
+		<?php
+	}
+	?>
+
+</tr>	
+-->
+<tr>
+<tr>
+<td><a href="#" onclick="window.open('showReserveMember.html','','top=0,left=0,width=1000,height=600');"><img src="images/lstReserveMember.gif" border="0"></a></td>
+</tr>
+<td height="80%"></td>
+</tr>
+</table>
+<?php
+
+$tmpRs = "";
+$rs = "";
+?>

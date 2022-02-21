@@ -1,0 +1,433 @@
+<html>
+<head>
+<script type="text/javascript">
+var cnt;
+var i;
+var j;
+var f;
+
+//응답변수
+var A1 = 0; 
+var A4 = 0;
+var A5 = 0;
+
+//응답변수 - 콤보박스
+var A2 = "";
+var A3 = "";
+
+
+
+function checkForm()
+{
+	f = document.form1;
+	
+	//자주 사용하는 게시판 체크 숫자
+	var checkUseCnt = 0;
+	//자주 사용하지 않는 게시판 체크 숫자
+	var checkNoUseCnt = 0;
+	
+	A2 = "";
+	A3 = "";
+	
+	if(A1 == 0)
+	{
+		alert('6번 문항에 응답 해 주세요');		
+		return;
+	}	
+	else if(A4 == 0)
+	{
+		alert('9번 문항에 응답 해 주세요');		
+		return;
+	}	
+	else if(A5 == 0)
+	{
+		alert('10번 문항에 응답 해 주세요');		
+		return;
+	}
+	
+	
+	//반복문 돌리면서 체크
+	// 사용하는것
+	var name = "chkUse"
+	var num = document.getElementsByName(name).length;
+	
+	for(var i=0 ; i < num ; i++)
+	{
+		if(document.getElementsByName(name)[i].checked)
+		{	
+				switch(name)
+				{
+					case "chkUse":
+					checkUseCnt++;
+					A2 = A2 + document.getElementsByName(name)[i].value + "^";
+					break;
+					
+					case "chkNoUse":
+					checkNoUseCnt++;
+					A3= A3 + document.getElementsByName(name)[i].value + "^";
+					break;
+				}
+		}
+	}
+	
+	//사용하지 않음
+	var name = "chkNoUse"
+	var num = document.getElementsByName(name).length;
+	
+	
+	for(var i=0 ; i < num ; i++)
+	{
+		if(document.getElementsByName(name)[i].checked)
+		{	
+				switch(name)
+				{
+					case "chkUse":
+					checkUseCnt++;
+					A2 = A2 + document.getElementsByName(name)[i].value + "^";
+					break;
+					
+					case "chkNoUse":
+					checkNoUseCnt++;
+					A3= A3 + document.getElementsByName(name)[i].value + "^";
+					break;
+				}
+		}
+	}
+	
+	if(checkUseCnt <3)
+	{
+		alert('자주 사용하는 게시판을 3개 선택 해 주세요');
+		return;
+	}
+	if(checkNoUseCnt <3)
+	{
+		alert('자주 사용하지 않는 게시판을 3개 선택 해 주세요');
+		return;
+	}
+	
+	
+	
+	document.getElementById("txtDetail2").value = A1+"$"+A2+"$"+A3+"$"+A4+"$"+A5+"$";
+	
+	f.action = "2011_survey3.html";
+	f.submit();
+	return;
+}
+function checkValue(name,value)
+{
+	switch(name)
+	{
+		case "rdq1":
+		A1 = value;		
+		break;
+		
+		case "rdq4":
+		A4 = value;
+		break;
+				
+		case "rdq5":
+		A5 = value;
+		break;
+	}
+}
+
+function checkCombobox(name,id)
+{
+	//이용하는 게시판
+	//chkUse
+	var num = document.getElementsByName(name).length;
+	
+	var cnt = 0;
+	for(var i=0 ; i < num ; i++)
+	{
+		if(document.getElementsByName(name)[i].checked)
+		{	
+				switch(name)
+				{
+					case "chkUse":
+					cnt++;
+					if(cnt>3)
+					{
+						alert("가장 많이 이용하는 게시판을 우선 순위로 3가지만 선택 해 주세요");					
+						document.getElementById(id).checked = false;
+						//document.getElementById(id).style.backgroundColor = "FFFFFF";
+						break;
+					}
+					else
+					{					
+						document.getElementsByName("chkNoUse")[i].disabled = true;
+						//document.getElementById(id).style.backgroundColor = "FF00CC";
+					}
+					
+					break;
+					
+					case "chkNoUse":
+					cnt++;
+					if(cnt>3)
+					{
+						alert("거의 이용하지 않는 게시판을 우선 순위로 3가지만 선택 해 주세요");
+						document.getElementById(id).checked = false;
+						break;
+					}
+					else
+					{
+						document.getElementsByName("chkUse")[i].disabled = true;
+						//document.getElementById(id).style.backgroundColor = "FF00CC";
+					}
+					break;
+				}
+		}
+		else
+		{
+			switch(name)
+			{
+				case "chkUse":
+				document.getElementsByName("chkNoUse")[i].disabled = false;
+				//document.getElementsByName("chkUse")[i].style.backgroundColor = "FFFFFF";
+				break;
+				
+				case "chkNoUse":
+				document.getElementsByName("chkUse")[i].disabled = false;
+				//document.getElementsByName("chkNoUse")[i].style.backgroundColor = "FFFFFF";
+				break;
+			}
+		}
+	}
+}
+
+
+function chkInit()
+{
+	if(document.getElementById("txtDetail1").value == 0)
+	{
+		alert('일시적인 오류가 발생했습니다. 처음부터 다시 시도해 주세요.');
+		location.href = 'http://www.502.co.kr/lani/survey/2011_survey.html';
+		return;
+	}
+}
+
+</script>
+
+</head>
+<body onload="chkInit();" style="margin-left:0px;margin-top:0px">
+
+<form name="form1" method="POST">
+<table width="1020" height="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+<td height="209"><img src="img/top.jpg"></td>
+</tr>
+<tr>
+<td style="background-image:url(img/center.jpg);" >
+<table>
+<tr> <!-- 6번 문항 -->
+<td width="50px"></td>
+<td width="920px">
+<img src="img/q6.jpg" border="0"><!--6. www.502.co.kr [평택촌놈]을 주 평균 얼마나 이용하십니까?--><br><br>
+	<input type="radio" name="rdq1" id="rdq1_1" value="1" onclick="checkValue(this.name,this.value);">	매일 
+	<input type="radio" name="rdq1" id="rdq1_2" value="2" onclick="checkValue(this.name,this.value);">	주 5회 이상 
+	<input type="radio" name="rdq1" id="rdq1_3" value="3" onclick="checkValue(this.name,this.value);">	주 3 ~ 4회
+	<input type="radio" name="rdq1" id="rdq1_4" value="4" onclick="checkValue(this.name,this.value);">	주 1 ~ 2회
+	<input type="radio" name="rdq1" id="rdq1_5" value="5" onclick="checkValue(this.name,this.value);">	주 1회 미만
+</td>
+<td width="50px"></td>
+</tr>
+<tr><td height="30px" colspan="3"></td></tr>
+<tr> <!-- 7번 문항 -->
+<td width="50px"></td>
+<td width="920px">
+<img src="img/q7.jpg" border="0"><!--7. www.502.co.kr [평택촌놈]에서 가장 많이 이용하는 게시판은? (우선순위로 3가지를 선택해주세요)--><br><br>
+	<table width="100%" cellpadding="0" cellspacing="0">
+	<tr valign="top">
+	<td align="left" valign="top">
+	<img src="img/sub1.jpg" border="0"><!--인터넷방송--><br>
+	<input type="checkbox" name="chkUse" id="chkUse1" value="1" onclick="checkCombobox(this.name,this.id)";>방송일정안내 <br>
+	<input type="checkbox" name="chkUse" id="chkUse2" value="2" onclick="checkCombobox(this.name,this.id)";>방송데모보기 <br>
+	<input type="checkbox" name="chkUse" id="chkUse3" value="3" onclick="checkCombobox(this.name,this.id)";>무료체험신청 <br>
+	<input type="checkbox" name="chkUse" id="chkUse4" value="4" onclick="checkCombobox(this.name,this.id)";>방송시청후기 <br>
+	<input type="checkbox" name="chkUse" id="chkUse5" value="5" onclick="checkCombobox(this.name,this.id)";>녹화방송보기 <br>
+	<input type="checkbox" name="chkUse" id="chkUse6" value="6" onclick="checkCombobox(this.name,this.id)";>프리미엄속보 <br>
+	<input type="checkbox" name="chkUse" id="chkUse7" value="7" onclick="checkCombobox(this.name,this.id)";>일반회원속보 <br>
+	<input type="checkbox" name="chkUse" id="chkUse8" value="8" onclick="checkCombobox(this.name,this.id)";>주식강의VOD <br>
+	</td>
+	<td align="left">
+	<img src="img/sub2.jpg" border="0"><!--VIP--><br>
+	<input type="checkbox" name="chkUse" id="chkUse9"   value="9"  onclick="checkCombobox(this.name,this.id)";>프리미엄 <br>
+	<input type="checkbox" name="chkUse" id="chkUse10" value="10" onclick="checkCombobox(this.name,this.id)";>투자클럽 <br>
+	<input type="checkbox" name="chkUse" id="chkUse11" value="11" onclick="checkCombobox(this.name,this.id)";>502TMS <br>
+	</td>
+	<td align="left">
+	<img src="img/sub3.jpg" border="0"><!--투자정보--><br>
+	<input type="checkbox" name="chkUse" id="chkUse12" value="12" onclick="checkCombobox(this.name,this.id)";>전문가 투자전략 <br>
+	<input type="checkbox" name="chkUse" id="chkUse13" value="13" onclick="checkCombobox(this.name,this.id)";>1등급 분석실 <br>
+	<input type="checkbox" name="chkUse" id="chkUse14" value="14" onclick="checkCombobox(this.name,this.id)";>평택촌놈 칼럼 <br>
+	<input type="checkbox" name="chkUse" id="chkUse15" value="15" onclick="checkCombobox(this.name,this.id)";>심봤다 종목추천 <br>
+	<input type="checkbox" name="chkUse" id="chkUse16" value="16" onclick="checkCombobox(this.name,this.id)";>502뉴스 <br>
+	<input type="checkbox" name="chkUse" id="chkUse17" value="17" onclick="checkCombobox(this.name,this.id)";>502무료티커 <br>
+	</td>
+	<td align="left">
+	<img src="img/sub4.jpg" border="0"><!--종목토론실--><br>
+	<input type="checkbox" name="chkUse" id="chkUse18" value="18" onclick="checkCombobox(this.name,this.id)";>종목추천 탑10 <br>
+	<input type="checkbox" name="chkUse" id="chkUse19" value="19" onclick="checkCombobox(this.name,this.id)";>종목추천 <br>
+	<input type="checkbox" name="chkUse" id="chkUse20" value="20" onclick="checkCombobox(this.name,this.id)";>종목질문(코스피) <br>
+	<input type="checkbox" name="chkUse" id="chkUse21" value="21" onclick="checkCombobox(this.name,this.id)";>종목질문(코스닥) <br>		
+	</td>
+	</tr>
+	<tr><td colspan="4" align="center" height="20px"></td></tr>
+	<tr valign="top">
+	<td align="left">
+	<img src="img/sub5.jpg" border="0"><!--매매평가실--><br>
+	<input type="checkbox" name="chkUse" id="chkUse22" value="22" onclick="checkCombobox(this.name,this.id)";>주식매매일지 <br>
+	<input type="checkbox" name="chkUse" id="chkUse23" value="23" onclick="checkCombobox(this.name,this.id)";>선물매매일지 <br>
+	<input type="checkbox" name="chkUse" id="chkUse24" value="24" onclick="checkCombobox(this.name,this.id)";>매매노하우 <br>
+	<input type="checkbox" name="chkUse" id="chkUse25" value="25" onclick="checkCombobox(this.name,this.id)";>수익률게시판 <br>		
+	</td>
+	<td align="left">
+	<img src="img/sub6.jpg" border="0"><!--평촌사랑방--><br>
+	<input type="checkbox" name="chkUse" id="chkUse26" value="26" onclick="checkCombobox(this.name,this.id)";>502사진방 <br>
+	<input type="checkbox" name="chkUse" id="chkUse27" value="27" onclick="checkCombobox(this.name,this.id)";>세상사는이야기 <br>
+	<input type="checkbox" name="chkUse" id="chkUse28" value="28" onclick="checkCombobox(this.name,this.id)";>주식공부방 <br>
+	<input type="checkbox" name="chkUse" id="chkUse29" value="29" onclick="checkCombobox(this.name,this.id)";>종교방 <br>		
+	<input type="checkbox" name="chkUse" id="chkUse30" value="30" onclick="checkCombobox(this.name,this.id)";>출석체크 <br>		
+	<input type="checkbox" name="chkUse" id="chkUse31" value="31" onclick="checkCombobox(this.name,this.id)";>랭킹,순위 <br>		
+	</td>
+	<td align="left">
+	<img src="img/sub7.jpg" border="0"><!--고객센터--><br>
+	<input type="checkbox" name="chkUse" id="chkUse32" value="32" onclick="checkCombobox(this.name,this.id)";>공지사항 <br>
+	<input type="checkbox" name="chkUse" id="chkUse33" value="33" onclick="checkCombobox(this.name,this.id)";>질문과 답변 <br>
+	<input type="checkbox" name="chkUse" id="chkUse34" value="34" onclick="checkCombobox(this.name,this.id)";>결제 이용안내 <br>
+	<input type="checkbox" name="chkUse" id="chkUse35" value="35" onclick="checkCombobox(this.name,this.id)";>사이트 이용안내 <br>		
+	</td>
+	<td align="left">
+	<img src="img/sub8.jpg" border="0"><!--FIRST--><br>
+	<input type="checkbox" name="chkUse" id="chkUse36" value="36" onclick="checkCombobox(this.name,this.id)";>FIRST <br>
+	</td>
+	</tr>
+	</table>
+</td>
+<td width="50px"></td>
+</tr>
+<tr><td height="30px" colspan="3"></td></tr>
+<tr> <!-- 8번 문항 -->
+<td width="50px"></td>
+<td width="920px">
+<img src="img/q8.jpg" border="0"><!--8. [평택촌놈]에서 거의 이용하지 않는 게시판은? (우선순위로 3가지를 선택해주세요)--><br><br>
+	<table width="100%" cellpadding="0" cellspacing="0">
+	<tr valign="top">
+	<td align="left" valign="top">
+	<img src="img/subNo1.jpg" border="0"><!--인터넷방송--><br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse1" value="1" onclick="checkCombobox(this.name,this.id)";>방송일정안내 <br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse2" value="2" onclick="checkCombobox(this.name,this.id)";>방송데모보기 <br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse3" value="3" onclick="checkCombobox(this.name,this.id)";>무료체험신청 <br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse4" value="4" onclick="checkCombobox(this.name,this.id)";>방송시청후기 <br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse5" value="5" onclick="checkCombobox(this.name,this.id)";>녹화방송보기 <br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse6" value="6" onclick="checkCombobox(this.name,this.id)";>프리미엄속보 <br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse7" value="7" onclick="checkCombobox(this.name,this.id)";>일반회원속보 <br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse8" value="8" onclick="checkCombobox(this.name,this.id)";>주식강의VOD <br>
+	</td>
+	<td align="left">
+	<img src="img/subNo2.jpg" border="0"><!--VIP--><br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse9"   value="9"  onclick="checkCombobox(this.name,this.id)";>프리미엄 <br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse10" value="10" onclick="checkCombobox(this.name,this.id)";>투자클럽 <br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse11" value="11" onclick="checkCombobox(this.name,this.id)";>502TMS <br>
+	
+	</td>
+	<td align="left">
+	<img src="img/subNo3.jpg" border="0"><!--투자정보--><br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse12" value="12" onclick="checkCombobox(this.name,this.id)";>전문가 투자전략 <br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse13" value="13" onclick="checkCombobox(this.name,this.id)";>1등급 분석실 <br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse14" value="14" onclick="checkCombobox(this.name,this.id)";>평택촌놈 칼럼 <br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse15" value="15" onclick="checkCombobox(this.name,this.id)";>심봤다 종목추천 <br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse16" value="16" onclick="checkCombobox(this.name,this.id)";>502뉴스 <br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse17" value="17" onclick="checkCombobox(this.name,this.id)";>502무료티커 <br>
+	</td>
+	<td align="left">
+	<img src="img/subNo4.jpg" border="0"><!--종목토론실--><br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse18" value="18" onclick="checkCombobox(this.name,this.id)";>종목추천 탑10 <br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse19" value="19" onclick="checkCombobox(this.name,this.id)";>종목추천 <br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse20" value="20" onclick="checkCombobox(this.name,this.id)";>종목질문(코스피) <br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse21" value="21" onclick="checkCombobox(this.name,this.id)";>종목질문(코스닥) <br>		
+	</td>
+	</tr>
+	<tr><td colspan="4" align="center" height="20px"></td></tr>
+	<tr valign="top">
+	<td align="left">
+	<img src="img/subNo5.jpg" border="0"><!--매매평가실--><br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse22" value="22" onclick="checkCombobox(this.name,this.id)";>주식매매일지 <br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse23" value="23" onclick="checkCombobox(this.name,this.id)";>선물매매일지 <br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse24" value="24" onclick="checkCombobox(this.name,this.id)";>매매노하우 <br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse25" value="25" onclick="checkCombobox(this.name,this.id)";>수익률게시판 <br>		
+	</td>
+	<td align="left">
+	<img src="img/subNo6.jpg" border="0"><!--평촌사랑방--><br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse26" value="26" onclick="checkCombobox(this.name,this.id)";>502사진방 <br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse27" value="27" onclick="checkCombobox(this.name,this.id)";>세상사는이야기 <br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse28" value="28" onclick="checkCombobox(this.name,this.id)";>주식공부방 <br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse29" value="29" onclick="checkCombobox(this.name,this.id)";>종교방 <br>		
+	<input type="checkbox" name="chkNoUse" id="chkNoUse30" value="30" onclick="checkCombobox(this.name,this.id)";>출석체크 <br>		
+	<input type="checkbox" name="chkNoUse" id="chkNoUse31" value="31" onclick="checkCombobox(this.name,this.id)";>랭킹,순위 <br>		
+	</td>
+	<td align="left">
+	<img src="img/subNo7.jpg" border="0"><!--고객센터--><br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse32" value="32" onclick="checkCombobox(this.name,this.id)";>공지사항 <br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse33" value="33" onclick="checkCombobox(this.name,this.id)";>질문과 답변 <br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse34" value="34" onclick="checkCombobox(this.name,this.id)";>결제 이용안내 <br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse35" value="35" onclick="checkCombobox(this.name,this.id)";>사이트 이용안내 <br>		
+	</td>
+	<td align="left">
+	<img src="img/subNo8.jpg" border="0"><!--FIRST--><br>
+	<input type="checkbox" name="chkNoUse" id="chkNoUse36" value="36" onclick="checkCombobox(this.name,this.id)";>FIRST <br>
+	</td>
+	</tr>
+	</table>
+</td>
+<td width="50px"></td>
+</tr>
+<tr><td height="30px" colspan="3"></td></tr>
+<tr> <!-- 9번 문항 -->
+<td width="50px"></td>
+<td width="920px">
+<img src="img/q9.jpg" border="0"><!--9. [평택촌놈]의 코인서비스를 알고 있다. <br>(코인 서비스란 현금처럼 쓸 수 있는 평택촌놈의 포인트 제도이다)--><br><br>
+	<input type="radio" name="rdq4" id="rdq4_1" value="1" onclick="checkValue(this.name,this.value);">잘 알고 있고 사용해본적 있다.
+	<input type="radio" name="rdq4" id="rdq4_2" value="2" onclick="checkValue(this.name,this.value);">알고있지만 사용해본적 없다.
+	<br><br>
+	<input type="radio" name="rdq4" id="rdq4_3" value="3" onclick="checkValue(this.name,this.value);">몰랐다. 앞으로도 사용해볼 의사가 없다. 	
+	<input type="radio" name="rdq4" id="rdq4_4" value="4" onclick="checkValue(this.name,this.value);">몰랐지만 추후 사용할 의사가 있다.
+</td>
+<td width="50px"></td>
+</tr>
+<tr><td height="30px" colspan="3"></td></tr>
+<tr> <!-- 10번 문항 -->
+<td width="50px"></td>
+<td width="920px">
+<img src="img/q10.jpg" border="0"><!--10. [평택촌놈]의 프리미엄방송과 502클럽의 차이를 알고 있다.--><br><br>
+	<input type="radio" name="rdq5" id="rdq5_1" value="1" onclick="checkValue(this.name,this.value);">각각의 차이를 잘 알고 있다.
+	<input type="radio" name="rdq5" id="rdq5_2" value="2" onclick="checkValue(this.name,this.value);">각각의 차이를 얼추 알고 있다.
+	<input type="radio" name="rdq5" id="rdq5_3" value="3" onclick="checkValue(this.name,this.value);">502클럽만 알고 있다.
+	<br><br>
+	<input type="radio" name="rdq5" id="rdq5_4" value="4" onclick="checkValue(this.name,this.value);">프리미엄방송서비스만 알고 있다.  
+	<input type="radio" name="rdq5" id="rdq5_5" value="5" onclick="checkValue(this.name,this.value);">둘다 어떤 서비스인지 모른다.
+</td>
+<td width="50px"></td>
+</tr>
+<tr><td height="15px" colspan="3"></td></tr>
+
+<tr> <!-- 10번 문항 -->
+<td width="50px"></td>
+<td width="920px" align="center">
+
+<img src="img/bn_next.gif" onclick="checkForm();" style="cursor:hand">
+</td>
+<td width="50px"></td>
+</table>
+</td>
+</tr>
+<tr>
+<td height="110"><img src="img/bottom.jpg"></td>
+</tr>
+</table>
+
+<input type="hidden" name="txtDetail1" id="txtDetail1" size="50" value="<?=$txtDetail1?>"><br>
+<input type="hidden" name="txtDetail2" id="txtDetail2" size="50">
+</form>
+</body>
+</html>

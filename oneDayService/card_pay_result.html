@@ -1,0 +1,52 @@
+<?
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+?>
+
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=euc-kr" />
+<title>결제결과</title>
+<SCRIPT LANGUAGE="JAVASCRIPT" SRC="/_js/cate_xml_script.js"></SCRIPT>
+<SCRIPT LANGUAGE="JAVASCRIPT" SRC="/_js/base_util_script.js"></SCRIPT>
+<SCRIPT LANGUAGE="JAVASCRIPT" SRC="/_js/web_script.js"></SCRIPT>
+<script language="JavaScript" src="/_js/Embed.js"></script>
+<style type="text/css">
+/*<![CDATA[*/
+table.t_ex2 {background:#FFFFFF; width:700px; margin:0 auto; text-align:left}
+.t_ex2 td, .t_ex2 th {border:1px solid #AAAAAA;padding:10px}
+.t_ex2 th {background:#DCDCDC; color:#5C5C5C; text-align:center}
+table.t_ex2 .c1 {text-align:center}
+table.t_ex2 .c2 {text-align:left}
+
+table.t_ex0 {background:#FFFFFF; width:700px; margin:0 auto; text-align:left;border=0;}
+
+/*]]>*/
+</style>
+</head>
+<body topmargin=0 leftmargin=0>
+<br>
+<table class="t_ex2">
+<tr>
+<th class="c1" width="100px">주문번호</th>
+<td><b><?=$rOrdNo?></b></td>
+</tr>
+<tr>
+<th class="c1" width="100px">결제상품</th>
+<td><b>찾아가는 서비스</b></td>
+</tr>
+<tr>
+<th class="c1" width="100px">결제금액</th>
+<td><b><?=$rAmt?>원</b></td>
+</tr>
+<tr>
+<th class="c1" width="100px">승인번호</th>
+<td><b><?=$rApprNo?></b></td>
+</tr>
+<tr>
+<td  colspan="2">
+<br>
+*결제내역은 [<a href="/mypage/02.html" target="_blank">마이페이지</a>]에서 다시 확인하실 수 있습니다.
+<br>
+</td></tr>
+</body>
+</html>

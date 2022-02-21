@@ -1,0 +1,178 @@
+<?
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+
+$sql="select * from Member where idx='".$_COOKIE['_CKE_USER_UID']."'";
+$meminfo=mysql_fetch_array(mysql_query($sql));
+
+$sql="select * from jongmokValueChargeInfo WHERE idx='".$insert_id."'";
+$service_info=mysql_fetch_array(mysql_query($sql));
+
+
+
+$pay_date_temp=explode(" ",$service_info[paydate]);
+$pay_date=explode("-",$pay_date_temp[0]);
+$pay_time=explode(":",$pay_date_temp[1]);
+
+//공통사용(카드결제)
+$AuthTy 		= trim( $_POST["AuthTy"] );				//결제형태
+$SubTy 			= trim( $_POST["SubTy"] );				//서브결제형태
+$rStoreId 		= trim( $_POST["rStoreId"] );			//업체ID
+$rAmt 			= trim( $_POST["rAmt"] );				//거래금액
+$rOrdNo 		= trim( $_POST["rOrdNo"] );				//주문번호
+$rProdNm 		= trim( $_POST["rProdNm"] );			//상품명
+$rOrdNm			= trim( $_POST["rOrdNm"] );				//주문자명
+
+
+
+	
+?>
+<INPUT TYPE="HIDDEN" NAME="price" value="<?=$price?>">
+<INPUT TYPE="HIDDEN" NAME="buy_no" value="<?=$buy_no?>">
+<INPUT TYPE="HIDDEN" NAME="jokmok" value="<?=$jokmok?>">
+<input type="hidden" name="bank" value="<?=$bank?>">
+<INPUT TYPE="HIDDEN" name="b_name" value="<?=$b_name?>">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=euc-kr" />
+<title>적정주가 결제결과</title>
+<link rel="stylesheet" type="text/css" href="/css/502style.css">
+<SCRIPT LANGUAGE="JAVASCRIPT" SRC="/_js/cate_xml_script.js"></SCRIPT>
+<SCRIPT LANGUAGE="JAVASCRIPT" SRC="/_js/base_util_script.js"></SCRIPT>
+<SCRIPT LANGUAGE="JAVASCRIPT" SRC="/_js/web_script.js"></SCRIPT>
+<script language="JavaScript" src="/_js/Embed.js"></script>
+<script>
+function show_receipt() 
+{
+	if("<?=$rSuccYn?>"== "y" && "<?=$AuthTy?>"=="card"){
+		url="http://www.allthegate.com/customer/receiptLast3.jsp"
+		url=url+"?sRetailer_id="+sRetailer_id.value;
+		url=url+"&approve="+approve.value;
+		url=url+"&send_no="+send_no.value;
+		
+		window.open(url, "window","toolbar=no,location=no,directories=no,status=,menubar=no,scrollbars=no,resizable=no,width=420,height=700,top=0,left=150");
+	}else{
+		alert("해당하는 결제내역이 없습니다");
+	}
+}
+</script>
+<SCRIPT language="JavaScript" type="text/javascript">
+<!-- Overture Korea
+// Event Type ID: 1
+// Segment Type ID: 1
+if (typeof(window.ysm_customData) != 'object') window.ysm_customData = new Object();
+window.ysm_customData.segment_1FOR7M8U21978A = "event=1,transId=,currency=,amount=";
+// -->
+</SCRIPT>
+</head>
+<img src="/img/pop/charge_contents_top.gif" width="400" height="38">
+<br>
+<table width="281" style="margin-top:5px" border="0" align="center" cellpadding="0" cellspacing="0" background="/img/pop/box01_bg.gif">
+  <tr>
+    <td><img src="/img/pop/box01_top.gif" width="281" height="6"></td>
+  </tr>
+  <tr>
+    <td>
+	<TABLE width=95% border=0 align="center" cellpadding=0 CELLSPACING=0 style="border-width:0px; border-color:rgb(204,204,204); border-style:solid;">
+      <TR height=26>
+        <TD WIDTH="73" height="22" align="center" class="darkbrown"><strong>결제자</strong></TD>
+        <TD width=3 height="22"></TD>
+        <TD width="191" height="22">&nbsp;<?=$buy_no?> (<?=$_COOKIE['_CKE_USER_ID']?>)</td>
+	  </tr>
+      <tr class="darkbrown">
+        <td height=1 colspan=3> </td>
+      </tr> 
+	   <TR height=26>
+        <TD WIDTH="73" height="22" align="center" class="darkbrown"><strong>결제방법</strong></TD>
+        <TD width=3 height="22"></TD>
+        <TD width="191" height="22">&nbsp; <?=$_CHARGE_SETTLETYPE[$service_info['settletype']]?></td>
+	  </tr>
+      <tr class="darkbrown">
+        <td height=1 colspan=3> </td>
+      </tr> 
+	   <TR height=26>
+        <TD WIDTH="73" height="22" align="center" class="darkbrown"><strong>결제상품</strong></TD>
+        <TD width=3 height="22"></TD>
+        <TD width="191" height="22">&nbsp;<?=$_JONGMOK_PRESENT[$service_info[jongmok]]?></td>
+	  </tr>
+      <tr class="darkbrown">
+        <td height=1 colspan=3> </td>
+      </tr> 
+	   <TR height=26>
+        <TD WIDTH="73" height="22" align="center" class="darkbrown"><strong>결제금액</strong></TD>
+        <TD width=3 height="22"></TD>
+        <TD width="191" height="22">&nbsp; <?=number_format($service_info[price])?>원</td>
+	  </tr>
+      <tr class="darkbrown">
+        <td height=1 colspan=3> </td>
+      </tr> 
+	   <TR height=26>
+        <TD WIDTH="73" height="22" align="center" class="darkbrown"><strong>결제일시</strong></TD>
+        <TD width=3 height="22"></TD>
+        <TD width="191" height="22">&nbsp;<?=$service_info[paydate]?></td>
+	  </tr>
+      <tr class="darkbrown">
+        <td height=1 colspan=3> </td>
+      </tr> 
+<?		if($AuthTy == "card" ) {?>
+	   <TR height=26>
+        <TD WIDTH="73" height="22" align="center" class="darkbrown"><strong>영수증 출력</strong></TD>
+        <TD width=3 height="22"></TD>
+        <TD width="191" height="22">
+			<!--영수증출력을위해서보내주는값-------------------->
+			<input type=hidden name=sRetailer_id value="<?=$rStoreId?>"><!--상점아이디-->
+			<input type=hidden name=approve value="<?=$rApprNo?>"><!---승인번호-->
+			<input type=hidden name=send_no value="<?=$rOrdNo?>"><!--주문번호-->
+			<!--영수증출력을위해서보내주는값-------------------->
+			&nbsp;<IMG SRC="/images/btn/btn_pop_print.gif" align="absmiddle" style="cursor:hand" border=0 onClick="javascript:show_receipt();">
+		</td>
+	  </tr>
+<?		} ?>
+      <tr class="darkbrown">
+        <td height=1 colspan=3> </td>
+      </tr> 
+	</table>
+	</td>
+  </tr>
+  <tr>
+    <td><img src="/img/pop/box01_btm.gif" width="281" height="6"></td>
+  </tr>
+</table>
+<table width="281" height="7" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tr>
+    <td> </td>
+  </tr>
+</table>
+<table cellspacing=0 cellpadding=0 border=0 width="281" align=center>
+<tr>
+	<TD class="brown" align=center>
+		결제내역은 [<a href="/mypage/02.html" target="_blank">마이페이지</a>]에서 
+		<br>
+		다시 확인하실 수 있습니다.
+	 </TD>
+</tr>
+<tr height=35>
+	<td align=center><img src='/img/sub/btn_bd_close.gif' align=absmiddle onClick="window.close();" style="cursor:hand"></td>
+</tr>
+</table>
+
+<script>
+var SP2 = (window.navigator.userAgent.indexOf("SV1") != -1);
+
+function winResize(){
+	window.resizeTo(320, document.body.scrollHeight + 80);
+}
+
+window.onload = function(){
+	 winResize();
+	 window.setTimeout("winResize();", 500);
+	 window.setTimeout("winResize();", 1000);
+}
+</script>
+</body>
+</html>

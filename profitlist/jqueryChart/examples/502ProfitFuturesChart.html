@@ -1,0 +1,248 @@
+<?php
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+
+$where = " where (regdate > '".date("Y-m")."' or sell_mode='Y' or sell_date > '".date("Y-m")."') ";
+
+if($term_select){
+	$mktime = mktime(0,0,0,date("m"),date("d")-$term_select,date("Y"));
+	
+	$where = " where regdate > '".date("Y-m-d",$mktime)."' ";
+}
+
+if($year && $month){
+	$where = " where regdate like '".$year."-".$month."%' ";
+}
+
+if($srv_code == "")
+{
+//	$srv_code = "QExSXFo%3D"; //고성으로 고정
+}
+
+if($srv_code){
+	//전문가 idx 복호화
+	$expert_idx = usrCrypt(URLdecode($srv_code),0);
+	$where .= " and expert_idx='".$expert_idx."' ";
+}
+
+if($order_by=="point"){
+	$orderby="order by sell_date desc, profit_point desc, profit desc ";
+
+}else if($order_by=="profit"){
+	$orderby="order by sell_date desc, profit desc, profit_point desc ";
+
+}else if($order_by=="sell_date"){
+	$orderby="order by  sell_date desc,sell_mode asc, profit desc, profit_point desc ";
+
+}else{
+	$orderby="order by sell_date desc, profit desc, profit_point desc ";
+}
+
+$orderby="order by sell_date ASC";
+
+/* 페이징 기본설정 */
+if(!$page){ $page = 1 ; }
+$pagePerNum = 40; // 한 페이지당 레코드 갯수
+$indexPerPage = 10; // 한페이지에 표시될 인덱스 갯수
+$searchSet ="&in_mode=$in_mode&srv_code=$srv_code&term_select=$term_select&year=$year&month=$month&search_mode=$search_mode";
+$optionSet ="";
+$pageURL = "";
+
+$query="select count(*) as num, sum(profit) as profit_sum from recommend_jongmok2 ".$where." ".$orderby." limit 40";
+$result = mysql_query($query) or die(mysql_error());
+$rs = mysql_fetch_array($result, MYSQL_ASSOC);
+$totalCount = $rs[num];
+$profit_sum = number_format($rs[profit_sum]);
+$totalPage = ceil($totalCount/$pagePerNum) ; // 전체 회원(검색 회원)수
+$start_p = $pagePerNum*($page-1); // 처음 시작페이지 지정
+
+$sql="select * from recommend_jongmok2 ".$where." ".$orderby." limit ".$start_p.",".$pagePerNum;
+//echo $sql;
+
+$tmpRs = mysql_query($sql);
+$yVal= "";
+$xVal = "";
+$num = 1; //가로축 순서
+$totalProfit = 0;
+$sellDate = "";
+$divNum = 0; //나머지 구하는 번호
+
+$rowNum = mysql_num_rows($tmpRs);
+if($rowNum == 0)
+{
+	if($term_select)
+	{
+		if($srv_code)
+		{
+			//전문가 idx 복호화
+			$expert_idx = usrCrypt(URLdecode($srv_code),0);
+			$where = " where expert_idx='".$expert_idx."' ";
+			$orderby = " order by regDate ASC";
+		}		
+		$query="select count(idx) as num from recommend_jongmok2 ".$where;
+		$tmpRs = mysql_query($query);
+		$rs = mysql_fetch_array($tmpRs);
+		if($rs[num]<40)
+		{
+			$expertRowNum = 0;			
+		}
+		else 
+		{
+			$expertRowNum = $rs[num]-40;
+		}
+		
+		$query="select * from recommend_jongmok2 ".$where." ".$orderby." limit $expertRowNum, 40";		
+		$tmpRs = mysql_query($query) or die(mysql_error());
+//		echo $query;
+	}
+
+}
+while($rs = mysql_fetch_array($tmpRs))
+{
+	//데이터 렌더링 하는 부분  2011-06-16 어윤학 작업시작
+	$totalProfit = $totalProfit + ($rs[profit_point]*50); //단위 만원
+	$yVal = $yVal."[$num,$totalProfit],";		//세로축에 표시되는 값
+	
+	$sellDate = substr($rs[regdate],0,10);
+	
+	if ($sellDate == "0000-00-00" )
+	{
+		$sellDate = date("Y-m-d",time(0));
+	}
+    		
+    	
+    		
+    	$num = $num+1; //가로 축 1 증가
+    	if ($rowNum < 20)
+    	{
+    		$divNum = 5;
+    	}
+    	else if ($rowNum >=20 && $rowNum <40)
+    	{
+    		$divNum = 17;
+    	}
+    	else if($rowNum >=40 && $rowNum <60)
+    	{
+    		$divNum = 20;
+    	}
+    	else if($rowNum >=60 && $rowNum <80)
+    	{
+    		$divNum = 20;
+    	}
+    	else if($rowNum >=80 && $rowNum <100)
+    	{
+    		$divNum = 20;
+    	}
+    	else if($rowNum >=100)
+    	{
+    		$divNum = 30;
+    	}
+    	
+    	
+    	
+    	
+    	if ($num%$divNum == 0)
+    	{
+    		$xVal = $xVal."'$sellDate',";		//가로축에 표시되는 값
+    	}
+    	else 
+    	{
+    		$xVal = $xVal."' ',";		//가로축에 표시되는 값    		
+    	}
+    	
+    		
+    		
+}
+    	
+    	$yVal = substr($yVal,0,strlen($yVal)-1);		//yValue
+    	$xVal = substr($xVal,0,strlen($xVal)-1);		//xValue
+    	
+    	
+    	    	
+$expertImg = "profitChartTitle_all.gif";
+switch ($expert_idx)
+{
+	case "312":
+		$expertImg = "profitChartTitle_312.gif";
+		break;
+	case "26439":
+		$expertImg = "profitChartTitle_26439.gif";
+		break;
+	case "17365":
+		$expertImg = "profitChartTitle_17365.gif";
+		break;
+	case "3622":
+		$expertImg = "profitChartTitle_3622.gif";
+		break;
+	case "29681":
+		$expertImg = "profitChartTitle_29681.gif";
+		break;								
+}
+?>
+    
+    
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+		<title>Test 3</title>
+		
+		<!--[if IE]><script language="javascript" type="text/javascript" src="../excanvas.js"></script><![endif]-->
+		  
+		<link rel="stylesheet" type="text/css" href="../jquery.jqplot.css" />
+  <link rel="stylesheet" type="text/css" href="examples.css" />
+		
+		<!-- BEGIN: load jquery -->
+		<script language="javascript" type="text/javascript" src="../jquery-1.3.2.min.js"></script>
+		<!-- END: load jquery -->
+		
+		<!-- BEGIN: load jqplot -->
+		<script language="javascript" type="text/javascript" src="../jquery.jqplot.js"></script>
+		<script language="javascript" type="text/javascript" src="../plugins/jqplot.categoryAxisRenderer.js"></script>
+		<script language="javascript" type="text/javascript" src="../plugins/jqplot.barRenderer.js"></script>
+		<!-- END: load jqplot -->
+
+    
+	<script type="text/javascript" language="javascript">
+	/*
+	[1,40] <- X 순서 , Y 값
+	
+	*/  
+	
+	
+	$(document).ready(function(){
+    line1 = [<?=$yVal?>]; 
+    plot1 = $.jqplot('chart', [line1], {    
+        series: [{label: '1st Qtr'}],
+        axes: {
+            xaxis: {
+                ticks:[<?=$xVal?>],
+                renderer: $.jqplot.CategoryAxisRenderer
+            }
+        }
+    });
+});
+
+	</script>
+
+	</head>
+	<body style="padding : 0 0 0 0;">
+	<table cellpadding="0" cellspacing="0" width="740" height="400">
+	<tr>
+		<td align="center" valign="top"><img src="/img/profit/<?=$expertImg?>">
+    		
+		</td>
+	</tr>
+	<tr>
+		<td align="center">
+			<div id="chart" style="margin-top:20px; margin-left:20px; width:700px; height:300px;"></div>    		
+		</td>
+	</tr>
+	</table>
+	</body>
+</html>

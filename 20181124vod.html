@@ -1,0 +1,116 @@
+<?php
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+/*
+idx
+mobile
+firstLogin
+endDate
+lastLogin
+viewCnt / 기본값 0
+
+데이터베이스에 전화번호 뒤 4자리를 미리 입력해 놓음
+전화번호 뒷자리 입력하면 시청할 수 있게 처리(링크는 문자로 발송)
+제일 처음 로그인한 상태에서 +7일까지만 시청 가능
+
+1. 로그인
+2. 핸드폰 번호와 비번으로 인증
+
+1. firstLogin 필드가 비어있는지 검사
+
+	3-1) 비어 있다면 
+
+	firstLogin 필드에 날짜 기록
+    lastLogin 필드에 날짜 기록
+    endDate 필드에 +7일 날짜 기록(23:59:59까지)
+    viewCnt 필드에 +1
+
+    3-2) 비어 있지 않으면         
+	현재 날짜와 endDate 날짜 비교
+
+
+	4-1) True면 lastLogin 필드에 날짜 기록, viewCnt 필드 +1
+    4-2) False면 시청 불가
+*/
+
+
+if($txtPwd<>"dnsgod502"){
+echo "정상적인 접속이 아닙니다. 고객센터로 문의 하세요. tel) 031-651-5023";
+exit;
+}
+
+if($txtMobile==""){
+echo "핸드폰 번호 4자리를 다시 입력해 주세요. ";
+exit;
+}
+
+	$sql = "select * from 20181124VodList where mobile='".$txtMobile."';";
+	$tmpRs = mysql_query($sql);
+	$rs = mysql_fetch_array($tmpRs);
+	
+	if($rs[idx] == "")
+	{
+		echo "핸드폰 뒷 번호 네 자리를 입력해 주세요.<br><br>";
+		echo "결제여부 확인) 1577-7451";
+		exit;
+	}
+	
+	$mobile = $rs[mobile];
+	$firstLogin = $rs[firstLogin];
+	$endDate = $rs[endDate];
+	$lastLogin = $rs[lastLogin];
+	$viewCnt = $rs[viewCnt];
+	$idx = $rs[idx];
+	
+	if($idx && $viewCnt < 1) { //최초 접속
+	
+		$sql="update 20181124VodList set viewCnt = viewCnt+1,firstLogin=now(),lastLogin=now(),endDate= DATE_ADD(NOW(), INTERVAL +7 DAY)
+		where idx = ".$rs[idx];
+		
+		mysql_query($sql);
+		
+		
+	}else{ //2회차 접속
+		
+		$sql = "select idx from 20181124VodList where now() < endDate and idx = ".$rs[idx];
+		$tmpRs = mysql_query($sql);
+		$rs = mysql_fetch_array($tmpRs);
+	
+		if($rs[idx]){
+		
+			$sql="update 20181124VodList set viewCnt = viewCnt+1,lastLogin=now() 
+			where idx = ".$rs[idx];
+			
+			mysql_query($sql);
+			
+			
+		}else{
+		echo "영상 시청 기간이 만료되었습니다.";
+		exit;
+		}
+	}
+	
+	
+//echo $viewCnt."회 시청하고 있습니다.<br><br>";
+
+?>
+
+<iframe src="https://player.vimeo.com/video/302669231" width="640" height="360" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+<br><br>
+<font color='red'>PC화면입니다. 영상에 마우스를 올리면, 전체화면 모드를 선택할 수 있습니다. <br><br>
+</font><b>영상 비밀번호는 등기로 발송한 문서에 있습니다. (위, 아래 영상이 동일 비번을 사용합니다.)</b>
+
+
+
+
+<br><br><br><br>
+<iframe src="https://player.vimeo.com/video/302983560" width="640" height="360" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+<br><br>
+<font color='red'>교육모습 입니다. 영상에 마우스를 올리면, 전체화면 모드를 선택할 수 있습니다. 
+<br><br>
+<br><br>

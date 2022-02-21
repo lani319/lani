@@ -1,0 +1,47 @@
+<?php
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+?>
+
+<table width="750px">
+<tr height="15px">
+<td>순번</td>
+<td>이름</td>
+<td>등록일</td>
+<td>누적 상담수</td>
+</tr>
+<tr><td colspan="5" height="1" bgcolor="FF33CC"></td></tr>
+<tr><td colspan="5" height="1" bgcolor="FF33CC"></td></tr>
+
+<?php
+$query = "select * from TM_admin order by idx desc";
+$tmpRs = mysql_query($query);
+
+$rowCnt = mysql_num_rows($tmpRs);
+if($rowCnt == 0)
+{
+	echo "<tr><td colspan=10 align=center>등록 된 상담원이 없습니다.</td></tr>";
+}
+else 
+{
+	while($rs = mysql_fetch_array($tmpRs))
+	{
+?>
+<tr>
+<td><?=$rowCnt--?></td>
+<td><?=$rs[adminName]?></td>
+<td><?=$rs[regDate]?></td>
+<td><?=$rs[userCnt]?></td>
+</tr>
+<tr><td colspan="5" height="1" bgcolor="FF33CC"></td></tr>
+<?php
+	}
+}
+?>
+<tr><td colspan="5" height="1" bgcolor="FF33CC"></td></tr>
+</table>

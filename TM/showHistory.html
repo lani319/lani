@@ -1,0 +1,168 @@
+<?php
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+
+
+/* 총 게시물수 구하기 */
+	if(!$page){ $page = 1 ; }
+	$pagePerNum = 20; // 한 페이지당 레코드 갯수
+	$indexPerPage = 10; // 한페이지에 표시될 인덱스 갯수
+	$searchSet ="userIdx=$userIdx";	
+	
+	
+	function getAdminName($adminCode)
+	{
+		$sql = "select userName,userNickname from Member where idx=$adminCode";
+		$tmpRs = mysql_query($sql);
+		$rs = mysql_fetch_array($tmpRs);
+		
+		return $rs[userNickname]."($rs[userName])";
+	}
+?>
+<HTML>
+
+<head>
+<link rel="stylesheet" href="table.css" type="text/css" />
+<link href="/css/502style.css" type="text/css" rel="stylesheet">
+
+<script type="text/javascript">
+function setMemInfo(info)
+{
+	var txtMemInfo = document.getElementById("txtMemInfo");
+	
+	txtMemInfo.value = info;
+}
+
+function goModify(mode,idx)
+{
+		var url = "modHistory.html?idx="+idx;
+		var win = window.open(url,'','location=no, directories=no,resizable=no,status=no,toolbar=no,menubar=no, width=350,height=300,left=0, top=0, scrollbars=no');
+}
+
+
+//회원 등급 조정
+function setMemGrade(grade)
+{
+	var f = document.form1;
+	
+	f.memGrade.value = grade;
+	f.action = "changeMemGrade.php";
+	f.submit();
+	
+}
+</script>
+</head>
+
+
+ <body>
+ <input type="text" name="txtMemInfo" id="txtMemInfo" style="width:300px;height:20px;border-type:solid;border-style:thin;border-width:0px;text-align:right;" readonly>
+ <input type="button" value="1차 통화" onclick="setMemGrade('1')">
+ &nbsp;&nbsp;&nbsp;
+ <input type="button" value="2차 통화" onclick="setMemGrade('2')">
+ &nbsp;&nbsp;&nbsp;
+ <input type="button" value="3차 통화" onclick="setMemGrade('3')">
+ &nbsp;&nbsp;&nbsp;
+<table cellpadding="0" cellspacing="0" width="100%">
+			<tr bgcolor="E9EEF6" align="center">
+			<td style="color:#000000" width="150px">상담일</td>
+			<td style="color:#000000" width="200px">상담코드</td>
+			<td style="color:#000000" width="100px">상담원</td>
+			<td style="color:#000000" width="150px">상태</td>
+			<td style="color:#000000">메모</td>
+			<td width="100">
+			
+			</td>
+			</tr>
+		<?php
+				$sql = "select B.*,A.userName,A.userNickname from Member A inner join TM_info B on A.idx = B.userIdx where B.userIdx=$userIdx order by B.recentDate Desc";
+	
+//		echo $sql;
+		$tmpRs2 = mysql_query($sql);
+		$rowNum = mysql_num_rows($tmpRs2);
+			while($rs2 = mysql_fetch_array($tmpRs2))
+			{
+				$recentDate = $rs2[recentDate];
+				$counselKind = $rs2[counselKind];
+				$memo = $rs2[memo];
+				$adminName = getAdminName($rs2[adminIdx]);
+				$userName = $rs2[userName];
+				$arrKind = explode("^",$counselKind);
+				$arrKindDetail = explode("^",$rs2[counselKindDetail]);
+				$counselKindCode = "";
+				$counselKindDetail = "";
+				$nonMemberName = $rs2[nonMemberName];
+				$nonMemberMobile = $rs2[nonMemberMobile];
+				$nonMembers2SN = $rs2[nonMembers2SN];
+				$processResult = $rs2[processResult];
+				if($processResult == "")
+				{
+					$processResult = "Complete";
+				}
+				
+				switch ($processResult)
+				{
+					case "Complete":
+						$processResult = "처리";
+						$bgColor="FFFFFF";
+						break;
+					case "Fail":
+						$processResult = "<font color='red'>미처리</font>";
+						$bgColor="ffe2a5";
+						break;
+					case "Transfer":
+						$processResult = "<font color='blue'>이관</font>";
+						$bgColor="dbe9fc";
+						break;
+				}
+						
+				for($i = 0 ; $i<sizeof($arrKind); $i++)
+				{
+					$counselKindCode  = $counselKindCode." ".$arrKind[$i];
+					$counselKindDetail  = $counselKindDetail." ".$arrKindDetail[$i];
+				}
+			?>
+				<tr bgcolor="<?=$bgColor?>">
+				<td align="center"><?=$recentDate?></td>
+				<td align="center"><?=$counselKindCode?><br><?=$counselKindDetail?></td>
+				<td align="center"><?=$adminName?></td>
+				<td align="center"><?=$processResult?></td>
+				<td>				
+				<?=$memo?>
+				</td>
+				<td>
+					<a href="#" onclick="goModify('mod',<?=$rs2[idx]?>)">수정/삭제</a>
+					
+				</td>
+				</tr>
+				<tr><td colspan="10" height="1" background="images/line.gif"></td></tr>
+			<?php	
+			}
+			
+			$info = $userName."회원               전체 상담 : ".$rowNum."건";
+			
+		?>
+			<tr><td colspan="10" height="2" bgcolor="74C2E1"></td></tr>
+	</table>	
+	
+	<br>
+	
+	<form name="form1" target="invFrame" method="POST">
+	<input type="hidden" name="memIdx" value="<?=$userIdx?>">
+	<input type="hidden" name="memGrade">
+	</form>
+		
+	
+	<iframe name="invFrame" width="600" height="0"></iframe>
+	</body>
+	</HTML>
+	
+	<script>
+	setMemInfo('<?=$info?>');
+	</script>
+	
+	

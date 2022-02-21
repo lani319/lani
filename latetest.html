@@ -1,0 +1,220 @@
+<?php
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+
+?>
+<link rel="stylesheet" type="text/css" href="/css/502style.css">
+<script type="text/javascript">
+function changeMode(mode)
+{
+	switch(mode)
+	{
+		case "general":
+			document.getElementById("GeneralPayResult").style.display="inline";
+			document.getElementById("FirstPayResult").style.display = "none";
+		break;
+		
+		case "first":
+			document.getElementById("FirstPayResult").style.display="inline";
+			document.getElementById("GeneralPayResult").style.display = "none";
+		break;
+	}
+}
+<?
+include_once $_SERVER['DOCUMENT_ROOT']."/include/in_top_header.html";
+?>
+<body onLoad="MM_preloadImages('../img/customer/left_menu_11.gif','../img/customer/left_menu_21.gif','../img/customer/left_menu_31.gif','../img/customer/left_menu_41.gif','../img/customer/left_menu_51.gif','../img/customer/left_menu_61.gif','../img/customer/left_menu_71.gif','../img/customer/left_menu_81.gif','../img/customer/left_menu_91.gif','../img/customer/left_menu_101.gif','../img/customer/left_menu_111.gif','../img/customer/left_menu_121.gif','../img/customer/left_menu_131.gif')">
+<? include_once $_SERVER['DOCUMENT_ROOT']."/include/in_top.html" ?>
+<table width="940" border="0" align="center" cellpadding="0" cellspacing="0" id="body">
+  <tr>
+    <td width="172" valign="top">	
+	  <? include_once $_SERVER['DOCUMENT_ROOT']."/include/in_left_customer.html" ?>
+      <? include_once $_SERVER['DOCUMENT_ROOT']."/include/in_left_bn.html" ?>    </td>
+    <td colspan="2" valign="top"><table width="768" border="0" cellpadding="0" cellspacing="0">
+      <tr>
+        <td width="411" height="29" background="/img/strategy/title_bg.gif"><table border="0" cellpadding="0" cellspacing="0" background="/img/sub/title_bg.gif">
+          <tr>
+            <td class="k16b"><img src="/img/sub/title_left.gif" width="15" height="29" align="absmiddle">결제확인게시판<img src="/img/sub/title_r.gif" width="18" height="29" align="absmiddle"></td>
+          </tr>
+        </table></td>
+        <td width="340" align="right" background="/img/strategy/title_bg.gif"><img src="/img/strategy/title_navi.gif" width="4" height="29" align="absmiddle">   <a href="../index.html" class="white"><b>홈</b></a> <span class="white">></span> <a href="/customer/" class="white"><b>고객센터</b></a> <span class="white">> <b>결제확인</b></span></td>
+        <td width="17" align="right" background="/img/strategy/title_bg.gif"><img src="/img/strategy/title_end.gif" width="3" height="29"></td>
+      </tr>
+      <tr>
+        <td height="14"> </td>
+        <td height="14" align="right"> </td>
+        <td height="14" align="right"> </td>
+      </tr>
+    </table>
+      <table width="768" border="0" cellpadding="0" cellspacing="0" background="/img/moneyf/box_bg_l.gif">
+        <tr>
+          <td align="center" valign="top" bgcolor="#FFFFFF"><img src="/img/moneyf/box_top_l.gif" width="768" height="9" ></td>
+        </tr>
+        <tr>
+          <td align="center"><table width="100" height="15" border="0" align="center" cellpadding="0" cellspacing="0">
+              <tr>
+                <td></td>
+              </tr>
+          </table></td>
+        </tr>
+        <tr>
+          <td height="20" align="center">
+
+<TABLE width="95%" cellpadding=0 cellspacing=0 border=0>	
+<tr><td colspan=19 style="color:660000;font-weight:bold;font-size:15px;" align="center">&nbsp;&nbsp;&nbsp;<li>인터넷방송/프리미엄 결제내역</td></tr>
+<tr height=10><td></td></tr>
+<tr height=1><td bgcolor='999999' colspan=19></td></tr>
+	<tr height=2><td bgcolor='EEEEEE' colspan=19></td></tr>
+	<TR HEIGHT=27 bgcolor='#FFFFFF' align='center'>
+		
+		<TD width=40><FONT COLOR="#3C9CD1">번호</FONT></TD>
+		<TD width=1><img src='/naraboard/skin/test_skin/image/td_bar.gif' border=0></TD>
+		<TD width=100 align='center'><FONT COLOR="#3C9CD1">상품</FONT></TD>
+		<TD width=1><img src='/naraboard/skin/test_skin/image/td_bar.gif' border=0></TD>
+		<TD width=80><FONT COLOR="#3C9CD1">회원아이디</FONT></TD>
+		<TD width=1><img src='/naraboard/skin/test_skin/image/td_bar.gif' border=0></TD>
+		<TD width=40><FONT COLOR="#3C9CD1">금액</FONT></TD>
+		<TD width=1><img src='/naraboard/skin/test_skin/image/td_bar.gif' border=0></TD>
+		<TD><FONT COLOR="#3C9CD1">상태</FONT></TD>
+		<TD width=1><img src='/naraboard/skin/test_skin/image/td_bar.gif' border=0></TD>
+		<TD width=70><FONT COLOR="#3C9CD1">등록일</FONT></TD>
+	</TR>
+	<tr height=2><td bgcolor='3C9CD1' colspan=19></td></tr>
+	
+		<?php
+$sql = "select A.userID,B.price,(case B.settletype when '1' then 'CARD' when '0' then 'BANK' else 'ETC' end) as settletype,C.service_name,B.state,left(B.paydate,10) as paydate ";
+$sql = $sql . " from Member A inner join chargeInfo B on A.idx = B.uidx inner join service_kind C on B.service_type = C.service_orderID where settletype in (0,1) order by B.paydate desc limit 0,20";
+
+//echo $sql;
+
+$result = mysql_query($sql);
+$currentNum = 1;
+	
+	while($rs = mysql_fetch_array($result))
+	{
+		switch ($rs[state])
+		{
+			case "0":
+				$state = "무통장 예정";
+			break;
+			case "1":
+				$state = "무통장 확인";
+			break;		
+			case "2":
+				$state = "카드 예정";
+			break;
+			case "3":
+				$state = "카드 확인";
+			break;				
+		}
+		
+		echo "<tr><td align='center' height=30>$currentNum</td>";
+		echo "<td>&nbsp;</td>";
+		echo "<td align='center'>$rs[service_name]</td>";
+		echo "<td>&nbsp;</td>";
+		echo "<td align='center'>$rs[userID]</td>";
+		echo "<td>&nbsp;</td>";
+		echo "<td align='center'>".number_format($rs[price])."</td>";
+		echo "<td>&nbsp;</td>";
+		echo "<td align='center'>".$state."</td>";
+		echo "<td>&nbsp;</td>";
+		echo "<td align='center'>".$rs[paydate]."</td></tr>";				
+		$currentNum++;
+		echo "<tr><td height=1 bgcolor=AAAAAA colspan=19></td></tr>";
+	}
+	
+	?>
+	
+	
+	<?php
+	
+	$sql = "select A.userID,B.price,'FIRST' as service_name,B.state,date_format(B.paydate,'%Y-%m-%d') as paydate from Member A inner join First_chargeInfo B on A.idx = B.uidx order by B.paydate desc limit 0,20";
+	$result = mysql_query($sql);
+	$currentNum = 1;
+	?>
+	<TABLE width="95%" cellpadding=0 cellspacing=0 border=0>	
+<tr><td colspan=19 style="color:660000;font-weight:bold;font-size:15px;" align="center">&nbsp;&nbsp;&nbsp;<li>FIRST 결제내역</td></tr>
+<tr height=10><td></td></tr>
+<tr height=1><td bgcolor='999999' colspan=19></td></tr>
+	<tr height=2><td bgcolor='EEEEEE' colspan=19></td></tr>
+	<TR HEIGHT=27 bgcolor='#FFFFFF' align='center'>
+		
+		<TD width=40><FONT COLOR="#3C9CD1">번호</FONT></TD>
+		<TD width=1><img src='/naraboard/skin/test_skin/image/td_bar.gif' border=0></TD>
+		<TD width=100 align='center'><FONT COLOR="#3C9CD1">상품</FONT></TD>
+		<TD width=1><img src='/naraboard/skin/test_skin/image/td_bar.gif' border=0></TD>
+		<TD width=80><FONT COLOR="#3C9CD1">회원아이디</FONT></TD>
+		<TD width=1><img src='/naraboard/skin/test_skin/image/td_bar.gif' border=0></TD>
+		<TD width=40><FONT COLOR="#3C9CD1">금액</FONT></TD>
+		<TD width=1><img src='/naraboard/skin/test_skin/image/td_bar.gif' border=0></TD>
+		<TD><FONT COLOR="#3C9CD1">상태</FONT></TD>
+		<TD width=1><img src='/naraboard/skin/test_skin/image/td_bar.gif' border=0></TD>
+		<TD width=70><FONT COLOR="#3C9CD1">등록일</FONT></TD>
+	</TR>
+	<tr height=2><td bgcolor='3C9CD1' colspan=19></td></tr>
+	<?php
+	
+	while($rs = mysql_fetch_array($result))
+	{
+		switch ($rs[state])
+		{
+			case "0":
+				$state = "무통장 예정";
+			break;
+			case "1":
+				$state = "무통장 확인";
+			break;		
+			case "2":
+				$state = "카드 예정";
+			break;
+			case "3":
+				$state = "카드 확인";
+			break;				
+		}
+		echo "<tr><td align='center' height=30>$currentNum</td>";
+		echo "<td>&nbsp;</td>";
+		echo "<td align='center'>$rs[service_name]</td>";
+		echo "<td>&nbsp;</td>";
+		echo "<td align='center'>$rs[userID]</td>";
+		echo "<td>&nbsp;</td>";
+		echo "<td align='center'>".number_format($rs[price])."</td>";
+		echo "<td>&nbsp;</td>";
+		echo "<td align='center'>".$state."</td>";
+		echo "<td>&nbsp;</td>";
+		echo "<td align='center'>".$rs[paydate]."</td></tr>";				
+		$currentNum++;
+		echo "<tr><td height=1 bgcolor=AAAAAA colspan=19></td></tr>";
+	}
+	
+	?>
+	
+</table>
+
+		  </td>
+        </tr>
+        <tr>
+          <td valign="top"><table width="100" height="15" border="0" align="center" cellpadding="0" cellspacing="0">
+              <tr>
+                <td></td>
+              </tr>
+          </table></td>
+        </tr>
+        <tr>
+          <td><img src="/img/moneyf/box_btm_l.gif" width="768" height="9"></td>
+        </tr>
+      </table></td>
+  </tr>
+  
+  <tr>
+    <td height="16" colspan="2" valign="top"> </td>
+    <td width="150" height="16" align="right" valign="top"> </td>
+  </tr>
+</table>
+<? include_once $_SERVER['DOCUMENT_ROOT']."/include/in_foot.html" ?>
+</body>
+</html>

@@ -1,0 +1,11 @@
+<!--
+업종별 적정주가
+-->
+<?php
+//키워드 암호화, 복호화 필요
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+?>
+<frameset cols="790,210" name="main01">
+    <frame src="search_01.html?searchKeyword=<?=base64_encode($searchKeyword)?>" frameborder="0">
+    <frame src="right.html" frameborder="0" scrolling="No">
+</frameset>

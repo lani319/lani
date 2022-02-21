@@ -1,0 +1,267 @@
+<?
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/coin_lib.php";
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+
+
+
+$memUid = $_COOKIE["_CKE_USER_UID"];
+$memId = $_COOKIE["_CKE_USER_ID"];
+$memName = $_COOKIE["_CKE_USER_NAME"];
+
+if($memUid == "")
+{
+	echo "<script>alert('로그인 후 이용 해 주세요');opener.location.href='/index.html';this.close();</script>";
+}
+
+//기존에 신청 했는 지 체크
+$sql = "select count(idx) as cnt from 502Mountain where mIdx=$memUid";
+$tmpRs = mysql_query($sql);
+$rs = mysql_fetch_array($tmpRs);
+
+if($rs[cnt] > 0)
+{
+	echo "<script>location.href='regResult.html';</script>";
+}
+
+
+
+
+//핸드폰 번호 가져오기
+$sql = "select mobile from Member where idx = $memUid";
+$tmpRs  = mysql_query($sql);
+$rs = mysql_fetch_array($tmpRs);
+$arrMobile = explode("-",$rs[mobile]);
+
+
+//요금
+$fee = 15000;
+$feeChild = 5000;
+?>
+
+
+<html>
+<title>산악회 신청하기</title>
+<head>
+<link rel="stylesheet" type="text/css" href="/css/502style.css">
+<script type="text/javascript">
+function setFee(mode)
+{
+	var cntAdult = 0;
+	var cntChild = 0;
+	var numA = document.getElementById("cmbMemNumAdult").value;
+	var numC = document.getElementById("cmbMemNumChild").value;
+	var msg = "";
+	
+	if(document.getElementById("rdLunch").checked == true) //점심 먹어
+	{
+		if(mode == 'adult')
+		{
+			//회비
+	//		document.getElementById("mFee").value = numA*<?=$fee?>;
+	//		var fee = commify(numA*<?=$fee?>); //콤마찍기
+			
+			msg += "<p align='center' style='font-size:13px'>예상 식대는 대인 15,000원, 어린이 5,000원 입니다.<br>(1인 기준 /중,고생은 대인 적용/ 상세 내역은 공지사항 참고)<br>";
+			msg += "식대는 하산 후 현지 식당에서 걷을 예정입니다.<br><br>";			
+			document.getElementById("tdNotice").innerHTML = msg;
+			
+		}
+	}	
+	else
+	{
+		
+		//	msg += "<p align='center' style='font-size:13px'>점심식사에 참석하지 않는 회원분께서는 <br> 시간에 맞추어 집결지에 부탁드립니다. </p>";
+			msg = "";
+			document.getElementById("tdNotice").innerHTML = msg;
+		
+			//회비
+//			document.getElementById("mFee").value = 0;
+	}
+
+	//대인, 어린이 숫자 
+		document.getElementById("mNumAdult").value = numA;
+		document.getElementById("mNumChild").value = numC;
+		
+	
+	
+}
+
+function commify(n) {
+  var reg = /(^[+-]?\d+)(\d{3})/;   // 정규식
+  n += '';                          // 숫자를 문자열로 변환
+
+  while (reg.test(n))
+    n = n.replace(reg, '$1' + ',' + '$2');
+
+  return n;
+}
+
+
+function goNotice(mode)
+{
+	switch(mode)
+	{
+		case "Notice":
+		//alert('공지 준비중');
+		opener.location.href = "http://www.502.co.kr/board.php?db=notice&mode=view&idx=335&page=1&come_from=&srv_code=";
+		break;
+		
+		case "Blog":
+		//opener.location.href = "http://blog.naver.com/azxcv9991/40114709837";
+		
+		//location.href = "http://blog.naver.com/azxcv9991/40114709837";
+		break;
+	}
+}
+function goSubmit()
+{
+	
+	var f = document.form1;
+	f.submit();
+}
+
+
+
+	function getCookie(name) 
+	{
+	   var from_idx = document.cookie.indexOf(name+'=');
+	   if (from_idx != -1) { 
+		  from_idx += name.length + 1
+		  to_idx = document.cookie.indexOf(';', from_idx) 
+	
+		  if (to_idx == -1) {
+				to_idx = document.cookie.length
+		  }
+		  return unescape(document.cookie.substring(from_idx, to_idx))
+	   }
+	}
+	
+	
+	function setCookie(name, value, expDays) 
+	{
+	var exp = new Date(); 
+	exp.setTime(exp.getTime() + (expDays*24*60*60*1000));
+	var expire_date = new Date(exp);
+	var odC = getCookie(name)+'';
+	
+	document.cookie = name + "=" + odC +","+ escape(value) + ";path=/; expires=" + expire_date.toGMTString(); 
+	
+	}
+	
+	function setNoToday() //1일 동안 안 띄우기 (자동으로 안 띄우기)
+	{
+		setCookie("Mountain502", "no" , 30);
+		
+	}
+</script>
+
+
+</head>
+
+
+<body style="padding-left : 0px ; padding-top : 0px;">
+<form name="form1" action="regOk.php" target="invFrame">
+<input type="hidden" name="mNumAdult" id="mNumAdult" value="0">
+<input type="hidden" name="mNumChild" id="mNumChild" value="0">
+<input type="hidden" name="mFee" id="mFee">
+<table cellpadding="0" cellspacing="0" width="450px" height="700" border="0" style="background-image:url('img/bg.jpg'); background-repeat:no-repeat">
+<tr>
+<td height="245px"></td>
+</tr>
+<tr>
+<td height="245" valign="top"   style="padding-left:20px;padding-right:20px">
+	<table cellpadding="0" cellspacing="0" width="100%">
+	<tr>
+	<td width="100px" style="padding-left : 10px;"><img src="img/title01.gif"></td>
+	<td>
+		<input type="text" name="txtMemName" id="txtMemName" size="10" tabindex="1" value="<?=$memName?>">
+	</td>
+	</tr>
+	<tr><td height="5px"></td></tr>
+	<tr>
+	<td style="padding-left : 10px;"><img src="img/title02.gif"></td>
+	<td valign="top">
+	대인 : 
+		<select name="cmbMemNumAdult" onchange="setFee('adult')" style="height:19px" tabindex="2">;		
+		<option value="1" selected>1명</option>
+		<option value="2">2명</option>
+		<option value="3">3명</option>
+		<option value="4">4명</option>
+		<option value="5">5명</option>
+		</select>
+	소인 :
+		<select name="cmbMemNumChild" onchange="setFee('child')" style="height:19px" tabindex="3">;
+		<option value="0">--</option>
+		<option value="1">1명</option>
+		<option value="2">2명</option>
+		<option value="3">3명</option>
+		<option value="4">4명</option>
+		<option value="5">5명</option>
+		</select>
+	
+	</td>
+	</tr>
+	<tr><td height="5px"></td></tr>
+	<tr>
+	<td width="100px" style="padding-left : 10px;"><img src="img/title03.gif"></td>
+	<td>
+		<input type="text" name="txtMemPhone01" id="txtMemPhone01" size="4" style="width:30px" value="<?=$arrMobile[0]?>" tabindex="4">
+		-
+		<input type="text" name="txtMemPhone02" id="txtMemPhone02" size="4" style="width:40px" value="<?=$arrMobile[1]?>" tabindex="5">
+		-
+		<input type="text" name="txtMemPhone03" id="txtMemv03" size="4" style="width:40px" value="<?=$arrMobile[2]?>" tabindex="6">
+	</td>
+	</tr>
+	<tr><td height="5px"></td></tr>
+	<tr><td style="padding-left : 10px;"><img src="img/title04.gif"></td>
+	<td>
+	<input type="radio" name="rdLunch" value="Y" checked onclick="setFee('adult')">신청
+	<input type="radio" name="rdLunch" value="N" onclick="setFee('adult')">미신청
+	</td>
+	</tr>
+	<tr><td height="5px"></td></tr>
+	<tr>	
+	<td colspan="5" id="tdNotice" width="100%">
+	</td>
+	</tr>
+	<tr><td height="5px"></td></tr>
+	<td colspan="5" width="100%" align="center">
+	
+	<img src="img/submit.gif" style="cursor:hand" onclick="goSubmit();">
+	</td>
+		<tr>	
+	<td colspan="5" id="tdNotice" width="100%" align="center">
+	</td>
+	</tr>
+	<tr><td height="5px"></td></tr>
+	<td colspan="5" width="100%" align="center">
+	<a href="http://www.502.co.kr/board.php?db=notice&mode=view&idx=335&page=1&come_from=&srv_code=" target="_blank"><img src="img/submit01.gif" style="cursor:hand" border=0></a>
+	<!--
+	&nbsp;&nbsp;
+	<img src="img/submit02.gif" style="cursor:hand" onclick="goNotice('Blog');">
+	-->
+	
+	</td>
+	</table>
+</td>
+</tr>
+<tr>
+<td></td>
+</tr>
+</table>
+<script>
+setNoToday();
+setFee('adult');
+
+</script>
+
+<iframe name="invFrame" width="0" height="0"></iframe>
+</form>
+</body>
+</html>
+

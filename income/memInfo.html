@@ -1,0 +1,42 @@
+<?php
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+
+
+$sql = "select idx,userId,userName,userNum,mobile,userEmail from Member where idx between 20000 and 50000";
+
+$tmpRs = mysql_query($sql);
+
+?>
+
+
+<table cellpadding="0" cellspacing="0" border="1" width="800">
+<?php
+while($rs = mysql_fetch_array($tmpRs))
+{
+	/*
+	$usernum=numDec($rs[userNum]);
+	$usernum1 = substr($usernum,0,6);
+	$usernum2 = substr($usernum,6,7);
+	$usernum = $usernum1."-".$usernum2;
+	*/
+?>
+<tr>
+<td><?=$rs[idx]?></td>
+<td><?=$rs[userId]?></td>
+<td><?=$rs[userName]?></td>
+<!--
+<td><?=$usernum?></td>
+<td><?=$rs[mobile]?></td>
+<td><?=$rs[userEmail]?></td>
+-->
+</tr>
+<?php
+}
+?>
+</table>

@@ -1,0 +1,760 @@
+<?php
+/*
+1. idx가 있으면 회원 정보를 가져와서 뿌려준다
+*/
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+
+//회원 검색
+/*
+if($idx)
+{
+	$sql = "select A.idx,A.userName,A.userNickname,B.recentDate,B.recentCode,B.adminIdx from Member A inner join TM_info B on A.idx = B.userIdx where B.idx=$idx order by B.recentDate DESC";
+	$tmpRs = mysql_query($sql);
+	$rowCnt = mysql_num_rows($tmpRs);
+	if($rowCnt>0)
+	{
+		$rs = mysql_fetch_array($tmpRs);
+		
+		$userName = $rs[userName];
+		$userNickname = $rs[userNickname];
+		$recentDate = $rs[recentDate];
+		$recentCode = getCode($rs[recentCode]);
+		$adminName = getAdminName($rs[adminIdx]);
+	}
+	else 
+	{
+		$sql = "select idx,userName,userNickname from Member where idx=$idx";
+		$tmpRs = mysql_query($sql);
+		$rs = mysql_fetch_array($tmpRs);
+		
+		$userName = $rs[userName];
+		$userNickname = $rs[userNickname];
+	}
+}
+*/
+
+?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=euc-kr" />
+<title>502 Customer Relationship Management System</title>
+<link rel="stylesheet" href="table.css" type="text/css" />
+
+ <link href="/css/502style.css" type="text/css" rel="stylesheet">
+ <link type="text/css" href="/lani/TM/jquery/development-bundle/themes/ui-lightness/jquery.ui.all.css" rel="stylesheet" />
+
+<script type="text/javascript" src="/lani/TM/jquery/development-bundle/jquery-1.4.2.js"></script>
+<script type="text/javascript" src="/lani/TM/jquery/development-bundle/ui/jquery.ui.core.js"></script>
+<script type="text/javascript" src="/lani/TM/jquery/development-bundle/ui/jquery.effects.core.js"></script>
+<script type="text/javascript" src="/lani/TM/jquery/development-bundle/ui/jquery.ui.datepicker.js"></script>
+
+<script type="text/javascript">
+<!--
+//입력 폼 체크
+function chkForm()
+{
+	var f = document.form1;
+	var pf = parent.form1;
+	f.adminIdx.value = "<?=$_COOKIE['_CKE_USER_UID']?>";
+	f.reserveDate.value = document.getElementById('datepicker').value;
+	f.recentEndDate.value = "now()";
+	f.recentDate.value = pf.txtCounselTime.value;	
+	f.memo.value = document.getElementById("txtMemo").value;
+	f.counselTime.value = pf.ncalltm.value;
+	f.counselTimebyNumber.value = pf.counselTimebyNumber.value;
+	f.action = "counsel_ok.php";
+	f.submit();
+}
+
+ $(function() 
+ { 
+     $("#datepicker").datepicker({showOn: 'button', buttonImage: '/lani/TM/jquery/development-bundle/demos/datepicker/images/calendar.gif', buttonImageOnly: true, changeMonth: true, changeYear: true, showMonthAfterYear:false}); 
+     $('#datepicker').datepicker('option', {dateFormat: 'yy-mm-dd'});      
+     $("#anim").change(function() { $('#datepicker').datepicker('option', {showAnim: $(this).val()}); });
+ }); 
+
+ 
+ //상담 종류 체크해서 기록하기
+ function chkKind(id,value,checked)
+ {
+ 	var x = document.getElementsByName("chk");
+ 	var i=0;
+ 	
+ 	
+ 	var f = document.form1;
+ 	
+ 	f.counselKind.value = "";
+ 	f.counselKindDetail.value = "";
+ 	
+ 	var parentF = parent.form1.txtKind;
+ 	
+ 	
+ 	
+ 	for(i=0 ; i < x.length ; i++)
+ 	{
+ 		var tdName = "td"; //이름 초기화
+ 		tdName = tdName+x[i].id;
+ 		var td = document.getElementById(tdName);
+ 		if(x[i].checked == true) //체크가 되어 있으면
+ 		{ 		
+ 			td.style.background = "yellow";
+ 			f.counselKindDetail.value = f.counselKindDetail.value + x[i].value+"/";
+ 			f.counselKind.value = f.counselKind.value + x[i].id+"^";
+ 			
+ 		}
+ 		else
+ 		{
+ 			td.style.background = "white";
+ 		}
+ 	}
+ 	parentF.value = f.counselKindDetail.value;
+ 	
+ }
+ 
+ //처리결과
+ function setProcessResult(value)
+ {
+ 	document.getElementById("processResult").value = value;
+ 	document.getElementById("txtMemo").focus();
+ }
+ 
+ //비회원 정보 입력 완료
+ function setNonMemberInfo()
+ {
+ 	
+ 	
+ 	document.getElementById("nonMemberName").value = document.getElementById("txtNonMemberName").value;
+ 	document.getElementById("nonMemberMobile").value = document.getElementById("txtNonMemberMobile1").value+"-"+document.getElementById("txtNonMemberMobile2").value+"-"+document.getElementById("txtNonMemberMobile3").value;
+ 	document.getElementById("nonMemberSSN").value = document.getElementById("txtNonMemberSSN").value;
+ 	document.getElementById("nonMemberFlag").value = "T"; 	
+ 	document.getElementById("divNonMember").style.display = "none"; //div 숨긴다
+ 	
+ 	parent.divNonMember.innerHTML = "<font color='red'>비회원 성명 : </font><b>"+document.getElementById("nonMemberName").value+"</b> / <font color='red'> 연락처 : </font><b>"+document.getElementById("nonMemberMobile").value+"</b>/ <font color='red'>생년월일 : </font><b>"+document.getElementById("nonMemberSSN").value+"</b>";
+ }
+ 
+ //비회원 검색하고 나서 정보 입력하는거
+  function displayNonMemberInfo(userName,mobile,ssn)
+  {
+ 	parent.divNonMember.innerHTML = "<font color='red'>비회원 성명 : </font><b>"+userName+"</b> / <font color='red'> 연락처 : </font><b>"+mobile+"</b>/ <font color='red'>생년월일 : </font><b>"+ssn+"</b>";
+  }
+  
+  function setBlackList(check,value)
+  {
+  	if(check == true)
+  	{
+  		document.getElementById("txtBlackList").value = value;
+  	}
+  	else
+  	{
+  		document.getElementById("txtBlackList").value = "";  		
+  	}
+  }
+  
+  function setReservationTime()
+  {
+  	if(check == true)
+  	{
+  		document.getElementById("txtReservationTime").value = value;
+  	}
+  	else
+  	{
+  		document.getElementById("txtReservationTime").value = "";  		
+  	}
+  }
+ 
+function roundTable(objID) {
+       var obj = document.getElementById(objID);
+       var Parent, objTmp, Table, TBody, TR, TD;
+       var bdcolor, bgcolor, Space;
+       var trIDX, tdIDX, MAX;
+       var styleWidth, styleHeight;
+
+       // get parent node
+       Parent = obj.parentNode;
+       objTmp = document.createElement('SPAN');
+       Parent.insertBefore(objTmp, obj);
+       Parent.removeChild(obj);
+
+       // get attribute
+       bdcolor = obj.getAttribute('rborder');
+       bgcolor = obj.getAttribute('rbgcolor');
+       radius = parseInt(obj.getAttribute('radius'));
+       if (radius == null || radius < 1) radius = 1;
+       else if (radius > 6) radius = 6;
+
+       MAX = radius * 2 + 1;
+       
+       /*
+              create table {{
+       */
+       Table = document.createElement('TABLE');
+       TBody = document.createElement('TBODY');
+
+       Table.cellSpacing = 0;
+       Table.cellPadding = 0;
+
+       for (trIDX=0; trIDX < MAX; trIDX++) {
+              TR = document.createElement('TR');
+              Space = Math.abs(trIDX - parseInt(radius));
+              for (tdIDX=0; tdIDX < MAX; tdIDX++) {
+                     TD = document.createElement('TD');
+                     
+                     styleWidth = '1px'; styleHeight = '1px';
+                     if (tdIDX == 0 || tdIDX == MAX - 1) styleHeight = null;
+                     else if (trIDX == 0 || trIDX == MAX - 1) styleWidth = null;
+                     else if (radius > 2) {
+                            if (Math.abs(tdIDX - radius) == 1) styleWidth = '2px';
+                            if (Math.abs(trIDX - radius) == 1) styleHeight = '2px';
+                     }
+
+                     if (styleWidth != null) TD.style.width = styleWidth;
+                     if (styleHeight != null) TD.style.height = styleHeight;
+
+                     if (Space == tdIDX || Space == MAX - tdIDX - 1) TD.style.backgroundColor = bdcolor;
+                     else if (tdIDX > Space && Space < MAX - tdIDX - 1)  TD.style.backgroundColor = bgcolor;
+                     
+                     if (Space == 0 && tdIDX == radius) TD.appendChild(obj);
+                     TR.appendChild(TD);
+              }
+              TBody.appendChild(TR);
+       }
+
+       /*
+              }}
+       */
+
+       Table.appendChild(TBody);
+       
+       // insert table and remove original table
+       Parent.insertBefore(Table, objTmp);
+}
+-->
+</script>
+
+
+</head>
+<style type="text/css">
+
+.search
+{
+	font-size:15px;
+	font-weight:bold;
+	text-align:right;
+	background-color:f9dede;
+}
+
+.time
+{
+	font-size:18px;
+	font-weight:bold;
+	text-align:right;
+	border-style:none;	
+}
+
+</style>
+<body>
+
+
+<div id="divNonMember" style="width:455px;height:510px;top:2px;left:840px;position:absolute;display:none;">
+<table width="450px" height="500px" cellpadding="0" cellspacing="0" border="0"  id="ta1" radius="3" rborder="#0099FF" rbgcolor="#FFFFFF">
+<tr><td colspan="2" align="right"><img src="images/btnClose.gif" style="cursor:hand;" onclick="parent.showNonMember('close');"></td></tr>
+<tr>
+<th width="150px"  height="30px">이름</th>
+<td>
+<input type="text" name="txtNonMemberName" id="txtNonMemberName" style="width:150px;height:25px;">
+</td>
+</tr>
+<tr><td colspan="2" height="1"></td></tr>
+<tr>
+<th height="30px">연락처</th>
+<td>
+<input type="text" name="txtNonMemberMobile1" id="txtNonMemberMobile1" style="width:50px;height:25px;" maxlength="3">
+-
+<input type="text" name="txtNonMemberMobile2" id="txtNonMemberMobile2" style="width:50px;height:25px;" maxlength="4">
+-
+<input type="text" name="txtNonMemberMobile3" id="txtNonMemberMobile3" style="width:50px;height:25px;" maxlength="4">
+</td>
+</tr>
+<tr><td colspan="2" height="1"></td></tr>
+<tr>
+<th height="30px">주민번호앞자리</th>
+<td>
+<input type="text" name="txtNonMemberSSN" id="txtNonMemberSSN" style="width:150px;height:25px;" maxlength="6">
+</td>
+</tr>
+<tr><td colspan="2" align="center">
+<img src="images/_btnNonMember.gif" border="0" style="cursor:hand;" onmouseover="this.src = 'images/btnNonMember.gif'" onmouseout="this.src = 'images/_btnNonMember.gif'" onclick="setNonMemberInfo();" >
+</td></tr>
+</table>
+<script>roundTable("ta1");</script>
+</div>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr align="center">
+  <th width="80px" height="400" bgcolor="#FFFFCC">상담정보:</th>
+  <td align="left" valign="top">
+	<table cellpadding="0" cellspacing="0" border="0" width="100%" height="100%">
+	<tr>
+	<td width="750px"valign="top">
+	<table cellpadding="0" cellspacing="0" border="0" width="100%" height="100%"> 
+	<tr>
+	<td valign="top" align="center" style="border-right-color:339dff; border-right-style:ridge; border-right-width:1px">	
+	<font color="007eff">
+	유료가입,결제,만기 [1]
+	</font>
+	
+	
+		<table cellpadding="0" cellspacing="0" border="0">
+			<tr><td height="10px"></td></tr>
+			<tr>
+			<td  align="left">
+				<table cellpadding="0" cellspacing="0"  width="100%" border="0">
+				<tr>
+				<td id="td1a"><input type="checkbox" name="chk" id="1a" value="가입,상품문의" onclick="chkKind(this.id,this.value,this.checked);">가입,상품문의 [a]</td>
+				</tr>
+				<tr>
+				<td id="td1aa"><input type="checkbox" name="chk" id="1aa" value="인터넷방송,TMS" onclick="chkKind(this.id,this.value,this.checked);">인터넷방송,TMS [a]</td>
+				</tr>
+				<tr>
+				<td id="td1ab"><input type="checkbox" name="chk" id="1ab" value="텍스트(투자클럽/심봤다/VOD)" onclick="chkKind(this.id,this.value,this.checked);">텍스트(투자클럽,심봤다,VOD) [b]</td>
+				</tr>
+				<tr>
+				<td id="td1ac"><input type="checkbox" name="chk" id="1ac" value="퍼스트" onclick="chkKind(this.id,this.value,this.checked);">퍼스트 [c]</td>
+				</tr>
+				<tr>
+				<td id="td1ad"><input type="checkbox" name="chk" id="1ad" value="금전투자,502주식" onclick="chkKind(this.id,this.value,this.checked);">금전투자,502주식 [d]</td>
+				</tr>
+				</table>
+			</td>
+			</tr>
+			<tr><td height="10px"></td></tr>
+			<tr>
+			<td align="left">
+				<table cellpadding="0" cellspacing="0"  width="100%" border="0">
+				<tr>
+				<td id="td1b">
+				<input type="checkbox" name="chk" id="1b" value="결제" onclick="chkKind(this.id,this.value,this.checked);">결제 [b]
+				</td>
+				</tr>
+				<tr>
+				<td id="td1ba">
+				<input type="checkbox" name="chk" id="1ba" value="무통장(입금확인)" onclick="chkKind(this.id,this.value,this.checked);">무통장(입금확인) [a]
+				</td>
+				</tr>
+				<tr>
+				<td id="td1bb">
+				<input type="checkbox" name="chk" id="1bb" value="카드" onclick="chkKind(this.id,this.value,this.checked);">카드 [b]
+				</td>
+				</tr>
+				<tr>
+				<td  id="td1bc">
+				<input type="checkbox" name="chk" id="1bc" value="핸드폰,기타" onclick="chkKind(this.id,this.value,this.checked);">핸드폰,기타 [c]
+				</td>
+				</tr>
+				<tr>
+				<td id="td1bd">
+				<input type="checkbox" name="chk" id="1bd" value="결제오류" onclick="chkKind(this.id,this.value,this.checked);">결제오류 [d]
+				</td>
+				</tr>
+				</table>
+			</td>
+			</tr>
+			<tr><td height="10px"></td></tr>
+			<tr>
+			<td align="left">
+				<table cellpadding="0" cellspacing="0" width="100%" border="0">
+				<tr>
+				<td id="td1c">
+				<input type="checkbox" name="chk" id="1c" value="만기일,연장" onclick="chkKind(this.id,this.value,this.checked);">만기일,연장 [c]
+				</td>
+				</tr>				
+				<tr>
+				<td id="td1ca">
+				<input type="checkbox" name="chk" id="1ca" value="만기일문의" onclick="chkKind(this.id,this.value,this.checked);">만기일 문의 [a]
+				</td>
+				</tr>
+				<tr>
+				<td id="td1cb">
+				<input type="checkbox" name="chk" id="1cb" value="연장방법문의" onclick="chkKind(this.id,this.value,this.checked);">연장방법문의 [b]
+				</td>
+				</tr>
+				</table>
+			</td>
+			</tr>
+			<tr><td height="10px"></td></tr>
+			
+		</table>
+	
+	</td>
+	<td valign="top" align="center" style="border-right-color:339dff; border-right-style:ridge; border-right-width:1px">
+	<font color="c73c3c">
+	사이트이용 [2]
+	</font>
+		<table cellpadding="0" cellspacing="0" border="0" id="tableB">
+			<tr><td height="10px"></td></tr>
+			<tr>
+			<td id="td2a" align="left">
+			<input type="checkbox" name="chk" id="2a" value="SMS,TMS,티커(수신거부 포함)" onclick="chkKind(this.id,this.value,this.checked);">SMS/TMS/티커(수신거부 포함) [a]			
+			</td>
+			</tr>
+			<tr><td height="10px"></td></tr>
+			<tr>
+			<td id="td2b" align="left"><input type="checkbox" name="chk" id="2b" value="포인트,등급" onclick="chkKind(this.id,this.value,this.checked);">포인트,등급 [b]</td>
+			</tr>			
+			<tr><td height="10px"></td></tr>
+			<tr>
+			<td align="left">
+			<table cellpadding="0" cellspacing="0" width="100%" border="0">
+			<tr>
+			<td id="td2c"><input type="checkbox" name="chk" id="2c" value="방송" onclick="chkKind(this.id,this.value,this.checked);">방송 [c]</td>
+			</tr>
+				<tr>
+				<td id="td2ca"><input type="checkbox" name="chk" id="2ca" value="방송오류" onclick="chkKind(this.id,this.value,this.checked);">방송오류 [a]</td>
+				</tr>
+				<tr>
+				<td id="td2cb"><input type="checkbox" name="chk" id="2cb" value="방송이용문의" onclick="chkKind(this.id,this.value,this.checked);">방송이용문의 [b]<br>(시간,청취방법)</td>
+				</tr>
+			</table>
+			</td>
+			</tr>			
+		</table>
+	</td>
+	<td valign="top" align="center" style="border-right-color:339dff; border-right-style:ridge; border-right-width:1px">	
+	<font color="167e05">
+	탈퇴/환불 [3]
+	</font>
+		<table cellpadding="0" cellspacing="0" border="0" id="tableC">			
+			<tr><td height="10px"></td></tr>
+			<tr>
+			<td id="td3a" align="left"><input type="checkbox" name="chk" id="3a" value="탈퇴방법" onclick="chkKind(this.id,this.value,this.checked);">탈퇴방법문의 [a]</td>
+			</tr>
+			<tr><td height="10px"></td></tr>
+			<tr>
+			<td id="td3b" align="left"><input type="checkbox" name="chk" id="3b" value="환불신청" onclick="chkKind(this.id,this.value,this.checked);">환불신청 [b]</td>
+			</tr>
+			<tr><td height="10px"></td></tr>
+			<tr>
+			<td id="td3c" align="left"><input type="checkbox" name="chk" id="3c" value="상품변경" onclick="chkKind(this.id,this.value,this.checked);">상품변경 [c]</td>
+			</tr>			
+		</table>
+	</td>
+	<td valign="top" align="center" style="border-right-color:339dff; border-right-style:ridge; border-right-width:1px">	
+	<font color="b507af">
+	기타문의 [4]
+	</font>
+		<table cellpadding="0" cellspacing="0" border="0" id="tableD" >
+			<tr><td height="10px"></td></tr>
+			<tr>
+			<td id="td4a" align="left">
+			<input type="checkbox" name="chk" id="4a" value="광고제안,거래처" onclick="chkKind(this.id,this.value,this.checked);">광고제안/거래처 [a]
+			</td>
+			</tr>
+			<tr><td height="10px"></td></tr>
+			<tr>
+			<td id="td4b" align="left"><input type="checkbox" name="chk" id="4b" value="기타" onclick="chkKind(this.id,this.value,this.checked);">기타 [b]</td>
+			</tr>
+			<tr><td height="10px"></td></tr>
+			<tr>
+			<td id="td4c" align="left"><input type="checkbox" name="chk" id="4c" value="항의,불만" onclick="chkKind(this.id,this.value,this.checked);">항의/불만 [c]</td>
+			</tr>
+		</table>
+	</td>
+	<td valign="top" align="center" style="border-right-color:339dff; border-right-style:ridge; border-right-width:1px">
+	<font color="b58207">
+	아웃바운드 [5]
+	</font>
+		<table cellpadding="0" cellspacing="0" border="0" width="100%" id="tableG" >						
+			<tr>
+			<tr><td height="10px"></td></tr>			
+			<td  align="center" colspan="5">			
+			<table cellpadding="0" cellspacing="0" width="100%">
+				<tr><td id="td5a">긍정</td></tr>
+				<tr>
+				<td id="td5aa" align="left">
+				<input type="checkbox" name="chk" id="5aa" value="결제예약,신뢰,충성" onclick="chkKind(this.id,this.value,this.checked);">결제예약,신뢰,충성 [a]<br>(구체적인 예약 혹은 결제진행)<br>
+				</td>
+				</tr>
+				<tr>
+				<td id="td5ab" align="left">
+				<input type="checkbox" name="chk" id="5ab" value="결제가능,호감" onclick="chkKind(this.id,this.value,this.checked);">결제가능,호감 [b]<br>(빠른시일내결제의사있음)<br>
+				</td>
+				</tr>
+				<tr>
+				<td id="td5ac" align="left">
+				<input type="checkbox" name="chk" id="5ac" value="감안" onclick="chkKind(this.id,this.value,this.checked);">감안 [c]<br>(생각해보겠다/긍정적반응)<br>
+				</td>
+				</tr>				
+			</table>
+			</td>
+			</tr>
+			<tr><td height="10px"></td></tr>
+			<tr>
+			<td align="center">
+				<table cellpadding="0" cellspacing="0" width="100%">
+					<tr><td id="td5b">부정</td></tr>
+					<tr>
+					<td id="td5ba" align="left">
+					<input type="checkbox" name="chk" id="5ba" value="망설임" onclick="chkKind(this.id,this.value,this.checked);">망설임 [a]<br>(생각해보겠다/부정적 반응)<br>
+					</td>
+					</tr>
+					<tr>
+					<td id="td5bb" align="left">
+					<input type="checkbox" name="chk" id="5bb" value="불필요" onclick="chkKind(this.id,this.value,this.checked);">불필요 [b]<br>(매매아함)<br>
+					</td>
+					</tr>
+					<tr>
+					<td id="td5bc" align="left">
+					<input type="checkbox" name="chk" id="5bc" value="비교,불편" onclick="chkKind(this.id,this.value,this.checked);">비교,불편 [c]<br>(이용법 복잡, 타사이트가 더 좋음)<br>
+					</td>
+					</tr>				
+					<tr>
+					<td id="td5bd" align="left">
+					<input type="checkbox" name="chk" id="bd" value="불가능" onclick="chkKind(this.id,this.value,this.checked);">불가능 [d]<br>(투자금 없음,매매여건 안됨)<br>
+					</td>
+					</tr>				
+					<tr>
+					<td id="td5be" align="left">
+					<input type="checkbox" name="chk" id="5be" value="불신,불만" onclick="chkKind(this.id,this.value,this.checked);">불신,불만 [e]<br>(악평,손실 등으로 신뢰못함)<br>
+					</td>
+					</tr>				
+				</table>
+			</td>
+			</tr>
+			<tr><td height="10px"></td></tr>
+			<tr>
+			<td align="center">
+				<table cellpadding="0" cellspacing="0" width="100%">
+					<tr><td id="td5c">통화못함</td></tr>
+					<tr>
+					<td id="td5ca" align="left">
+					<input type="checkbox" name="chk" id="5ca" value="통화중" onclick="chkKind(this.id,this.value,this.checked);">통화중 [a]<br>
+					</td>
+					</tr>
+					<tr>
+					<td id="td5cb" align="left">
+					<input type="checkbox" name="chk" id="5cb" value="다른번호" onclick="chkKind(this.id,this.value,this.checked);">다른번호,불통 [b]<br>
+					</td>
+					</tr>
+					<tr>
+					<td id="td5cc" align="left">
+					<input type="checkbox" name="chk" id="5cc" value="전화거부" onclick="chkKind(this.id,this.value,this.checked);"> 전화거부 [c] <br> (수신거부요청,불쾌해함)
+					</td>
+					</tr>									
+				</table>
+			</td>
+		</table>	
+	</td>
+	</tr>	
+	<tr>
+	<td valign="top" colspan="10" style="border-top-color:339dff; border-top-style:ridge; border-top-width:2px">
+	<br>
+	<img src="images/counselHistory.gif" border="0"><br>
+	
+	<table cellpadding="0" cellspacing="0" border="0" width="100%" class="table_basic">
+	<tr align="center">
+	<th>상담일시</th><th>코드</th><th>메모</th><th>상담자</th>
+	</tr>	
+	<?php
+	if($mode == "Member" || $mode == "")
+	{
+		if($idx)
+		{
+			$sql = "select B.recentDate,B.counselKind,B.counselKindDetail,B.memo,A.userName,A.userNickname from Member A inner join TM_info B on A.idx = B.adminIdx where B.userIdx=$idx order by B.idx desc limit 0,4";		
+			$tmpRs = mysql_query($sql);
+			$rowCnt = mysql_num_rows($tmpRs);
+			if($rowCnt>0)
+			{
+				while ($rs = mysql_fetch_array($tmpRs)) 
+				{
+					$recentDate = $rs[recentDate];
+					$counselKind = $rs[counselKind];
+					$memo = $rs[memo];
+					$adminName = $rs[userName];
+					$adminNickName = $rs[userNickname];
+					$arrKind = explode("^",$counselKind);
+					$arrKindDetail = explode("^",$rs[counselKindDetail]);
+					$counselKindCode = "";
+					$counselKindDetail = "";
+					
+					for($i = 0 ; $i<sizeof($arrKind); $i++)
+					{
+						$counselKindCode  = $counselKindCode." ".$arrKind[$i];
+						$counselKindDetail  = $counselKindDetail." ".$arrKindDetail[$i];
+					}
+				?>
+				<tr align="center">
+				<td><?=$recentDate?></td><td><?=$counselKindCode?><br>[<?=$counselKindDetail?>]</td><td align="left"><?=$memo?></td><td><?=$adminNickName?></td>
+				</tr>
+				<?php
+				}
+			}
+		}
+		else 
+		{
+			echo "<tr><td colspan='10' align='center'>이력이 없습니다.</td></tr>";
+		}
+	}
+	else if($mode == "NonMember") //비회원
+	{
+		if($idx)
+		{
+			$sql = "select B.recentDate,B.counselKind,B.counselKindDetail,B.memo,A.userName,A.userNickname,B.nonMemberName,B.nonMemberMobile,B.nonMemberSSN from Member A inner join TM_info_NonMember B on A.idx = B.adminIdx where nonMemberName =  '$idx' and nonMemberSSN = '$SSN' order by B.idx desc limit 0,4";		
+//			echo $sql;
+			$tmpRs = mysql_query($sql);
+			$rowCnt = mysql_num_rows($tmpRs);
+			if($rowCnt>0)
+			{
+				while ($rs = mysql_fetch_array($tmpRs)) 
+				{
+					$recentDate = $rs[recentDate];
+					$counselKind = $rs[counselKind];
+					$memo = $rs[memo];
+					$adminName = $rs[userName];
+					$adminNickName = $rs[userNickname];
+					$arrKind = explode("^",$counselKind);
+					$arrKindDetail = explode("^",$rs[counselKindDetail]);
+					$counselKindCode = "";
+					$counselKindDetail = "";
+					$nonMemberName = $rs[nonMemberName];
+					$nonMemberMobile = $rs[nonMemberMobile];
+					$nonMemberSSN = $rs[nonMemberSSN];
+					
+					for($i = 0 ; $i<sizeof($arrKind); $i++)
+					{
+						$counselKindCode  = $counselKindCode." ".$arrKind[$i];
+						$counselKindDetail  = $counselKindDetail." ".$arrKindDetail[$i];
+					}
+				?>
+				<tr align="center">
+				<td><?=$recentDate?></td><td><?=$counselKindCode?><br>[<?=$counselKindDetail?>]</td><td align="left"><?=$memo?></td><td><?=$adminNickName?></td>
+				</tr>
+				<?php
+				}
+				
+				//여기에다가 비회원 연락처 / 번호를 표출 하는 로직을 넣는다.
+				echo "<script type='text/javascript'>displayNonMemberInfo('$nonMemberName','$nonMemberMobile','$nonMemberSSN')</script>'";
+			}
+		}
+		else 
+		{
+			echo "<tr><td colspan='10' align='center'>이력이 없습니다.</td></tr>";
+		}
+	}
+	else 
+	{
+	
+	}
+	?>
+	</table>
+	
+	</td>
+	</tr>
+	</table>
+	
+	</td>
+	<td rowspan="2">
+	
+	<iframe name="invFrame" width="750px" height="550px" src="member_view.php?idx=<?=$idx?>" frameborder="0"></iframe>
+	
+	</td>
+	</tr>
+	
+	</table>
+</td>
+</tr>
+
+<tr>
+<th height="37" bgcolor="#FFFFCC">처리 결과:</th>
+  <td align="left">
+    <table border="0">
+    <tr>
+    <td width="80px"><input type="radio" name="rdStatus" value="Complete" checked onclick="setProcessResult(this.value);">처리</td>
+    <td width="80px"><input type="radio" name="rdStatus" value="Fail" onclick="setProcessResult(this.value);">미처리</td>
+    <td width="80px"><input type="radio" name="rdStatus" value="Transfer" onclick="setProcessResult(this.value);">이관</td>
+    <td width="80px" align="center">메모</td>
+    <td><input type="text" name="txtMemo" id="txtMemo" style="width:400px"></td>
+    </tr>
+    </table>
+  
+  </td>  
+</tr>
+<tr align="center">
+  <th height="37" bgcolor="#FFFFCC">상담 예약:</th>
+  <td align="left">
+    <table border="0">
+  <tr valign="top">
+  <td valign="top" align="left">
+
+<INPUT id=datepicker type=text name="regDate" style="width:150px;height:25px">
+  </td>
+  <td style="padding-left:25px">
+	  <table cellpadding="0" cellspacing="0" width="400px">
+	  <tr>
+	  <th height="37" bgcolor="#FFFFCC" align="center">
+	  상담시간대 : 	
+	  </th>
+	  <td align="left" style="padding-left:10px">
+	  <input type="radio" value="M" name="chkReservationTime" onclick="setReservationTime(this.checked,this.value);">오전
+	  </td>
+	  <td align="left" style="padding-left:10px">
+	  <input type="radio" value="A" name="chkReservationTime" onclick="setReservationTime(this.checked,this.value);" checked>오후
+	  </td>	  
+	  <th height="37" bgcolor="#FFFFCC" colspan="10">
+	  	<input type="checkbox" value="B" name="chkBlackList" onclick="setBlackList(this.checked,this.value);">블랙리스트
+	  </th>
+	  </tr>
+	  </table>
+  <!--
+<img src="images/btnReserve.gif" border="0" style="cursor:hand" onmouseover="this.src='images/_btnReserve.gif'" onmouseout="this.src='images/btnReserve.gif'" />
+-->
+  </td>
+  </tr>
+  </table>
+</td>
+</tr>
+<tr><td colspan="2" height="20px"></td></tr>
+<tr>
+  <td  height="37"></td>
+  <td style="padding-left:300px">
+<img src="images/btnSubmit.gif" border="0" style="cursor:hand" onmouseover="this.src='images/_btnSubmit.gif'" onmouseout="this.src='images/btnSubmit.gif'" onclick="chkForm();"/>
+</td>
+</tr>
+</table>
+<form name="form1" method="POST" target="invFrame">
+<input type="hidden" name="userIdx" id="userIdx" value="<?=$idx?>">
+<input type="hidden" name="adminIdx" id="adminIdx">
+<input type="hidden" name="recentDate" id="recentDate">
+<input type="hidden" name="reserveDate" id="reserveDate">
+<input type="hidden" name="recentEndDate" id="recentEndDate">
+<input type="hidden" name="processResult" id="processResult" value="Complete">
+<input type="hidden" name="memo" id="memo">
+<input type="hidden" name="counselKind" id="counselKind"> <!-- 상담 코드 -->
+<input type="hidden" name="counselKindDetail" id="counselKindDetail"> <!-- 상담 코드 상세 -->
+<input type="hidden" name="counselTime" id="counselTime"> <!-- 상담 코드 상세 -->
+<input type="hidden" name="counselTimebyNumber" id="counselTimebyNumber"> <!-- 상담 코드 상세 -->
+
+<!-- 비회원일 경우에 시작-->
+<input type="text" name="nonMemberName" id="nonMemberName" value="<?=$idx?>">
+<input type="text" name="nonMemberMobile" id="nonMemberMobile" value="<?=$mobile?>">
+<input type="text" name="nonMemberSSN" id="nonMemberSSN" value="<?=$SSN?>">
+<input type="text" name="nonMemberFlag" id="nonMemberFlag" <?php if($mode == "NonMember"){echo " value='T'";} ?>>
+
+<input type="text" name="txtBlackList" id="txtBlackList">
+<input type="text" name="txtReservationTime" id="txtReservationTime">
+
+
+<!-- 비회원일 경우에 종료-->
+</form>
+</body>
+
+<iframe name="invFrame" width="0" height="0"></iframe>
+
+</html>

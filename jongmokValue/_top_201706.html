@@ -1,0 +1,77 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="css/top_menu.css">
+<script type="text/javascript">
+function goSearch()
+{
+	var f = document.frm;
+	var keyword = document.getElementById("searchKeyword");
+	if(keyword.value.length >1)
+	{
+		f.submit();
+	}
+	/*
+	else{
+		alert("종목코드 또는 종목명을 2자 이상 입력해 주세요.")
+	}
+	*/
+	
+}
+function goFirstSearch()
+{
+	var f = document.frm;	
+	f.submit();
+}
+function window::onload() {
+   document.getElementById('searchKeyword').focus();
+}
+
+function goPage(num)
+{	
+	var url = "contents_"+num+".html";	
+	parent.main01.contents.location.href=url;
+	
+}
+</script>
+</head>
+<body onload=goFirstSearch();>
+<form name="frm" target="frmResult" action="contents_01_201706_free.html" method="POST">
+<table width="900px"border="0">
+<tr>
+<td width="10px">&nbsp;</td>
+<td align="left">
+<!--
+<a href="http://plus.sentv.co.kr/help/notice/18598" target="_blank">
+<img src="http://www.sentv.co.kr/img/banner/main/0707_ptcn_413x77.jpg" border=0></a>
+-->
+<img src="http://www.502.co.kr/upload_file/WImgPost/2017/07/1501129848714.jpg">
+<br><br>
+<input type="text" size="30" name="searchKeyword" id="searchKeyword" class="input05">
+<input type="submit" class="btnSearch" onclick="goSearch();" onsubmit="goSearch();" value="검 색">
+<br>
+<br>
+<font size="3" color="red"><b>*종목명 또는 종목코드를 입력 후 엔터키 누르거나 검색 클릭하세요. 
+<br><br>
+<font size="3" color="black">*매달 1회 전체종목 업데이트, 신규상장주 당일 업로드<br><br>적정주가 산출에 필요한 정보 미 제공시 적정주가 0원으로 표출 됩니다. 
+<br><br>
+<font size="3" color="blue">*우선주, 스팩, 선박투자회사 제외/스팩에서 변경 상장, 종목명 변경 등이<br><br> 실시간 제공되지 않을 수도 있습니다.
+<br><br>
+<!--
+<font size="3" color="black">*무료회원은 코스피100, 코스닥50 종목만 검색 및 조회 가능합니다.
+-->
+</td>
+</tr>
+</table>
+</form>
+<table width="700px"border="0">
+<tr>
+<td width="10px">&nbsp;</td>
+<td align="left">
+<iframe name="frmResult" width="700px" height="800px" frameborder="0"></iframe>
+</td>
+</tr>
+</table>
+
+</body>
+
+</html>

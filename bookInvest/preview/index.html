@@ -1,0 +1,142 @@
+<?php
+
+if($num=="")
+{
+	$num = "1";
+}
+
+
+switch ($num)
+{
+	case "1":
+	$next = "2";
+	$prev = "1";
+	break;
+	
+	case "2":
+	$next = "3";
+	$prev = "1";
+	break;
+	
+	case "3":
+	$next = "4";
+	$prev = "2";
+	break;
+
+	case "4":
+	$next = "5";
+	$prev = "3";
+	break;	
+	
+	case "5":
+	$next = "6";
+	$prev = "4";
+	break;		
+	
+	case "6":
+	$next = "7";
+	$prev = "5";
+	break;		
+
+	case "7":
+	$next = "8";
+	$prev = "6";
+	break;		
+
+	case "8":
+	$next = "9";
+	$prev = "7";
+	break;		
+
+	case "9":
+	$next = "10";
+	$prev = "8";
+	break;			
+	
+	case "10":
+	$next = "10";
+	$prev = "9";
+	break;				
+}
+
+?>
+<html>
+<head>
+<script type="text/javascript">
+function goNext(idx)
+{
+	location.href = 'index.html?num='+idx;
+}
+
+function goPrev(idx)
+{
+	location.href = 'index.html?num='+idx;
+}
+
+function goBuy()
+{
+	alert('본 상품은 판매가 중단되었습니다.');
+	return;
+	//var win = window.open('/lani/bookInvest/popBuy.html','dd','width=350px,height=400,toolbar=no,status=no,location=no,menubar=no,scrollbars=no,resizable=no,left=0,top=0');
+	//location.href = '/lani/bookInvest/contents_order.php';
+	//this.self.close();
+}
+</script>
+</head>
+
+<body>
+<table width="1020" height="760" cellpadding="0" cellspacing="0" border="0">
+<tr>
+	<td width="750px">
+		<table width="100%" cellpadding="0" cellspacing="0" border="0">
+		<tr>
+		<td valign="middle">
+		<?php
+		if($num>1)
+		{
+		?>
+		<img src="img/prev.gif" style="cursor:hand;" onclick="goPrev(<?=$prev?>);"></td>
+		<?php
+		}
+		?>
+		</td>	
+		<td><img src="img/<?=$num?>.jpg"></td>
+		<td valign="middle">
+		<?php
+		if($num<10)
+		{
+		?>
+		<img src="img/next.gif" style="cursor:hand;" onclick="goNext(<?=$next?>);">
+		<?php
+		}
+		?>
+		</td>
+		</tr>
+		</table>
+	</td>	
+	<td background="img/rightBg.gif" width="20px">&nbsp;&nbsp;  </td>
+	<td valign="top">
+		<table cellpadding="0" cellspacing="0" width="200px">
+		<tr>
+		<td  valign="top">
+		<img src="img/topTitle.gif" border="0"> 
+		</td>		
+		</tr>
+		<tr>
+		<td valign="top" align="center">
+		<img src="img/topMain.gif" border="0"> 
+		<br>
+		<br>
+		<img src="img/btnBuy.gif" style="cursor:hand;" onclick="goBuy();">
+		</td>
+		</tr>		
+		</table>
+	
+	</td>
+</tr>
+
+</table>
+</body>
+
+
+</html>

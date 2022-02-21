@@ -1,0 +1,84 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="css/top_menu.css">
+<script type="text/javascript">
+function goSearch()
+{
+	var f = document.frm;
+	var keyword = document.getElementById("searchKeyword");
+	if(keyword.value.length >1)
+	{
+		f.submit();
+	}else{
+		alert("종목코드 또는 종목명을 2자 이상 입력해 주세요.")
+	}
+	
+}
+function window::onload() {
+   document.getElementById('searchKeyword').focus();
+}
+
+function goPage(num)
+{	
+	var url = "contents_"+num+".html";	
+	parent.main01.contents.location.href=url;
+	
+}
+</script>
+</head>
+<body>
+<form name="frm" target="contents" action="search_01.html" method="POST">
+<table width="900px"border="0">
+<tr>
+<td width="250px">&nbsp;</td>
+<td align="left">
+
+<img src="img/small_ci.jpg">
+
+<input type="text" size="30" name="searchKeyword" id="searchKeyword" class="input05">
+<input type="submit" onclick="goSearch();" value="검색">
+<input type="hidden" id="txtRemainCnt" size="3" value="0">
+<!--
+<font color='red' size="4"><b>Ctrl+F (컨트롤+F)눌러서 종목명 검색하세요</b></font>
+</br>
+-->
+
+</td>
+<td width="100px"></td>
+</tr>
+<tr>
+<td colspan="30">
+	<table width="900px" border="0" class="table01">
+	<tr align="center" class="tableTop">
+	<td width="200px" id="menu1" height="35px"onclick="goPage('01');" style="cursor:hand;font-size:14px" onmouseover="this.style.color='#FFFFFF';" onmouseout="this.style.color='#000000'">적정주가 검색하기</td>
+	<td width="1px">|</td>
+	<td width="200px" id="menu2" onclick="goPage('02');" style="cursor:hand;font-size:14px" onmouseover="this.style.color='#FFFFFF';" onmouseout="this.style.color='#000000'">개  념</td>
+	<td width="1px">|</td>
+	<td id="menu3" onclick="goPage('03');" style="cursor:hand;font-size:14px" onmouseover="this.style.color='#FFFFFF';" onmouseout="this.style.color='#000000'">적용사례</td>
+	<td width="1px">|</td>
+	<td id="menu4" onclick="goPage('04');" style="cursor:hand;font-size:14px" onmouseover="this.style.color='#FFFFFF';" onmouseout="this.style.color='#000000'">활용방법</td>
+	
+	<!--
+	<td width="1px">|</td>
+	<td id="menu5" onclick="goPage('05');" style="cursor:hand;font-size:14px" onmouseover="this.style.color='#FFFFFF';" onmouseout="this.style.color='#000000'">확인방법</td>	
+	-->
+	<?php
+	
+	if($_COOKIE['_CKE_USER_ID']=='coylwh' ||$_COOKIE['_CKE_USER_ID']=='ayh319' ||$_COOKIE['_CKE_USER_ID']=='noba81'){
+	?>
+	<td width="1px">|</td>
+	<td id="menu6" onclick="goPage('07');" style="cursor:hand;font-size:14px" onmouseover="this.style.color='#FFFFFF';" onmouseout="this.style.color='#000000'">1/5배 저평가</td>	
+	<td width="1px">|</td>
+	<td id="menu7" onclick="goPage('08');" style="cursor:hand;font-size:14px" onmouseover="this.style.color='#FFFFFF';" onmouseout="this.style.color='#000000'">3배 고평가</td>	
+	<?php
+	}
+	?>
+	</tr>
+	</table>
+</td>
+</tr>
+</table>
+</form>
+</body>
+
+</html>

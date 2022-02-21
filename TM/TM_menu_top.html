@@ -1,0 +1,179 @@
+<?php
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+?>
+
+
+<html>
+<head>
+
+<script type="text/javascript">
+
+function goDateSearch()
+{
+	var year = document.getElementById("selYear").value;
+	var month = document.getElementById("selMonth").value;
+	var day = document.getElementById("selDay").value;
+	
+	month = changeNumber(month);
+	day = changeNumber(day);
+	
+	var param = "&selYear="+year+"&selMonth="+month+"&selDay="+day;
+	var url = "customer_list_date.html?mode=date"+param;
+	location.href = url;
+}
+
+function changeNumber(num)
+{
+	if(num<10)
+	{
+		return "0"+num;
+	}
+	else
+	{
+		return num;
+	}
+}
+
+</script>
+
+</head>
+
+
+<link rel="stylesheet" href="table.css" type="text/css" />
+<link rel="stylesheet" href="/css/502style.css" type="text/css" />
+<body style="margin-left:20;margin-top:20;font-size:12px">
+<form name="form1">
+<!--
+회원구분 : 
+<select name="selTargetMember" id="selTargetMember"  style="height:40px; width:200px;" onchange="getAllMemberList(this.value);">
+<option value="">--</option>
+<option value="TargetMember" <?php if($mode=="TargetMember") echo " selected" ?>>상담대상 전체회원</option>
+</select>
+-->
+상담날짜 :
+<select name="selYear" id="selYear"  style="height:40px;">
+<?php
+for($i=2010 ; $i<=2012 ; $i++)
+{
+	if($selYear == $i)
+	{
+		echo "<option value='$i' selected>$i</option>";
+	}
+	else 
+	{
+		echo "<option value='$i'>$i</option>";	
+	}
+	
+}
+?>
+
+</select>년
+<select name="selMonth" id="selMonth"  style="height:40px;">
+<option value="0">--</option>
+<?php
+for($i=1 ; $i<=12 ; $i++)
+{
+	if($selMonth == $i)
+	{
+		echo "<option value='$i' selected>$i</option>";
+	}
+	else 
+	{
+		echo "<option value='$i'>$i</option>";	
+	}
+	
+}
+?>
+</select>월
+<select name="selDay" id="selDay"  style="height:40px;">
+<option value="0">--</option>
+<?php
+for($i=1 ; $i<=31 ; $i++)
+{
+	if($selDay == $i)
+	{
+		echo "<option value='$i' selected>$i</option>";
+	}
+	else 
+	{
+		echo "<option value='$i'>$i</option>";	
+	}
+	
+}
+?>
+</select>일
+
+<font color="FFFFFF">______</font>
+
+처리결과 :
+<select name="selProcessResult"  id="selProcessResult" style="height:40px; width:100px;">
+<option value="">--</option>
+<option value="Complete"  <?php if($search=="Complete") echo " selected" ?>>처리</option>
+<option value="Fail" <?php if($search=="Fail") echo " selected" ?>>미처리</option>
+<option value="Transfer" <?php if($search=="Transfer") echo " selected" ?>>이관</option>
+</select>
+<font color="FFFFFF">___</font>
+블랙리스트:
+<select name="selBlackList"  id="selBlackList" style="height:40px; width:100px;">
+<option value="">--</option>
+<option value="B"  <?php if($blackList=="B") echo " selected" ?>>블랙리스트</option>
+</select>
+
+<?php
+	if($_COOKIE['_CKE_USER_ID'] == "ayh319" || $_COOKIE['_CKE_USER_ID'] == "seodh0070" || $_COOKIE['_CKE_USER_ID'] == "tndls5" || $_COOKIE['_CKE_USER_ID'] == "jinsuk930")
+	{
+?>
+<font color="FFFFFF">___</font>
+		상담원
+		<select name="selAdmin"  id="selAdmin" style="height:40px; width:120px;">
+		<option value="">전체</option>
+		<?php
+		
+		$sql = "SELECT A.userName,A.userNickname,A.userId,A.idx FROM Member A INNER JOIN TM_admin B ON A.userId = B.adminId order by userId desc";
+		$tmpRs3 = mysql_query($sql);
+		while($rs3 = mysql_fetch_array($tmpRs3))
+		{
+			if($selAdmin == $rs3[idx])
+			{
+		?>
+				<option value="<?=$rs3[idx]?>" selected style="color:blue"> <?=$rs3[userName]?>[<?=$rs3[userNickname]?>]</option>		
+		<?php
+			}
+			else
+			{
+		?>
+				<option value="<?=$rs3[idx]?>"> <?=$rs3[userName]?>[<?=$rs3[userNickname]?>]</option>		
+		<?php
+			}
+		}
+		
+		?>
+		</select>
+		
+<?php
+	}
+	else 
+	{
+		echo "<input type='hidden' name='selAdmin'>";		
+	}
+?>
+<font color="FFFFFF">___</font>
+		상담코드
+		<select name="selCode"  id="selCode" style="height:40px; width:140px;">
+		<option value="">전체</option>		
+		<option value="1a"  <?php if($selCode=='1a'){echo selected;}?>> 가입/상품문의</option>		
+		<option value="1b" <?php if($selCode=='1b'){echo selected;}?>> 결제확인</option>
+		<option value="1bd" <?php if($selCode=='1bd'){echo selected;}?>> 결제오류</option>
+		<option value="3" <?php if($selCode=='3'){echo selected;}?>> 탈퇴/환불/상품변경</option>
+		</select>
+<font color="FFFFFF">___</font>
+<img src="images/btnSearch_member.gif" border="0" style="cursor:hand;" onclick="goSearch();" onmouseover="this.src = 'images/_btnSearch_member.gif'" onmouseout="this.src = 'images/btnSearch_member.gif'">
+</form>
+</body>
+</html>

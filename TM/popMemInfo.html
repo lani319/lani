@@ -1,0 +1,185 @@
+<?php
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+
+
+if($userInfo=="")
+{
+	echo "<script>alert('회원정보를 입력 해 주세요');self.close();</script>";
+	exit;
+}
+
+?>
+
+<html>
+
+<head>
+<title>popMemInfo</title>
+<meta http-equiv="Content-Type" content="text/html; charset=euc-kr">
+
+<script>
+function setMeminfo(idx,mode,ssn,mobile)
+{
+	if(mode == "Member")
+	{
+		opener.location.href = "_counsel.html?idx="+idx+"&mode="+mode;
+	}
+	else
+	{
+		opener.location.href = "_counsel.html?idx="+idx+"&mode="+mode+"&SSN="+ssn+"&mobile="+mobile;		
+	}
+	
+	self.close();
+}
+
+</script>
+
+
+<script>
+function roundTable(objID) {
+       var obj = document.getElementById(objID);
+       var Parent, objTmp, Table, TBody, TR, TD;
+       var bdcolor, bgcolor, Space;
+       var trIDX, tdIDX, MAX;
+       var styleWidth, styleHeight;
+
+       // get parent node
+       Parent = obj.parentNode;
+       objTmp = document.createElement('SPAN');
+       Parent.insertBefore(objTmp, obj);
+       Parent.removeChild(obj);
+
+       // get attribute
+       bdcolor = obj.getAttribute('rborder');
+       bgcolor = obj.getAttribute('rbgcolor');
+       radius = parseInt(obj.getAttribute('radius'));
+       if (radius == null || radius < 1) radius = 1;
+       else if (radius > 6) radius = 6;
+
+       MAX = radius * 2 + 1;
+       
+       /*
+              create table {{
+       */
+       Table = document.createElement('TABLE');
+       TBody = document.createElement('TBODY');
+
+       Table.cellSpacing = 0;
+       Table.cellPadding = 0;
+
+       for (trIDX=0; trIDX < MAX; trIDX++) {
+              TR = document.createElement('TR');
+              Space = Math.abs(trIDX - parseInt(radius));
+              for (tdIDX=0; tdIDX < MAX; tdIDX++) {
+                     TD = document.createElement('TD');
+                     
+                     styleWidth = '1px'; styleHeight = '1px';
+                     if (tdIDX == 0 || tdIDX == MAX - 1) styleHeight = null;
+                     else if (trIDX == 0 || trIDX == MAX - 1) styleWidth = null;
+                     else if (radius > 2) {
+                            if (Math.abs(tdIDX - radius) == 1) styleWidth = '2px';
+                            if (Math.abs(trIDX - radius) == 1) styleHeight = '2px';
+                     }
+
+                     if (styleWidth != null) TD.style.width = styleWidth;
+                     if (styleHeight != null) TD.style.height = styleHeight;
+
+                     if (Space == tdIDX || Space == MAX - tdIDX - 1) TD.style.backgroundColor = bdcolor;
+                     else if (tdIDX > Space && Space < MAX - tdIDX - 1)  TD.style.backgroundColor = bgcolor;
+                     
+                     if (Space == 0 && tdIDX == radius) TD.appendChild(obj);
+                     TR.appendChild(TD);
+              }
+              TBody.appendChild(TR);
+       }
+
+       /*
+              }}
+       */
+
+       Table.appendChild(TBody);
+       
+       // insert table and remove original table
+       Parent.insertBefore(Table, objTmp);
+}
+
+</script>
+<link rel="stylesheet" href="/css/502style.css" type="text/css" />
+</head>
+<body bgcolor="#FFFFFF" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+<!-- 회원 -->
+<img src="images/lstMember.gif" border="0"><br>
+<table width="600px" cellpadding="0" cellspacing="0" border="0"  id="ta1" radius="3" rborder="#0099FF" rbgcolor="#FFFFFF">
+	<tr align="center">
+		<td width="40">순번</td>
+		<td width="100">성명	</td>
+		<td width="150">필명</td>
+		<td width="200">연락처</td>
+		<td width="150">생년월일</td>
+		<td></td>
+	</tr>
+	
+	<?php
+		$sql = "select A.idx,A.userName,A.userNickname,A.mobile,A.phone,A.userNum_sub from Member A where (A.userName like '%$userInfo%' or A.userNickname like '%$userInfo%' or A.userId like '%$userInfo%' or REPLACE(mobile,'-','') like '%$userInfo%' or REPLACE(phone,'-','') like '%$userInfo%') order by A.idx ASC";
+//		echo $sql;
+		$tmpRs = mysql_query($sql);
+		$rowCnt = mysql_num_rows($tmpRs);
+		while($rs = mysql_fetch_array($tmpRs))
+		{
+		?>		
+		<tr><td colspan="10" background="images/bgLine.gif"></td></tr>
+		<tr align="center">
+		<td><?=$rowCnt--?></td>
+		<td><?=$rs[userName]?></td>
+		<td><?=$rs[userNickname]?><br>(<?=$rs[phone]?>)</td>
+		<td><?=$rs[mobile]?></td>
+		<td><?=$rs[userNum_sub]?></td>
+		<td><input type="button" value="선택" onclick="setMeminfo('<?=$rs[idx]?>','Member','','')"></td>
+		</tr>
+		
+	<?php
+		}
+	?>	
+	
+</table>
+<script>roundTable("ta1");</script>
+<br><br>
+<!-- 비회원 -->
+<img src="images/lstNonMember.gif" border="0"><br>
+<table width="600px" cellpadding="0" cellspacing="0" border="0"  id="ta2" radius="3" rborder="#0099FF" rbgcolor="#FFFFFF">
+	<tr align="center">
+		<td width="40px">순번</td>
+		<td width="100px">성명	</td>		
+		<td width="200px">연락처</td>
+		<td width="150px">생년월일</td>
+		<td></td>
+	</tr>
+		<?php
+		$sql = "select nonMemberName,nonMemberMobile,nonMemberSSN from TM_info_NonMember where (nonMemberName like '%$userInfo%' or nonMemberMobile like '%$userInfo%' or nonMemberSSN like '%$userInfo%') group by nonMemberSSN order by idx DESC ";
+//		echo $sql;
+		$tmpRs = mysql_query($sql);
+		$rowCnt = mysql_num_rows($tmpRs);
+		while($rs = mysql_fetch_array($tmpRs))
+		{
+		?>		
+		<tr><td colspan="10" background="images/bgLine.gif"></td></tr>
+		<tr align="center">
+		<td><?=$rowCnt--?></td>
+		<td><?=$rs[nonMemberName]?></td>		
+		<td><?=$rs[nonMemberMobile]?></td>
+		<td><?=$rs[nonMemberSSN]?></td>
+		<td><input type="button" value="선택" onclick="setMeminfo('<?=$rs[nonMemberName]?>','NonMember','<?=$rs[nonMemberSSN]?>','<?=$rs[nonMemberMobile]?>')"></td>
+		</tr>
+		<?php
+		}
+		?>	
+</table>
+<script>roundTable("ta2");</script>
+<!-- End Save for Web Slices -->
+</body>
+</html>

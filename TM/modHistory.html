@@ -1,0 +1,68 @@
+<?php
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+
+
+$sql = "select A.userName,B.memo,B.recentDate from Member A inner join TM_info B on A.idx = B.userIdx where B.idx=$idx ";
+$tmpRs = mysql_query($sql);
+
+$rs = mysql_fetch_array($tmpRs);
+
+$memInfo = $rs[userName];
+$regDate = $rs[recentDate];
+$contents = $rs[memo];
+if($rs[memo]=="")
+{
+	$contents = "메모가 없습니다";
+}
+?>
+
+<html>
+<head>
+<link rel="stylesheet" href="table.css" type="text/css" />
+<link href="/css/502style.css" type="text/css" rel="stylesheet">
+
+<script type="text/javascript">
+function chkForm(mode)
+{
+	var f = document.form1;
+	f.txtMode.value = mode;
+	f.target = "invFrame";
+	f.action = "modHistory_ok.php";			
+	f.submit();
+}
+</script>
+</head>
+<body>
+<form name="form1" method="POST" target="invFrame" action="modHistory_ok.php">
+<input type="hidden" name="txtMode" id="txtMode">
+<input type="hidden" name="txtIdx" id="txtIdx" value="<?=$idx?>">
+<table cellpadding="0" cellspacing="0">
+<tr>
+<td>*상담내역</td>
+</tr>
+<tr>
+<td align="center">
+<?=$memInfo?> &nbsp; &nbsp;<?=$regDate?>
+</td>
+</tr>
+<tr> <td align="center">
+<textarea name="txtHistory" cols="30" rows="10"><?=$contents?></textarea>
+</td> </tr>
+<tr> <td align="center">
+<input type="button" value="수정" onclick="chkForm('mod')">
+&nbsp;
+<input type="button" value="삭제" onclick="chkForm('del')">
+</td> </tr>
+
+</table>
+</form> 
+</body>
+<iframe name="invFrame" width="0" height="0"></iframe>
+
+</html>

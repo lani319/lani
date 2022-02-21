@@ -1,0 +1,18 @@
+<script type="text/javascript" src="/lani/TM/jquery/development-bundle/jquery-1.4.2.js"></script>
+<script type="text/javascript" src="/lani/TM/jquery/development-bundle/ui/jquery.ui.core.js"></script>
+<script type="text/javascript" src="/lani/TM/jquery/development-bundle/ui/jquery.effects.core.js"></script>
+<script type="text/javascript" src="/lani/TM/jquery/development-bundle/ui/jquery.ui.datepicker.js"></script>
+
+<script type="text/javascript">
+$(function() 
+ { 
+     $("#datepicker").datepicker({showOn: 'button', buttonImage: '/lani/TM/jquery/development-bundle/demos/datepicker/images/calendar.gif', buttonImageOnly: true, changeMonth: true, changeYear: true, showMonthAfterYear:false}); 
+     $('#datepicker').datepicker('option', {dateFormat: 'yy-mm-dd'});      
+     $("#anim").change(function() { $('#datepicker').datepicker('option', {showAnim: $(this).val()}); });
+ }); 
+</script>
+
+<link type="text/css" href="/lani/TM/jquery/development-bundle/themes/ui-lightness/jquery.ui.all.css" rel="stylesheet" />
+<body>
+<INPUT id=datepicker type=text name="regDate" style="width:150px;height:20px">
+</body>

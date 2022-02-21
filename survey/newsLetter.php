@@ -1,0 +1,1 @@
+<a href="http://www.502.co.kr/lani/survey/2011_survey.html"><img src="http://www.502.co.kr/lani/survey/img/newsSurvey.jpg" border="0"></a>

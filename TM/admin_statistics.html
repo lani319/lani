@@ -1,0 +1,1248 @@
+<?php
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+
+
+if($selYear<2010)
+{
+	$selYear = "2010";
+}
+
+if($selMonth=="")
+{
+	$selMonth = date("m");
+}
+
+if($selDay == "")
+{
+	$selDay = date("d");
+}
+
+
+$addWhere1 = "and Left(B.recentDate,4) = '$selYear'";
+
+if($selMonth !="0")
+{
+	$addWhere1 = "and Left(B.recentDate,7) = '$selYear-$selMonth' ";
+	if($selDay != "0")	
+	{
+		$addWhere1 = "and Left(B.recentDate,10) = '$selYear-$selMonth-$selDay' ";
+	}
+}
+?>
+<html>
+<TITLE>상담원별 상담 통계</TITLE>
+<head>
+<link rel="stylesheet" href="table.css" type="text/css" />
+<link rel="stylesheet" href="/css/502style.css" type="text/css" />
+
+
+<script type="text/javascript">
+function goSearch()
+{
+	var year = document.getElementById("selYear").value;
+	var month = document.getElementById("selMonth").value;
+	var day = document.getElementById("selDay").value;
+	
+	month = changeNumber(month);
+	day = changeNumber(day);
+		
+	var url = "admin_statistics.html?admin=<?=$admin?>"+"&selYear="+year+"&selMonth="+month+"&selDay="+day;
+	location.href = url;
+}
+
+function changeNumber(num)
+{
+	if(num<10)
+	{
+		return "0"+num;
+	}
+	else
+	{
+		return num;
+	}
+}
+</script>
+
+</head>
+<body style="margin-left:20;margin-top:20;">
+<form name="form1">
+<!--
+<table width="1200" cellpadding="0" cellspacing="0" border="0">
+<tr>
+<td>
+상담날짜 :
+<select name="selYear" id="selYear"  style="height:40px;">
+<?php
+for($i=2010 ; $i<=2012 ; $i++)
+{
+	if($selYear == $i)
+	{
+		echo "<option value='$i' selected>$i</option>";
+	}
+	else 
+	{
+		echo "<option value='$i'>$i</option>";	
+	}
+	
+}
+?>
+
+</select>년
+<select name="selMonth" id="selMonth"  style="height:40px;">
+<option value="0">--</option>
+<?php
+for($i=1 ; $i<=12 ; $i++)
+{
+	if($selMonth == $i)
+	{
+		echo "<option value='$i' selected>$i</option>";
+	}
+	else 
+	{
+		echo "<option value='$i'>$i</option>";	
+	}
+	
+}
+?>
+</select>월
+<select name="selDay" id="selDay"  style="height:40px;">
+<option value="0">--</option>
+<?php
+for($i=1 ; $i<=31 ; $i++)
+{
+	if($selDay == $i)
+	{
+		echo "<option value='$i' selected>$i</option>";
+	}
+	else 
+	{
+		echo "<option value='$i'>$i</option>";	
+	}
+	
+}
+?>
+</select>일
+<font color="FFFFFF">_____</font>
+
+<img src="images/btnSearch_member.gif" border="0" style="cursor:hand;" onclick="goSearch();" onmouseover="this.src = 'images/_btnSearch_member.gif'" onmouseout="this.src = 'images/btnSearch_member.gif'">
+
+</td>
+</tr>
+<tr><td height="20px"></td></tr>
+</table>
+<img src="images/title_statistics_date.gif" border="0">
+<table width="1200" cellpadding="0" cellspacing="0" border="1" class="table_basic">
+<tr>
+<th>순번</th>
+<th>상담원 이름</th>
+<th>누적 상담건수</th>
+<th>처리 건수</th>
+<th>미처리 건수</th>
+<th>이관 건수</th>
+<th>총 통화시간</th>
+<th>평균 통화시간</th>
+<th>결제자 수</th>
+</tr>
+<?php
+if($admin=="")
+{
+	$sql = "select A.idx from Member A inner join TM_admin B on A.userId = B.adminID inner join TM_info C on A.idx = C.adminIdx group by A.idx";
+}
+else 
+{
+	$sql = "select A.idx from Member A inner join TM_admin B on A.userId = B.adminID inner join TM_info C on A.idx = C.adminIdx where A.idx=$admin group by A.idx";
+}
+//echo $sql;
+
+$tmpRs = mysql_query($sql);
+$rowCnt = mysql_num_rows($tmpRs);
+while($rs = mysql_fetch_array($tmpRs))
+{
+	$adminIdx = $rs[idx];
+	
+	$sql = "SELECT A.userName,A.userNickname,COUNT(B.idx) as cnt,SUM(B.counselTimebyNumber) AS TotalCallTime,AVG(B.counseltimebyNumber) AS AvgCallTime,COUNT(processResult) AS processRecultCnt,processResult FROM Member A INNER JOIN TM_info B ON A.idx = B.adminIdx WHERE 
+B.processResult = 'Complete' and B.adminIdx = $adminIdx $addWhere1
+GROUP BY B.adminIdx
+UNION ALL
+SELECT A.userName,A.userNickname,COUNT(B.idx) as cnt,SUM(B.counselTimebyNumber) AS TotalCallTime,AVG(B.counseltimebyNumber) AS AvgCallTime,COUNT(processResult) AS processRecultCnt,processResult FROM Member A INNER JOIN TM_info B ON A.idx = B.adminIdx WHERE 
+B.processResult = 'Fail' and B.adminIdx = $adminIdx $addWhere1
+GROUP BY B.adminIdx
+UNION ALL
+SELECT A.userName,A.userNickname,COUNT(B.idx) as cnt,SUM(B.counselTimebyNumber) AS TotalCallTime,AVG(B.counseltimebyNumber) AS AvgCallTime,COUNT(processResult) AS processRecultCnt,processResult FROM Member A INNER JOIN TM_info B ON A.idx = B.adminIdx WHERE 
+B.processResult = 'Transfer' and B.adminIdx = $adminIdx $addWhere1
+GROUP BY B.adminIdx
+";
+//	echo $sql;
+
+	$tmpRs2 = mysql_query($sql);
+	
+	$sumTotalCallTime = array();
+	$sumAvgCallTime = array();
+	$sumCounselCnt = array();
+	
+	//초기화
+	$sumTotalCallTime = 0;
+	$sumAvgCallTime = 0;
+	$sumCounselCnt = 0;
+	
+	
+	
+	while($rs2 = mysql_fetch_array($tmpRs2))
+	{
+		
+		$arrUserName = array();
+		$arrUserNickName = array();
+		$arrCounselCnt = array();
+		$arrProcessResultCnt = array();
+		$arrTotalCallTime = array();
+		$arrAvgCallTime = array();
+		
+		//변수 초기화
+		$arrCounselCnt[0] = 0;
+		$arrProcessResultCnt[0] = 0;
+		$arrTotalCallTime[0] = 0;
+		$arrAvgCallTime[0] = 0;
+		
+		
+		$arrUserName[] = $rs2[userName];
+		
+		$arrUserNickName[] = $rs2[userNickname];
+		$arrCounselCnt[] = $rs2[userName];
+		$arrProcessResultCnt[] = $rs2[cnt];				//여기
+		$arrTotalCallTime[] = $rs2[TotalCallTime];
+		$arrAvgCallTime[] = $rs2[AvgCallTime];
+		
+		$sumCounselCnt = $sumCounselCnt + $rs2[cnt];
+		$sumTotalCallTime = $sumTotalCallTime+$rs2[TotalCallTime];
+		$sumAvgCallTime = $sumAvgCallTime+$rs2[AvgCallTime];
+	
+	}//두번째 while(실제 출력)
+?>
+		<tr align="center">
+		<td><?=$rowCnt--?></td>
+		<td><?=$arrUserName[0]?><br>[<?=$arrUserNickName[0]?>]</td>
+		<td><?=$sumCounselCnt?></td>
+		<td><?=$arrProcessResultCnt[0]?></td>
+		<td><?=$arrProcessResultCnt[1]?></td>
+		<td><?=$arrProcessResultCnt[2]?></td>
+		<td><?=number_format($sumTotalCallTime/60,2)?>분</td>
+		<td><?=number_format($sumAvgCallTime/60,2)?>분</td>
+		<td>결제자 수</td>
+		</tr>
+<?php
+	
+}//첫번째 while (상담원 수 만큼 loop를 돈다)
+?>
+
+</table>
+-->
+<br><br><br><br>
+
+<img src="images/title_statistics_all.gif" border="0">
+<table width="1200" cellpadding="0" cellspacing="0" border="1" class="table_basic">
+<tr>
+<th>순번</th>
+<th>상담원 이름</th>
+<th>누적 상담건수</th>
+<th>처리 건수</th>
+<th>미처리 건수</th>
+<th>이관 건수</th>
+<th>총 통화시간</th>
+<th>평균 통화시간</th>
+<th>결제자 수</th>
+</tr>
+<?php
+if($admin=="")
+{
+	$sql = "select A.idx from Member A inner join TM_admin B on A.userId = B.adminID inner join TM_info C on A.idx = C.adminIdx group by A.idx";
+}
+else 
+{
+	$sql = "select A.idx from Member A inner join TM_admin B on A.userId = B.adminID inner join TM_info C on A.idx = C.adminIdx where A.idx=$admin group by A.idx";
+}
+//echo $sql;
+
+$tmpRs = mysql_query($sql);
+$rowCnt = mysql_num_rows($tmpRs);
+while($rs = mysql_fetch_array($tmpRs))
+{
+	$adminIdx = $rs[idx];
+	
+	$sql = "SELECT A.userName,A.userNickname,COUNT(B.idx) as cnt,SUM(B.counselTimebyNumber) AS TotalCallTime,AVG(B.counseltimebyNumber) AS AvgCallTime,COUNT(processResult) AS processRecultCnt,processResult FROM Member A INNER JOIN TM_info B ON A.idx = B.adminIdx WHERE 
+B.processResult = 'Complete' and B.adminIdx = $adminIdx
+GROUP BY B.adminIdx
+UNION ALL
+SELECT A.userName,A.userNickname,COUNT(B.idx) as cnt,SUM(B.counselTimebyNumber) AS TotalCallTime,AVG(B.counseltimebyNumber) AS AvgCallTime,COUNT(processResult) AS processRecultCnt,processResult FROM Member A INNER JOIN TM_info B ON A.idx = B.adminIdx WHERE 
+B.processResult = 'Fail' and B.adminIdx = $adminIdx
+GROUP BY B.adminIdx
+UNION ALL
+SELECT A.userName,A.userNickname,COUNT(B.idx) as cnt,SUM(B.counselTimebyNumber) AS TotalCallTime,AVG(B.counseltimebyNumber) AS AvgCallTime,COUNT(processResult) AS processRecultCnt,processResult FROM Member A INNER JOIN TM_info B ON A.idx = B.adminIdx WHERE 
+B.processResult = 'Transfer' and B.adminIdx = $adminIdx
+GROUP BY B.adminIdx
+";
+//	echo $sql;
+
+	$tmpRs2 = mysql_query($sql);
+	
+	$sumTotalCallTime = array();
+	$sumAvgCallTime = array();
+	$sumCounselCnt = array();
+	
+	//초기화
+	$sumTotalCallTime = 0;
+	$sumAvgCallTime = 0;
+	$sumCounselCnt = 0;
+	
+	
+	
+	while($rs2 = mysql_fetch_array($tmpRs2))
+	{
+		
+		$arrUserName = array();
+		$arrUserNickName = array();
+		$arrCounselCnt = array();
+		$arrProcessResultCnt = array();
+		$arrTotalCallTime = array();
+		$arrAvgCallTime = array();
+		
+		//변수 초기화
+		$arrCounselCnt[0] = 0;
+		$arrProcessResultCnt[0] = 0;
+		$arrTotalCallTime[0] = 0;
+		$arrAvgCallTime[0] = 0;
+		
+		
+		$arrUserName[] = $rs2[userName];
+		
+		$arrUserNickName[] = $rs2[userNickname];
+		$arrCounselCnt[] = $rs2[userName];
+		$arrProcessResultCnt[] = $rs2[cnt];				//여기
+		$arrTotalCallTime[] = $rs2[TotalCallTime];
+		$arrAvgCallTime[] = $rs2[AvgCallTime];
+		
+		$sumCounselCnt = $sumCounselCnt + $rs2[cnt];
+		$sumTotalCallTime = $sumTotalCallTime+$rs2[TotalCallTime];
+		$sumAvgCallTime = $sumAvgCallTime+$rs2[AvgCallTime];
+	
+	}//두번째 while(실제 출력)
+?>
+		<tr align="center">
+		<td><?=$rowCnt--?></td>
+		<td><?=$arrUserName[0]?><br>[<?=$arrUserNickName[0]?>]</td>
+		<td><?=$sumCounselCnt?></td>
+		<td><?=$arrProcessResultCnt[0]?></td>
+		<td><?=$arrProcessResultCnt[1]?></td>
+		<td><?=$arrProcessResultCnt[2]?></td>
+		<td><?=number_format($sumTotalCallTime/60,2)?>분</td>
+		<td><?=number_format($sumAvgCallTime/60,2)?>분</td>
+		<td>결제자 수</td>
+		</tr>
+<?php
+	
+}//첫번째 while (상담원 수 만큼 loop를 돈다)
+?>
+</table>
+
+<!--
+<?php
+//지금부터는 전체 통계이다.
+$selDate = $selYear;
+if($selMonth !="0")
+{
+	$selDate =  "$selYear-$selMonth";
+	if($selDay != "0")	
+	{
+		$selDate =  "$selYear-$selMonth-$selDay";
+	}
+}
+
+ $sql = "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE (counselKind like '%5a%' or counselKind like '%5b%' or counselKind like '%5c%') and recentDate LIKE '%$selDate%' and adminIdx in (39250,38343,39530,30904)";
+ 
+ $tmpRs = mysql_query($sql);
+ $rs = mysql_fetch_array($tmpRs);
+ $totalCount = $rs[totalCnt];
+ 
+ echo "<br><br><br>";
+ echo "<font size='2' color='blue'>전체 아웃바운드 콜 수 : ".$totalCount."</font>";
+ echo "&nbsp;&nbsp;&nbsp;&nbsp;<font size='2'>*전체 콜 수와 응답수는, 복수 응답으로 인해 약간 차이가 있을 수 있습니다. </font>";
+ echo "<br>";
+ 
+ 
+ //이제 각 상태별로 통계를 뽑는다
+ $sql = "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5aa%'";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5ab%'";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5ac%'";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5ad%'";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5ae%'";
+ $tmpRs = mysql_query($sql);
+ 
+ $arrFirst = array();
+ 
+ while($rs = mysql_fetch_array($tmpRs))
+ {
+ 	$arrFirst[] = $rs[totalCnt];
+ }
+ 
+?>
+<table cellpadding="0" cellspacing="0" width="800" class="table_basic">
+<tr>
+<td width="33%" valign="top">
+	<table cellpadding="0" cellspacing="0" width="100%" border="0">
+	<tr>
+		<td colspan="2" align="center" bgcolor="skyblue">1차 전화</td>
+	</tr>
+	<tr align="center">
+		<td width="150px">전화거부</td>
+		<td><?=$arrFirst[0]?></td>
+	</tr>
+	<tr align="center">
+		<td>다른번호</td>
+		<td><?=$arrFirst[1]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화중,부재중</td>
+		<td><?=$arrFirst[2]?></td>
+	</tr>
+	<tr align="center">
+		<td>이용안내완료</td>
+		<td><?=$arrFirst[3]?></td>
+	</tr>
+	<tr align="center">
+		<td>안내도중 끊음</td>
+		<td><?=$arrFirst[4]?></td>
+	</tr>
+	</table>
+ </td>
+
+<td width="33%" valign="top">
+<?php
+//이제 각 상태별로 통계를 뽑는다
+ $sql = "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5ba%'";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bb%'";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bc%'";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bd%'";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5be%'";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bf%'";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bg%'";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bh%'";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bi%'";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bj%'";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bk%'";
+ $tmpRs = mysql_query($sql);
+ 
+ $arrSecond = array();
+ 
+ while($rs = mysql_fetch_array($tmpRs))
+ {
+ 	$arrSecond[] = $rs[totalCnt];
+ }
+?>
+	<table cellpadding="0" cellspacing="0" width="100%" border="0">
+	<tr>
+		<td colspan="2" align="center" bgcolor="ECFC71">2차 전화</td>
+	</tr>
+	<tr align="center">
+		<td width="150">전화거부</td>
+		<td><?=$arrSecond[0]?></td>
+	</tr>
+	<tr align="center">
+		<td>다른번호</td>
+		<td><?=$arrSecond[1]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화중,부재중</td>
+		<td><?=$arrSecond[2]?></td>
+	</tr>
+	<tr align="center">
+		<td>결제완료</td>
+		<td><?=$arrSecond[3]?></td>
+	</tr>
+	<tr align="center">
+		<td>결제예약,의사있음</td>
+		<td><?=$arrSecond[4]?></td>
+	</tr>
+	<tr align="center">
+		<td>망설임</td>
+		<td><?=$arrSecond[5]?></td>
+	</tr>
+	<tr align="center">
+		<td>불필요(자의)</td>
+		<td><?=$arrSecond[6]?></td>
+	</tr>
+	<tr align="center">
+		<td>불가능(타의)</td>
+		<td><?=$arrSecond[7]?></td>
+	</tr>
+	<tr align="center">
+		<td>비교,불편</td>
+		<td><?=$arrSecond[8]?></td>
+	</tr>
+	<tr align="center">
+		<td>불신,불만</td>
+		<td><?=$arrSecond[9]?></td>
+	</tr>
+	</table>
+ </td>
+ <td width="33%" valign="top">
+ <?php
+//이제 각 상태별로 통계를 뽑는다
+ $sql = "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5ca%'";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5cb%'";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5cc%'";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5cd%'";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5ce%'";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5cf%'";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5cg%'";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5ch%'";
+ 
+ $tmpRs = mysql_query($sql);
+ 
+ $arrThird = array();
+ 
+ while($rs = mysql_fetch_array($tmpRs))
+ {
+ 	$arrThird[] = $rs[totalCnt];
+ }
+?>
+	<table cellpadding="0" cellspacing="0" width="100%" border="0">
+	<tr align="center">
+		<td colspan="2" bgcolor="FFD173">3차 전화</td>
+	</tr>
+	<tr align="center">
+		<td width="150px">전화거부</td>
+		<td><?=$arrThird[0]?></td>
+	</tr>
+	<tr align="center">
+		<td>다른번호</td>
+		<td><?=$arrThird[1]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화중,부재중</td>
+		<td><?=$arrThird[2]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화함,만족도 5</td>
+		<td><?=$arrThird[3]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화함,만족도 4</td>
+		<td><?=$arrThird[4]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화함,만족도 3</td>
+		<td><?=$arrThird[5]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화함,만족도 2</td>
+		<td><?=$arrThird[6]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화함,만족도 1</td>
+		<td><?=$arrThird[7]?></td>
+	</tr>
+	</table>
+ </td>
+</tr>
+</table>
+
+
+<?php
+//지금부터는 전체 통계이다.
+$selDate = $selYear;
+if($selMonth !="0")
+{
+	$selDate =  "$selYear-$selMonth";
+	if($selDay != "0")	
+	{
+		$selDate =  "$selYear-$selMonth-$selDay";
+	}
+}
+
+ $sql = "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE (counselKind like '%5a%' or counselKind like '%5b%' or counselKind like '%5c%') and recentDate LIKE '%$selDate%' and adminIdx=30904 ";
+ //echo $sql;
+ 
+ $tmpRs = mysql_query($sql);
+ $rs = mysql_fetch_array($tmpRs);
+ $totalCount = $rs[totalCnt];
+ 
+ echo "<br><br><br>";
+ echo "<font size='2' color='blue'>[이진숙] 전체 아웃바운드 콜 수 : ".$totalCount."</font>"; 
+ echo "<br>";
+ 
+ 
+ //이제 각 상태별로 통계를 뽑는다
+ $sql = "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5aa%' and adminIdx=30904";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5ab%' and adminIdx=30904";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5ac%' and adminIdx=30904";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5ad%' and adminIdx=30904";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5ae%' and adminIdx=30904";
+ $tmpRs = mysql_query($sql);
+ 
+ $arrFirst = array();
+ 
+ while($rs = mysql_fetch_array($tmpRs))
+ {
+ 	$arrFirst[] = $rs[totalCnt];
+ }
+ 
+?>
+<table cellpadding="0" cellspacing="0" width="800" class="table_basic">
+<tr>
+<td width="33%" valign="top">
+	<table cellpadding="0" cellspacing="0" width="100%" border="0">
+	<tr>
+		<td colspan="2" align="center" bgcolor="skyblue">1차 전화</td>
+	</tr>
+	<tr align="center">
+		<td width="150px">전화거부</td>
+		<td><?=$arrFirst[0]?></td>
+	</tr>
+	<tr align="center">
+		<td>다른번호</td>
+		<td><?=$arrFirst[1]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화중,부재중</td>
+		<td><?=$arrFirst[2]?></td>
+	</tr>
+	<tr align="center">
+		<td>이용안내완료</td>
+		<td><?=$arrFirst[3]?></td>
+	</tr>
+	<tr align="center">
+		<td>안내도중 끊음</td>
+		<td><?=$arrFirst[4]?></td>
+	</tr>
+	</table>
+ </td>
+
+<td width="33%" valign="top">
+<?php
+//이제 각 상태별로 통계를 뽑는다
+ $sql = "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like  '%5ba%' and adminIdx=30904";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bb%' and adminIdx=30904";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bc%' and adminIdx=30904";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bd%' and adminIdx=30904";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5be%' and adminIdx=30904";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bf%' and adminIdx=30904";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bg%' and adminIdx=30904";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bh%' and adminIdx=30904";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bi%' and adminIdx=30904";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bj%' and adminIdx=30904";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bk%' and adminIdx=30904";
+ $tmpRs = mysql_query($sql);
+ 
+ $arrSecond = array();
+ 
+ while($rs = mysql_fetch_array($tmpRs))
+ {
+ 	$arrSecond[] = $rs[totalCnt];
+ }
+?>
+	<table cellpadding="0" cellspacing="0" width="100%" border="0">
+	<tr>
+		<td colspan="2" align="center" bgcolor="ECFC71">2차 전화</td>
+	</tr>
+	<tr align="center">
+		<td width="150">전화거부</td>
+		<td><?=$arrSecond[0]?></td>
+	</tr>
+	<tr align="center">
+		<td>다른번호</td>
+		<td><?=$arrSecond[1]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화중,부재중</td>
+		<td><?=$arrSecond[2]?></td>
+	</tr>
+	<tr align="center">
+		<td>결제완료</td>
+		<td><?=$arrSecond[3]?></td>
+	</tr>
+	<tr align="center">
+		<td>결제예약,의사있음</td>
+		<td><?=$arrSecond[4]?></td>
+	</tr>
+	<tr align="center">
+		<td>망설임</td>
+		<td><?=$arrSecond[5]?></td>
+	</tr>
+	<tr align="center">
+		<td>불필요(자의)</td>
+		<td><?=$arrSecond[6]?></td>
+	</tr>
+	<tr align="center">
+		<td>불가능(타의)</td>
+		<td><?=$arrSecond[7]?></td>
+	</tr>
+	<tr align="center">
+		<td>비교,불편</td>
+		<td><?=$arrSecond[8]?></td>
+	</tr>
+	<tr align="center">
+		<td>불신,불만</td>
+		<td><?=$arrSecond[9]?></td>
+	</tr>
+	</table>
+ </td>
+ <td width="33%" valign="top">
+ <?php
+//이제 각 상태별로 통계를 뽑는다
+ $sql = "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind  like '%5ca%' and adminIdx=30904";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5cb%' and adminIdx=30904";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5cc%' and adminIdx=30904";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5cd%' and adminIdx=30904";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5ce%' and adminIdx=30904";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5cf%' and adminIdx=30904";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5cg%' and adminIdx=30904";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5ch%' and adminIdx=30904";
+ 
+ $tmpRs = mysql_query($sql);
+ 
+ $arrThird = array();
+ 
+ while($rs = mysql_fetch_array($tmpRs))
+ {
+ 	$arrThird[] = $rs[totalCnt];
+ }
+?>
+	<table cellpadding="0" cellspacing="0" width="100%" border="0">
+	<tr align="center">
+		<td colspan="2" bgcolor="FFD173">3차 전화</td>
+	</tr>
+	<tr align="center">
+		<td width="150px">전화거부</td>
+		<td><?=$arrThird[0]?></td>
+	</tr>
+	<tr align="center">
+		<td>다른번호</td>
+		<td><?=$arrThird[1]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화중,부재중</td>
+		<td><?=$arrThird[2]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화함,만족도 5</td>
+		<td><?=$arrThird[3]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화함,만족도 4</td>
+		<td><?=$arrThird[4]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화함,만족도 3</td>
+		<td><?=$arrThird[5]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화함,만족도 2</td>
+		<td><?=$arrThird[6]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화함,만족도 1</td>
+		<td><?=$arrThird[7]?></td>
+	</tr>
+	</table>
+ </td>
+</tr>
+</table>
+
+<?php
+//지금부터는 전체 통계이다.
+$selDate = $selYear;
+if($selMonth !="0")
+{
+	$selDate =  "$selYear-$selMonth";
+	if($selDay != "0")	
+	{
+		$selDate =  "$selYear-$selMonth-$selDay";
+	}
+}
+
+ $sql = "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE (counselKind like '%5a%' or counselKind like '%5b%' or counselKind like '%5c%') and recentDate LIKE '%$selDate%' and adminIdx=39250 ";
+ //echo $sql;
+ 
+ $tmpRs = mysql_query($sql);
+ $rs = mysql_fetch_array($tmpRs);
+ $totalCount = $rs[totalCnt];
+ 
+ echo "<br><br><br>";
+ echo "<font size='2' color='blue'>[문아름] 전체 아웃바운드 콜 수 : ".$totalCount."</font>";
+ 
+ echo "<br>";
+ 
+ 
+ //이제 각 상태별로 통계를 뽑는다
+ $sql = "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5aa%' and adminIdx=39250";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5ab%' and adminIdx=39250";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5ac%' and adminIdx=39250";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5ad%' and adminIdx=39250";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5ae%' and adminIdx=39250";
+ $tmpRs = mysql_query($sql);
+ 
+ $arrFirst = array();
+ 
+ while($rs = mysql_fetch_array($tmpRs))
+ {
+ 	$arrFirst[] = $rs[totalCnt];
+ }
+ 
+?>
+<table cellpadding="0" cellspacing="0" width="800" class="table_basic">
+<tr>
+<td width="33%" valign="top">
+	<table cellpadding="0" cellspacing="0" width="100%" border="0">
+	<tr>
+		<td colspan="2" align="center" bgcolor="skyblue">1차 전화</td>
+	</tr>
+	<tr align="center">
+		<td width="150px">전화거부</td>
+		<td><?=$arrFirst[0]?></td>
+	</tr>
+	<tr align="center">
+		<td>다른번호</td>
+		<td><?=$arrFirst[1]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화중,부재중</td>
+		<td><?=$arrFirst[2]?></td>
+	</tr>
+	<tr align="center">
+		<td>이용안내완료</td>
+		<td><?=$arrFirst[3]?></td>
+	</tr>
+	<tr align="center">
+		<td>안내도중 끊음</td>
+		<td><?=$arrFirst[4]?></td>
+	</tr>
+	</table>
+ </td>
+
+<td width="33%" valign="top">
+<?php
+//이제 각 상태별로 통계를 뽑는다
+ $sql = "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like  '%5ba%' and adminIdx=39250";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bb%' and adminIdx=39250";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bc%' and adminIdx=39250";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bd%' and adminIdx=39250";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5be%' and adminIdx=39250";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bf%' and adminIdx=39250";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bg%' and adminIdx=39250";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bh%' and adminIdx=39250";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bi%' and adminIdx=39250";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bj%' and adminIdx=39250";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bk%' and adminIdx=39250";
+ $tmpRs = mysql_query($sql);
+ 
+ $arrSecond = array();
+ 
+ while($rs = mysql_fetch_array($tmpRs))
+ {
+ 	$arrSecond[] = $rs[totalCnt];
+ }
+?>
+	<table cellpadding="0" cellspacing="0" width="100%" border="0">
+	<tr>
+		<td colspan="2" align="center" bgcolor="ECFC71">2차 전화</td>
+	</tr>
+	<tr align="center">
+		<td width="150">전화거부</td>
+		<td><?=$arrSecond[0]?></td>
+	</tr>
+	<tr align="center">
+		<td>다른번호</td>
+		<td><?=$arrSecond[1]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화중,부재중</td>
+		<td><?=$arrSecond[2]?></td>
+	</tr>
+	<tr align="center">
+		<td>결제완료</td>
+		<td><?=$arrSecond[3]?></td>
+	</tr>
+	<tr align="center">
+		<td>결제예약,의사있음</td>
+		<td><?=$arrSecond[4]?></td>
+	</tr>
+	<tr align="center">
+		<td>망설임</td>
+		<td><?=$arrSecond[5]?></td>
+	</tr>
+	<tr align="center">
+		<td>불필요(자의)</td>
+		<td><?=$arrSecond[6]?></td>
+	</tr>
+	<tr align="center">
+		<td>불가능(타의)</td>
+		<td><?=$arrSecond[7]?></td>
+	</tr>
+	<tr align="center">
+		<td>비교,불편</td>
+		<td><?=$arrSecond[8]?></td>
+	</tr>
+	<tr align="center">
+		<td>불신,불만</td>
+		<td><?=$arrSecond[9]?></td>
+	</tr>
+	</table>
+ </td>
+ <td width="33%" valign="top">
+ <?php
+//이제 각 상태별로 통계를 뽑는다
+ $sql = "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind  like '%5ca%' and adminIdx=39250";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5cb%' and adminIdx=39250";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5cc%' and adminIdx=39250";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5cd%' and adminIdx=39250";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5ce%' and adminIdx=39250";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5cf%' and adminIdx=39250";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5cg%' and adminIdx=39250";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5ch%' and adminIdx=39250";
+ 
+ $tmpRs = mysql_query($sql);
+ 
+ $arrThird = array();
+ 
+ while($rs = mysql_fetch_array($tmpRs))
+ {
+ 	$arrThird[] = $rs[totalCnt];
+ }
+?>
+	<table cellpadding="0" cellspacing="0" width="100%" border="0">
+	<tr align="center">
+		<td colspan="2" bgcolor="FFD173">3차 전화</td>
+	</tr>
+	<tr align="center">
+		<td width="150px">전화거부</td>
+		<td><?=$arrThird[0]?></td>
+	</tr>
+	<tr align="center">
+		<td>다른번호</td>
+		<td><?=$arrThird[1]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화중,부재중</td>
+		<td><?=$arrThird[2]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화함,만족도 5</td>
+		<td><?=$arrThird[3]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화함,만족도 4</td>
+		<td><?=$arrThird[4]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화함,만족도 3</td>
+		<td><?=$arrThird[5]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화함,만족도 2</td>
+		<td><?=$arrThird[6]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화함,만족도 1</td>
+		<td><?=$arrThird[7]?></td>
+	</tr>
+	</table>
+ </td>
+</tr>
+</table>
+
+<?php
+//지금부터는 전체 통계이다.
+$selDate = $selYear;
+if($selMonth !="0")
+{
+	$selDate =  "$selYear-$selMonth";
+	if($selDay != "0")	
+	{
+		$selDate =  "$selYear-$selMonth-$selDay";
+	}
+}
+
+ $sql = "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE (counselKind like '%5a%' or counselKind like '%5b%' or counselKind like '%5c%') and recentDate LIKE '%$selDate%' and adminIdx=39530 ";
+ //echo $sql;
+ 
+ $tmpRs = mysql_query($sql);
+ $rs = mysql_fetch_array($tmpRs);
+ $totalCount = $rs[totalCnt];
+ 
+ echo "<br><br><br>";
+ echo "<font size='2' color='blue'>[장희영] 전체 아웃바운드 콜 수 : ".$totalCount."</font>";
+ 
+ echo "<br>";
+ 
+ 
+ //이제 각 상태별로 통계를 뽑는다
+ $sql = "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5aa%' and adminIdx=39530";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5ab%' and adminIdx=39530";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5ac%' and adminIdx=39530";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5ad%' and adminIdx=39530";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5ae%' and adminIdx=39530";
+ $tmpRs = mysql_query($sql);
+ 
+ $arrFirst = array();
+ 
+ while($rs = mysql_fetch_array($tmpRs))
+ {
+ 	$arrFirst[] = $rs[totalCnt];
+ }
+ 
+?>
+<table cellpadding="0" cellspacing="0" width="800" class="table_basic">
+<tr>
+<td width="33%" valign="top">
+	<table cellpadding="0" cellspacing="0" width="100%" border="0">
+	<tr>
+		<td colspan="2" align="center" bgcolor="skyblue">1차 전화</td>
+	</tr>
+	<tr align="center">
+		<td width="150px">전화거부</td>
+		<td><?=$arrFirst[0]?></td>
+	</tr>
+	<tr align="center">
+		<td>다른번호</td>
+		<td><?=$arrFirst[1]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화중,부재중</td>
+		<td><?=$arrFirst[2]?></td>
+	</tr>
+	<tr align="center">
+		<td>이용안내완료</td>
+		<td><?=$arrFirst[3]?></td>
+	</tr>
+	<tr align="center">
+		<td>안내도중 끊음</td>
+		<td><?=$arrFirst[4]?></td>
+	</tr>
+	</table>
+ </td>
+
+<td width="33%" valign="top">
+<?php
+//이제 각 상태별로 통계를 뽑는다
+ $sql = "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like  '%5ba%' and adminIdx=39530";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bb%' and adminIdx=39530";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bc%' and adminIdx=39530";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bd%' and adminIdx=39530";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5be%' and adminIdx=39530";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bf%' and adminIdx=39530";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bg%' and adminIdx=39530";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bh%' and adminIdx=39530";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bi%' and adminIdx=39530";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bj%' and adminIdx=39530";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5bk%' and adminIdx=39530";
+ $tmpRs = mysql_query($sql);
+ 
+ $arrSecond = array();
+ 
+ while($rs = mysql_fetch_array($tmpRs))
+ {
+ 	$arrSecond[] = $rs[totalCnt];
+ }
+?>
+	<table cellpadding="0" cellspacing="0" width="100%" border="0">
+	<tr>
+		<td colspan="2" align="center" bgcolor="ECFC71">2차 전화</td>
+	</tr>
+	<tr align="center">
+		<td width="150">전화거부</td>
+		<td><?=$arrSecond[0]?></td>
+	</tr>
+	<tr align="center">
+		<td>다른번호</td>
+		<td><?=$arrSecond[1]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화중,부재중</td>
+		<td><?=$arrSecond[2]?></td>
+	</tr>
+	<tr align="center">
+		<td>결제완료</td>
+		<td><?=$arrSecond[3]?></td>
+	</tr>
+	<tr align="center">
+		<td>결제예약,의사있음</td>
+		<td><?=$arrSecond[4]?></td>
+	</tr>
+	<tr align="center">
+		<td>망설임</td>
+		<td><?=$arrSecond[5]?></td>
+	</tr>
+	<tr align="center">
+		<td>불필요(자의)</td>
+		<td><?=$arrSecond[6]?></td>
+	</tr>
+	<tr align="center">
+		<td>불가능(타의)</td>
+		<td><?=$arrSecond[7]?></td>
+	</tr>
+	<tr align="center">
+		<td>비교,불편</td>
+		<td><?=$arrSecond[8]?></td>
+	</tr>
+	<tr align="center">
+		<td>불신,불만</td>
+		<td><?=$arrSecond[9]?></td>
+	</tr>
+	</table>
+ </td>
+ <td width="33%" valign="top">
+ <?php
+//이제 각 상태별로 통계를 뽑는다
+ $sql = "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind  like '%5ca%' and adminIdx=39530";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5cb%' and adminIdx=39530";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5cc%' and adminIdx=39530";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5cd%' and adminIdx=39530";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5ce%' and adminIdx=39530";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5cf%' and adminIdx=39530";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5cg%' and adminIdx=39530";
+ $sql .= " union All ";
+ $sql .= "SELECT COUNT(idx) as totalCnt FROM TM_info WHERE recentDate LIKE '%$selDate%' and counselKind like '%5ch%' and adminIdx=39530";
+ 
+ $tmpRs = mysql_query($sql);
+ 
+ $arrThird = array();
+ 
+ while($rs = mysql_fetch_array($tmpRs))
+ {
+ 	$arrThird[] = $rs[totalCnt];
+ }
+?>
+	<table cellpadding="0" cellspacing="0" width="100%" border="0">
+	<tr align="center">
+		<td colspan="2" bgcolor="FFD173">3차 전화</td>
+	</tr>
+	<tr align="center">
+		<td width="150px">전화거부</td>
+		<td><?=$arrThird[0]?></td>
+	</tr>
+	<tr align="center">
+		<td>다른번호</td>
+		<td><?=$arrThird[1]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화중,부재중</td>
+		<td><?=$arrThird[2]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화함,만족도 5</td>
+		<td><?=$arrThird[3]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화함,만족도 4</td>
+		<td><?=$arrThird[4]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화함,만족도 3</td>
+		<td><?=$arrThird[5]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화함,만족도 2</td>
+		<td><?=$arrThird[6]?></td>
+	</tr>
+	<tr align="center">
+		<td>통화함,만족도 1</td>
+		<td><?=$arrThird[7]?></td>
+	</tr>
+	</table>
+ </td>
+</tr>
+</table>
+-->
+<!-- 장희영 -->
+
+</form>
+</body>
+</html>

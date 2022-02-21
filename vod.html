@@ -1,0 +1,240 @@
+<?php
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+
+?>
+<link rel="stylesheet" type="text/css" href="/css/502style.css">
+<style type="text/css">
+<!--
+.style1 {
+	font-size: 14px;
+	font-weight: bold;
+}
+body {
+	margin-left: 0px;
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+}
+-->
+</style>
+<script type="text/JavaScript">
+<!--
+function MM_swapImgRestore() { //v3.0
+  var i,x,a=document.MM_sr; for(i=0;a&&i<a.length&&(x=a[i])&&x.oSrc;i++) x.src=x.oSrc;
+}
+
+function MM_preloadImages() { //v3.0
+  var d=document; if(d.images){ if(!d.MM_p) d.MM_p=new Array();
+    var i,j=d.MM_p.length,a=MM_preloadImages.arguments; for(i=0; i<a.length; i++)
+    if (a[i].indexOf("#")!=0){ d.MM_p[j]=new Image; d.MM_p[j++].src=a[i];}}
+}
+
+function MM_findObj(n, d) { //v4.01
+  var p,i,x;  if(!d) d=document; if((p=n.indexOf("?"))>0&&parent.frames.length) {
+    d=parent.frames[n.substring(p+1)].document; n=n.substring(0,p);}
+  if(!(x=d[n])&&d.all) x=d.all[n]; for (i=0;!x&&i<d.forms.length;i++) x=d.forms[i][n];
+  for(i=0;!x&&d.layers&&i<d.layers.length;i++) x=MM_findObj(n,d.layers[i].document);
+  if(!x && d.getElementById) x=d.getElementById(n); return x;
+}
+
+function MM_swapImage() { //v3.0
+  var i,j=0,x,a=MM_swapImage.arguments; document.MM_sr=new Array; for(i=0;i<(a.length-2);i+=3)
+   if ((x=MM_findObj(a[i]))!=null){document.MM_sr[j++]=x; if(!x.oSrc) x.oSrc=x.src; x.src=a[i+2];}
+}
+//-->
+</script>
+<body onLoad="MM_preloadImages('/images/vod/pause.gif','/images/vod/mute.gif')"><table width="870" align="center" cellpadding="0" cellspacing="0">
+  <tr>
+    <td><img src="/images/vod/box_top.gif" width="870" height="80"></td>
+  </tr>
+  <tr>
+    <td align="center" background="/images/vod/box_bg.gif"><table cellspacing="0" cellpadding="0">
+      <tr>
+        <td height="22" valign="top"><span class="style1">동영상 강의제목표출 </span></td>
+      </tr>
+      <tr>
+        <td><table width="100%" cellspacing="0" cellpadding="0">
+          <tr>
+            <td><table width="511" height="325" cellpadding="0" cellspacing="0" style="background:url(/images/vod/vod_bg.gif) no-repeat">
+              <tr>
+                <td height="286" align="center" valign="bottom"><table width="480" height="272" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td bgcolor="#000000">&nbsp;</td>
+                  </tr>
+                </table></td>
+              </tr>
+              <tr>
+                <td height="39" align="right" style="padding-right:15px"><table width="472" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td width="33" align="left"><a href="#" onMouseOut="MM_swapImgRestore()" onMouseOver="MM_swapImage('Image3','','/images/vod/pause.gif',1)"><img src="/images/vod/play.gif" name="Image3" width="26" height="26" border="0"></a></td>
+                    <td align="left"><img src="/images/vod/stop.gif" width="26" height="26"></td>
+                    <td width="22" align="left"><a href="#" onMouseOut="MM_swapImgRestore()" onMouseOver="MM_swapImage('Image5','','/images/vod/mute.gif',1)"><img src="/images/vod/volume.gif" name="Image5"  border="0"></a></td>
+                  </tr>
+                </table></td>
+              </tr>
+            </table></td>
+            <td width="11"></td>
+            <td><table width="291" height="325" cellpadding="0" cellspacing="0">
+              <tr>
+                <td height="13"><img src="/images/vod/up.gif" width="291" height="13"></td>
+              </tr>
+              <tr>
+                <td align="center" background="/images/vod/list_bg.gif"><table cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td><table height="77" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td width="103"><img src="/images/vod/vod01.gif" width="103" height="77"></td>
+                        <td width="10">&nbsp;</td>
+                        <td width="148"><a href="" class="b12c">01. 모모모 강의</a><br>
+                          
+                          <a href="" class="k12g">강의설명강의설명강의설명이러아ㅓ아렁리ㅓ이러이ㅏㅓ라이렁ㅇㄹ앙ㄹ이....</a></td>
+                      </tr>
+                    </table></td>
+                  </tr>
+                  <tr>
+                    <td height="11"></td>
+                  </tr>
+                  <tr>
+                    <td><table height="77" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td width="103"><img src="/images/vod/vod01.gif" width="103" height="77"></td>
+                        <td width="10">&nbsp;</td>
+                        <td width="148"><a href="" class="b12c">01. 모모모 강의</a><br>
+                           
+                          <a href="" class="k12g">강의설명강의설명강의설명이러아ㅓ아렁리ㅓ이러이ㅏㅓ라이렁ㅇㄹ앙ㄹ이....</a></td>
+                      </tr>
+                    </table></td>
+                  </tr>
+                  <tr>
+                    <td height="11"></td>
+                  </tr>
+                  <tr>
+                    <td><table height="77" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td width="103"><img src="/images/vod/vod01.gif" width="103" height="77"></td>
+                        <td width="10">&nbsp;</td>
+                        <td width="148"><a href="" class="b12c">01. 모모모 강의</a><br>
+                            
+                          <a href="" class="k12g">강의설명강의설명강의설명이러아ㅓ아렁리ㅓ이러이ㅏㅓ라이렁ㅇㄹ앙ㄹ이....</a></td>
+                      </tr>
+                    </table></td>
+                  </tr>
+                </table></td>
+              </tr>
+              <tr>
+                <td height="12"><img src="/images/vod/down.gif" width="291" height="12"></td>
+              </tr>
+            </table></td>
+          </tr>
+        </table></td>
+      </tr>
+      <tr>
+        <td height="6"></td>
+      </tr>
+      <tr>
+        <td align="center"><table width="813" height="46" cellpadding="0" cellspacing="0">
+          <tr>
+            <td height="6"><img src="/images/vod/input_top.gif" width="813" height="6"></td>
+          </tr>
+          <tr>
+            <td align="center" bgcolor="#DADADA"><table cellspacing="0" cellpadding="0">
+              <tr>
+                <td><input name="textfield" type="text" style="BORDER-RIGHT: #B4B4B4 1px solid; BORDER-TOP: #B4B4B4 1px solid; padding-top:4; padding-left:3; FONT-SIZE: 12px; BORDER-LEFT: #B4B4B4 1px solid; WIDTH: 700px; COLOR: #666666; BORDER-BOTTOM: #B4B4B4 1px solid; FONT-FAMILY: 굴림; HEIGHT: 29px; BACKGROUND-COLOR: #FFFFFF" value="[댓글쓰기]강의를 본 소감을 작성해주세요. (한글100자까지가능)"></td>
+                <td width="8"></td>
+                <td width="89"><img src="/images/vod/btn_ok.gif" width="89" height="28"></td>
+              </tr>
+            </table></td>
+          </tr>
+          <tr>
+            <td height="6"><img src="/images/vod/input_foot.gif" width="813" height="6"></td>
+          </tr>
+        </table></td>
+      </tr>
+      <tr>
+        <td height="6"></td>
+      </tr>
+      <tr>
+        <td align="center"><table width="813" cellpadding="0" cellspacing="0">
+          <tr>
+            <td height="6"><img src="/images/vod/txt_top.gif" width="813" height="6"></td>
+          </tr>
+          <tr>
+            <td align="center" background="/images/vod/txt_bg.gif"><table width="98%" cellspacing="0" cellpadding="0">
+              <tr>
+                <td width="18" height="20" align="left"><img src="/images/vod/icon.gif" width="12" height="15"></td>
+                <td width="80" align="left">dfdfddfdkfdfd</td>
+                <td>강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강 소감강의...</td>
+                <td width="25" align="right"><img src="/images/vod/btn_x.gif" width="11" height="11"></td>
+                <td width="67" align="right" class="k11">2010-06-08</td>
+              </tr>
+              <tr>
+                <td height="20" align="left"><img src="/images/vod/icon.gif" width="12" height="15"></td>
+                <td align="left">dfdfddfdkfdfd</td>
+                <td>강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강 소감강의...</td>
+                <td align="right">&nbsp;</td>
+                <td width="67" align="right" class="k11">2010-06-08</td>
+              </tr>
+              <tr>
+                <td height="20" align="left"><img src="/images/vod/icon.gif" width="12" height="15"></td>
+                <td align="left">dfdfddfdkfdfd</td>
+                <td>강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강 소감강의...</td>
+                <td align="right">&nbsp;</td>
+                <td width="67" align="right" class="k11">2010-06-08</td>
+              </tr>
+              <tr>
+                <td height="20" align="left"><img src="/images/vod/icon.gif" width="12" height="15"></td>
+                <td align="left">dfdfddfdkfdfd</td>
+                <td>강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강 소감강의...</td>
+                <td align="right">&nbsp;</td>
+                <td width="67" align="right" class="k11">2010-06-08</td>
+              </tr>
+              <tr>
+                <td height="20" align="left"><img src="/images/vod/icon.gif" width="12" height="15"></td>
+                <td align="left">dfdfddfdkfdfd</td>
+                <td>강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강 소감강의...</td>
+                <td align="right">&nbsp;</td>
+                <td width="67" align="right" class="k11">2010-06-08</td>
+              </tr>
+              <tr>
+                <td height="20" align="left"><img src="/images/vod/icon.gif" width="12" height="15"></td>
+                <td align="left">dfdfddfdkfdfd</td>
+                <td>강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강 소감강의...</td>
+                <td align="right">&nbsp;</td>
+                <td width="67" align="right" class="k11">2010-06-08</td>
+              </tr>
+              <tr>
+                <td height="20" align="left"><img src="/images/vod/icon.gif" width="12" height="15"></td>
+                <td align="left">dfdfddfdkfdfd</td>
+                <td>강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강 소감강의...</td>
+                <td align="right">&nbsp;</td>
+                <td width="67" align="right" class="k11">2010-06-08</td>
+              </tr>
+              <tr>
+                <td height="20" align="left"><img src="/images/vod/icon.gif" width="12" height="15"></td>
+                <td align="left">dfdfddfdkfdfd</td>
+                <td>강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강의소감강 소감강의...</td>
+                <td align="right">&nbsp;</td>
+                <td width="67" align="right" class="k11">2010-06-08</td>
+              </tr>
+            </table></td>
+          </tr>
+          <tr>
+            <td height="20" align="center" background="/images/vod/txt_bg.gif"><span class="r12s">1</span>&nbsp;&nbsp; <a href="" class="k12p">2</a>&nbsp;&nbsp; <a href="" class="k12p">3</a> </td>
+          </tr>
+          <tr>
+            <td height="6"><img src="/images/vod/txt_foot.gif" width="813" height="6"></td>
+          </tr>
+        </table></td>
+      </tr>
+    </table></td>
+  </tr>
+  <tr>
+    <td height="11"><img src="/images/vod/box_foot.gif" width="870" height="11"></td>
+  </tr>
+</table>

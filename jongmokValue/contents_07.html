@@ -1,0 +1,78 @@
+<?php
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+/*
+1/5 저평가 종목
+*/
+
+//관리자인지 여부 가져오기
+$admin_level = $_COOKIE['_CKE_USER_LEVEL'];
+
+if(!$_COOKIE['_CKE_USER_ID']){
+	popupMsg("로그인후 이용이 가능합니다.");
+	echo "<script> window.close(); </script>";
+	exit();
+}
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+
+
+//적정주가 1/5배  저평가 종목을 가져온다. 
+$sql = " SELECT *  FROM jongmokValue 
+WHERE ((VALUE+VALUE*adjustValue) / currentValue   > 5) 
+and outFlag='F' AND VALUE > 1000
+order by (VALUE+VALUE*adjustValue) / currentValue desc
+";
+$tmpRs = mysql_query($sql);
+?>
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="css/table02.css">
+</head>
+<body  leftmargin="50px">
+<table border="0" cellpadding="0" cellspacing="0" width="650px" class="table01">
+<tr>
+<td colspan="6" ><font colo='blue' size='5'><b>1/5배 이하 저평가 종목</b></font></td>
+</tr>
+<tr class="thSearch01" style="height:25px;">
+<td width="150px" height="35px" class="white">종목명</td>
+<td class="white">소속</td>
+<td class="white">적정주가</td>
+<td class="white">현재가</td>
+<td class="white">저평가 비율</td>
+<td class="white">현재가 기준일</td>
+</tr>
+<?php
+	while($rs = mysql_fetch_array($tmpRs))
+	{
+	
+	$updateDate = $rs['updateDate'];
+	$value = round( $rs["value"]+($rs["value"]*$rs["adjustValue"]),-1); //현재 기준 적정주가	
+	$rate = round($value / $rs['currentValue'],2);
+?>
+	<tr>
+	<td height="30px"><?=$rs["name"]?></td>	
+	<td><?=$rs["type"]?></td>
+	<td style="color:#FF4500;size:20px;"><?=number_format($value)?>원</td>	
+	<td style="color:#000000;size:20px;"><?=number_format($rs['currentValue'])?>원</td>
+	<td><?=$rate?></td>
+	<td><?=$rs['currentDate']?></td>
+	</tr>			
+<?php
+	}
+?>
+
+</table>
+<br>
+<br>
+<br>
+
+
+
+
+</body>
+</html>

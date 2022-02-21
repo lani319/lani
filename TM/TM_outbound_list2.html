@@ -1,0 +1,711 @@
+<?php
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+
+$memId = $_COOKIE['_CKE_USER_ID'];
+$memIdx = $_COOKIE['_CKE_USER_UID'];
+
+
+/* 페이징 기본설정 */
+if(!$page){ $page = 1 ; }
+$pagePerNum = 20; // 한 페이지당 레코드 갯수
+$indexPerPage = 10; // 한페이지에 표시될 인덱스 갯수
+$searchSet ="&selAdmin=$selAdmin&rdKind=$rdKind&selCounselYear=$selCounselYear&selCounselMonth=$selCounselMonth&selCounselDay=$selCounselDay&selCallStatus=$selCallStatus";
+$optionSet ="";
+$pageURL = "";
+
+if($selAdmin)
+{
+	$addwhere = " where adminIdx=$selAdmin";
+}
+
+if(!$rdKind)
+{
+	$rdKind = "inbound";
+}
+
+//echo $selCounselYear;
+
+if($selCounselYear)
+{
+	$whereDate = " and B.recentDate like '$selCounselYear%' ";
+	if($selCounselMonth)
+	{
+		$whereDate = " and B.recentDate like '$selCounselYear-$selCounselMonth%' ";
+		
+		if($selCounselDay)
+		{
+			$whereDate = " and B.recentDate like '$selCounselYear-$selCounselMonth-$selCounselDay%' ";
+		}
+	}
+	
+}
+
+//echo $whereDate;
+
+//echo "상담구분 : ".$selCallStatus;
+
+if($selCallStatus) //상담구분이 있으면...
+{
+	if($selAdmin) //관리자가 있으면...
+	{	
+			$query = "select count(A.idx) as num from TM_customer A inner join TM_info B on A.userIdx = B.userIdx where B.adminIdx = $selAdmin and B.counselKind like '%$selCallStatus%' $whereDate";
+			
+			switch($selCallStatus)
+			{
+				case "5ad":
+					$query = "select count(A.idx) as num 
+					from TM_customer A inner join TM_info B on A.userIdx = B.userIdx 
+					where B.adminIdx = $selAdmin and B.counselKind like '%$selCallStatus%' and A.userGrade=1 $whereDate";
+				break;
+				
+				case "5b":
+					$query = "select count(A.idx) as num from TM_customer A inner join TM_info B on A.userIdx = B.userIdx where B.adminIdx = $selAdmin and (B.counselKind like '%5ba%' or B.counselKind like '%5bb%' or B.counselKind like '%5bd%' or B.counselKind like '%5be%' or B.counselKind like '%5bf%' or B.counselKind like '%5bg%' or B.counselKind like '%5bh%' or B.counselKind like '%5bi%' or B.counselKind like '%5bj%' or B.counselKind like '%5bk%' )   and A.userGrade=2 $whereDate";
+				break;
+				
+				case "5c":
+					$query = "select count(A.idx) as num from TM_customer A inner join TM_info B on A.userIdx = B.userIdx where B.adminIdx = $selAdmin and A.userGrade=3 $whereDate";
+				break;
+				
+				case "5ac":
+					$query = "select count(A.idx) as num from TM_customer A inner join TM_info B on A.userIdx = B.userIdx where B.adminIdx = $selAdmin and B.counselKind like '%$selCallStatus%' and A.userGrade=1 $whereDate";
+				break;
+
+				case "5bc":
+					$query = "select count(A.idx) as num from TM_customer A inner join TM_info B on A.userIdx = B.userIdx where B.adminIdx = $selAdmin and B.counselKind like '%$selCallStatus%' and A.userGrade=2 $whereDate";
+				break;
+			}
+			
+	}
+	else //관리자가 없으면...
+	{
+//		echo $selCallStatus;
+		
+			$query = "select count(A.idx) as num from TM_customer A inner join TM_info B on A.userIdx = B.userIdx where B.counselKind like '%$selCallStatus%' $whereDate";
+			
+			switch($selCallStatus)
+			{
+				case "5ad":
+					$query = "select count(A.idx) as num from TM_customer A inner join TM_info B on A.userIdx = B.userIdx where  B.counselKind like '%$selCallStatus%' and A.userGrade=1 $whereDate";
+				break;
+				
+				case "5b":
+					$query = "select count(A.idx) as num from TM_customer A inner join TM_info B on A.userIdx = B.userIdx where (B.counselKind like '%5ba%' or B.counselKind like '%5bb%' or B.counselKind like '%5bd%' or B.counselKind like '%5be%' or B.counselKind like '%5bf%' or B.counselKind like '%5bg%' or B.counselKind like '%5bh%' or B.counselKind like '%5bi%' or B.counselKind like '%5bj%' or B.counselKind like '%5bk%' )  and A.userGrade=2 $whereDate";
+				break;
+				
+				case "5c":
+					$query = "select count(A.idx) as num from TM_customer A inner join TM_info B on A.userIdx = B.userIdx where A.userGrade=3 $whereDate";
+				break;
+				
+				case "5ac":
+					$query = "select count(A.idx) as num from TM_customer A inner join TM_info B on A.userIdx = B.userIdx where B.counselKind like '%$selCallStatus%' and A.userGrade=1 $whereDate";
+				break;
+
+				case "5bc":
+					$query = "select count(A.idx) as num from TM_customer A inner join TM_info B on A.userIdx = B.userIdx where B.counselKind like '%$selCallStatus%' and A.userGrade=2 $whereDate";
+				break;
+			}
+	}
+}
+else //상담구분이 없으면...
+{
+	if($selAdmin) //관리자가 있으면...
+	{	
+			$query = "select count(A.idx) as num from TM_customer A where A.adminIdx = $selAdmin ";
+
+	}
+	else //관리자가 없으면...
+	{
+			$query = "select count(A.idx) as num from TM_customer A";
+
+	}
+}
+//echo $query;
+
+//echo "<br><br>";
+
+	/* 총 게시물수 구하기 */
+	
+	$result = mysql_query($query) or die(mysql_error());
+	$row = mysql_fetch_array($result, MYSQL_ASSOC);
+	$totalCount = $row[num];
+	
+//	echo $totalCount;
+
+//$totalCount = mysql_num_rows($result); //전체 글수 
+
+$totalPage = ceil($totalCount/$pagePerNum) ;
+$start_p = $pagePerNum*($page-1);
+
+if($in_mode=="Y"){
+	$counterWord = "<font style='color:red'>검색수 : $totalCount 개 &nbsp;,&nbsp; 현재 $page/$totalPage page</font>";
+}else{
+	$counterWord = "전체 : $totalCount 개 &nbsp;,&nbsp; 현재 $page/$totalPage page";
+}
+/* page Display */
+
+
+	$num=$totalCount - $start_p;
+
+
+
+
+
+
+
+
+//변수 설정
+$tmpStr = "";
+
+
+//TM_customer에 등록 된 대상 전체 수 , 그리고 1차 연락 한 회원 수, 2차 연락 한 회원 수, 3차이상 연락 한 회원 수를
+// 각 상담원 별로 추출하기
+$tmpAdmin = "";
+if($selAdmin)
+{
+	$addwhere1 = " where adminIdx=$selAdmin";
+}
+$sql = "SELECT adminIdx, COUNT(idx) as cnt  FROM TM_customer $addwhere1 GROUP BY adminIdx order by adminIdx ASC";
+
+$cntAdmin = 0; //admin의 수
+$arrCntAdmin = array();
+$arrAdmin = array();
+$tmpRs = mysql_query($sql);
+while($rs = mysql_fetch_array($tmpRs))
+{
+	
+	$arrCntAdmin[] = $rs[cnt];
+	$tmpAdmin = $tmpAdmin."$rs[adminIdx]".",";
+	
+	$arrAdmin[$cntAdmin][0] = $rs[adminIdx];		//adminIdx,1번전화/2번전화/3번전화/4번이상전화
+	$arrAdmin[$cntAdmin][1] = 0;		//adminIdx,1번전화/2번전화/3번전화/4번이상전화
+	$arrAdmin[$cntAdmin][2] = 0;		//adminIdx,1번전화/2번전화/3번전화/4번이상전화
+	$arrAdmin[$cntAdmin][3] = 0;		//adminIdx,1번전화/2번전화/3번전화/4번이상전화
+	$arrAdmin[$cntAdmin][4] = 0;		//adminIdx,1번전화/2번전화/3번전화/4번이상전화
+	
+	
+	$cntAdmin++;
+}
+
+$tmpAdmin = substr($tmpAdmin,0,strlen($tmpAdmin)-1);
+
+if($rdKind == "inbound")
+{
+	$sql = "SELECT adminIdx,COUNT(userIdx) as cnt FROM TM_info WHERE adminIdx IN ($tmpAdmin) GROUP BY userIdx";
+}
+else 
+{
+	$sql = "SELECT adminIdx,COUNT(userIdx) as cnt FROM TM_info WHERE adminIdx IN ($tmpAdmin) AND counselKind LIKE ('%5%') GROUP BY userIdx";
+}
+
+$tmpRs = mysql_query($sql);
+while($rs = mysql_fetch_array($tmpRs))
+{
+	for($i=0 ; $i<$cntAdmin ; $i++)
+	{
+		if($rs[adminIdx]==$arrAdmin[$i][0])
+		{
+			
+			switch ($rs[cnt])
+			{
+				case 1:
+					$arrAdmin[$i][1]++;
+					break;
+				case 2:
+					$arrAdmin[$i][2]++;
+					break;					
+				case 3:
+					$arrAdmin[$i][3]++;
+					break;		
+				default:
+					$arrAdmin[$i][4]++;
+					break;															
+			}
+		}
+
+	}
+}
+
+
+
+function getAdminName($adminCode)
+{
+	$sql = "select userName,userNickname from Member where idx=$adminCode";
+	$tmpRs = mysql_query($sql);
+	$rs = mysql_fetch_array($tmpRs);
+	
+	return $rs[userName];
+}
+
+
+function getRecentCounselInfo($memIdx)
+{
+	$sql = "select counselKind,recentDate,counselKindDetail from TM_info where userIdx=$memIdx order by idx desc limit 0,1 ";
+	$tmpRs = mysql_query($sql);
+	$rs = mysql_fetch_array($tmpRs);
+	
+	return $rs[counselKind]."$".$rs[recentDate]."$".$rs[counselKindDetail];
+}
+
+
+?>
+<HTML>
+<HEAD>
+<link rel="stylesheet" href="table.css" type="text/css" />
+<link rel="stylesheet" href="/css/502style.css" type="text/css" />
+
+<script type="text/javascript">
+function goOpen(idx,mode,ssn,mobile)
+{
+	var url = "_counsel.html?idx="+idx;
+	if(idx == 'null')
+	{
+		url = "_counsel.html";
+	}
+	if(mode=="NonMember")
+	{
+		url = "_counsel.html?idx="+idx+"&mode="+mode+"&SSN="+ssn+"&mobile="+mobile;		
+	}
+	
+	var x = window.screen.width-20;	
+	var y = window.screen.height-100;
+ 	var win = window.open(url,"_new","menubar=no, toolbar=no, location=no, status=no, resizable=1, top=0,left=0, scrollbars=yes,width=" + x + ", height=" + y);
+}
+
+
+function goSearch(value)
+{
+	var f = document.form1;
+	f.submit();
+}
+
+//상담 히스토리 보기
+function goHistory(idx)
+{
+	var url = "showHistory.html?userIdx="+idx;
+	var win = window.open(url,'','location=no, directories=no,resizable=no,status=no,toolbar=no,menubar=no, width=1200,height=300,left=0, top=0, scrollbars=yes');
+}
+
+</script>
+
+</HEAD>
+<BODY>
+
+<br><br>
+<table width="100%">
+<tr>
+<td width="110px"><?php include_once $_SERVER['DOCUMENT_ROOT']."/lani/TM/TM_menu.html"; ?></td>
+<td valign="top">
+<form name="form1" method="POST" action="TM_outbound_list2.html">
+<input type="hidden" name="admin" id="admin" value="<?=$admin?>">
+<table cellpadding="0" cellspacing="0" border="0" width="800px">
+	
+	
+	<tr align="right">
+	<td>	
+	
+	상담원
+			<select name="selAdmin"  id="selAdmin" style="height:40px; width:120px;" onchange="goSearch(this.value)">
+			
+			<?php
+if($memId == "ayh319" || $memId == "seodh0070" || $memId == "tndls5" || $memId == "jinsuk930")
+{
+			$sql = "SELECT A.userName,A.userNickname,A.userId,A.idx FROM Member A INNER JOIN TM_admin B ON A.userId = B.adminId order by userId desc";
+			echo "<option value=''>전체</option>";
+}
+else 
+{
+			$sql = "SELECT A.userName,A.userNickname,A.userId,A.idx FROM Member A INNER JOIN TM_admin B ON A.userId = B.adminId where B.adminId='$memId' order by userId desc";
+}
+			$tmpRs3 = mysql_query($sql);
+			while($rs3 = mysql_fetch_array($tmpRs3))
+			{
+				if($selAdmin == $rs3[idx])
+				{
+			?>
+					<option value="<?=$rs3[idx]?>" selected style="color:blue"> <?=$rs3[userName]?>[<?=$rs3[userNickname]?>]</option>		
+			<?php
+				}
+				else
+				{
+			?>
+					<option value="<?=$rs3[idx]?>"> <?=$rs3[userName]?>[<?=$rs3[userNickname]?>]</option>		
+			<?php
+				}
+			}
+			
+			?>
+			</select>
+	</td>
+	<!--
+	<td>
+	<input type="radio" name="rdKind" value="inbound" <?php if($rdKind=='inbound'){echo "checked";} ?>>인바운드
+	<font color="FFFFFF">___</font>
+	<input type="radio" name="rdKind" value="outbound" <?php if($rdKind=='outbound'){echo "checked";} ?>>아웃바운드
+	</td>
+	-->
+	<td>
+	상담날짜
+			<select name="selCounselYear"  id="selCounselYear" style="height:40px; width:50px;">
+			<option value="">전체</option>
+			<option value="2010" <?php if($selCounselYear=="2010"){echo "selected";} ?>>2010</option>
+			<option value="2011" <?php if($selCounselYear=="2011"){echo "selected";} ?>>2011</option>
+			<option value="2012" <?php if($selCounselYear=="2012"){echo "selected";} ?>>2012</option>
+			</select>년
+			&nbsp;
+			<select name="selCounselMonth"  id="selCounselMonth" style="height:40px; width:50px;">
+			<option value="">전체</option>
+			<?php
+			for($i=1 ; $i <= 12 ; $i++)
+			{
+				if($i<10)
+				{
+			?>
+				<option value="0<?=$i?>" <?php if($selCounselMonth=="$i"){echo "selected";} ?>><?=$i?></option>
+			<?php
+				}
+				else 
+				{
+					?>
+				<option value="<?=$i?>" <?php if($selCounselMonth=="$i"){echo "selected";} ?>><?=$i?></option>
+					<?php
+				}
+			?>
+			
+			<?php
+			}
+			?>
+			</select>월
+			&nbsp;
+			<select name="selCounselDay"  id="selCounselDay" style="height:40px; width:50px;">
+			<option value="">전체</option>
+			<?php
+			for($i=1 ; $i <= 31 ; $i++)
+			{
+				if($i<10)
+				{
+			?>
+				<option value="0<?=$i?>" <?php if($selCounselDay=="$i"){echo "selected";} ?>><?=$i?></option>
+			<?php
+				}
+				else 
+				{
+					?>
+				<option value="<?=$i?>" <?php if($selCounselDay=="$i"){echo "selected";} ?>><?=$i?></option>
+					<?php
+				}
+			?>
+			
+			<?php
+			}
+			?>
+			</select>일
+			
+		
+	</td>
+	
+	<td>
+	
+	상담구분
+			<select name="selCallStatus"  id="selCallStatus" style="height:40px; width:120px;" onchange="goSearch(this.value)">
+			<option value="">전체</option>
+			<option value="5ad" <?php if($selCallStatus=='5ad'){echo "selected";} ?>>1차 안내 완료</option>
+			<option value="5b" <?php if($selCallStatus=='5b'){echo "selected";} ?>>2차 안내 완료</option>
+			<option value="5c" <?php if($selCallStatus=='5c'){echo "selected";} ?>>3차 안내 완료</option>			
+			<option value="5ac" <?php if($selCallStatus=='5ac'){echo "selected";} ?>>1차 통화중</option>
+			<option value="5bc" <?php if($selCallStatus=='5bc'){echo "selected";} ?>>2,3차 통화중</option>			
+			</select>
+		
+	
+	</td>
+	</tr>
+	
+	<tr>	
+	<td colspan="10">
+		<img src="images/titleTmMemberTop.gif">
+		<table cellpadding="0" cellspacing="0" border="0" width="800">
+		<tr><td colspan="10" height="1" bgcolor="skyblue"></td></tr>
+		<tr align="center" bgcolor="84b4b0">
+			<td style="color:FFFFFF;font-weight:bold;">상담원</td>
+			<td style="color:FFFFFF;font-weight:bold;">전체배정</td>
+			<td style="color:FFFFFF;font-weight:bold;">1회</td>
+			<td style="color:FFFFFF;font-weight:bold;">2회</td>
+			<td style="color:FFFFFF;font-weight:bold;">3회</td>
+			<td style="color:FFFFFF;font-weight:bold;">4회이상</td>
+		</tr>
+		<tr><td colspan="10" height="1" bgcolor="skyblue"></td></tr>
+		<?php
+		for($i=0 ; $i<$cntAdmin ; $i++)
+		{
+			?>
+		<tr align="center">
+			<td><?=getAdminName($arrAdmin[$i][0])?></td>
+			<td><?=$arrCntAdmin[$i]?></td>
+			<td><?=$arrAdmin[$i][1]?></td>
+			<td><?=$arrAdmin[$i][2]?></td>
+			<td><?=$arrAdmin[$i][3]?></td>
+			<td><?=$arrAdmin[$i][4]?></td>
+		</tr>	
+		<tr><td colspan="10" background="images/line.gif"></td></tr>
+			<?php
+		}
+		?>
+		<tr><td colspan="10" height="15" bgcolor="84b4b0"></td></tr>
+		</table>
+	</td>
+	</tr>
+	
+	</table>
+<br><br><br>
+
+<img src="images/titleTmMemberList.gif">
+<table cellpadding="0" cellspacing="0" border="0" width="1000px">
+<tr><td colspan="10" height="1" bgcolor="skyblue"></td></tr>
+<tr align="center" bgcolor="84b4b0">
+<td width="60px" style="color:FFFFFF;font-weight:bold;">순번</td>
+<td  style="color:FFFFFF;font-weight:bold;">회원정보</td>
+<td width="120px" style="color:FFFFFF;font-weight:bold;">연락처</td>
+<td width="120px" style="color:FFFFFF;font-weight:bold;">통화등급</td>
+<td width="100px" style="color:FFFFFF;font-weight:bold;">담당자</td>
+<td width="100px" style="color:FFFFFF;font-weight:bold;">최근상담일</td>
+<td width="100px" style="color:FFFFFF;font-weight:bold;">최근상담코드</td>
+<td> &nbsp; </td>
+</tr>
+<tr><td colspan="10" height="1" bgcolor="skyblue"></td></tr>
+
+<?php
+if($selCallStatus) //상담구분이 있으면...
+{
+	if($selAdmin) //관리자가 있으면...
+	{	
+		$sql = "SELECT A.idx,A.userId,A.userName,A.userNickname,A.mobile,B.adminIdx,Left(A.signdate,10) as signdate FROM Member A inner join TM_info B on A.idx = B.userIdx where B.adminIdx=$selAdmin and B.counselKind like ('%$selCallStatus%') $whereDate group by B.userIdx ORDER BY B.userIdx ASC limit $start_p,$pagePerNum";
+		
+		switch($selCallStatus)
+			{
+				case "5ad": //1차완료
+					$sql = "SELECT A.idx,A.userId,A.userName,A.userNickname,A.mobile,B.adminIdx,Left(A.signdate,10) as signdate,C.userGrade 
+							FROM Member A inner join TM_info B on A.idx = B.userIdx 
+							INNER JOIN TM_customer C ON B.userIdx = C.userIdx
+							where B.adminIdx=$selAdmin and B.counselKind like ('%$selCallStatus%') and C.userGrade=1 $whereDate 
+							group by B.userIdx ORDER BY B.userIdx ASC limit $start_p,$pagePerNum";
+					break;
+				
+				case "5b": //2차완료
+					$sql = "SELECT A.idx,A.userId,A.userName,A.userNickname,A.mobile,B.adminIdx,Left(A.signdate,10) as signdate,C.userGrade 
+							FROM Member A inner join TM_info B on A.idx = B.userIdx 
+							INNER JOIN TM_customer C ON B.userIdx = C.userIdx
+							where B.adminIdx=$selAdmin and (B.counselKind like '%5ba%' or B.counselKind like '%5bb%' or B.counselKind like '%5bd%' or B.counselKind like '%5be%' or B.counselKind like '%5bf%' or B.counselKind like '%5bg%' or B.counselKind like '%5bh%' or B.counselKind like '%5bi%' or B.counselKind like '%5bj%' or B.counselKind like '%5bk%' ) and C.userGrade=2 $whereDate 
+							group by B.userIdx ORDER BY B.userIdx ASC limit $start_p,$pagePerNum";
+					break;
+									
+				case "5c": //3차완료
+					$sql = "SELECT A.idx,A.userId,A.userName,A.userNickname,A.mobile,B.adminIdx,Left(A.signdate,10) as signdate,C.userGrade 
+							FROM Member A inner join TM_info B on A.idx = B.userIdx 
+							INNER JOIN TM_customer C ON B.userIdx = C.userIdx
+							where B.adminIdx=$selAdmin and C.userGrade=3 $whereDate 
+							group by B.userIdx ORDER BY B.userIdx ASC limit $start_p,$pagePerNum";
+					break;
+					
+					case "5ac": //1차 통화중
+					$sql = "SELECT A.idx,A.userId,A.userName,A.userNickname,A.mobile,B.adminIdx,Left(A.signdate,10) as signdate,C.userGrade 
+							FROM Member A inner join TM_info B on A.idx = B.userIdx 
+							INNER JOIN TM_customer C ON B.userIdx = C.userIdx
+							where B.adminIdx=$selAdmin and B.counselKind like ('%$selCallStatus%') and C.userGrade=1 $whereDate 
+							group by B.userIdx ORDER BY B.userIdx ASC limit $start_p,$pagePerNum";
+					break;
+					
+					case "5bc": //2,3차 통화중
+					$sql = "SELECT A.idx,A.userId,A.userName,A.userNickname,A.mobile,B.adminIdx,Left(A.signdate,10) as signdate,C.userGrade 
+							FROM Member A inner join TM_info B on A.idx = B.userIdx 
+							INNER JOIN TM_customer C ON B.userIdx = C.userIdx
+							where B.adminIdx=$selAdmin and B.counselKind like ('%$selCallStatus%') $whereDate 
+							group by B.userIdx ORDER BY B.userIdx ASC limit $start_p,$pagePerNum";
+					break;
+			}
+
+	}
+	else //관리자가 없으면...
+	{
+			$sql = "SELECT A.idx,A.userId,A.userName,A.userNickname,A.mobile,B.adminIdx,Left(A.signdate,10) as signdate FROM Member A inner join TM_info B on A.idx = B.userIdx where B.counselKind like ('%$selCallStatus%') $whereDate group by B.userIdx ORDER BY B.userIdx ASC limit $start_p,$pagePerNum";
+			
+			switch($selCallStatus)
+			{
+					case "5ad": //1차완료
+					$sql = "SELECT A.idx,A.userId,A.userName,A.userNickname,A.mobile,B.adminIdx,Left(A.signdate,10) as signdate,C.userGrade 
+							FROM Member A inner join TM_info B on A.idx = B.userIdx 
+							INNER JOIN TM_customer C ON B.userIdx = C.userIdx
+							where B.counselKind like ('%$selCallStatus%') and C.userGrade=1 $whereDate 
+							group by B.userIdx ORDER BY B.userIdx ASC limit $start_p,$pagePerNum";
+					break;
+				
+					case "5b": //2차완료
+					$sql = "SELECT A.idx,A.userId,A.userName,A.userNickname,A.mobile,B.adminIdx,Left(A.signdate,10) as signdate,C.userGrade 
+							FROM Member A inner join TM_info B on A.idx = B.userIdx 
+							INNER JOIN TM_customer C ON B.userIdx = C.userIdx
+							where (B.counselKind like '%5ba%' or B.counselKind like '%5bb%' or B.counselKind like '%5bd%' or B.counselKind like '%5be%' or B.counselKind like '%5bf%' or B.counselKind like '%5bg%' or B.counselKind like '%5bh%' or B.counselKind like '%5bi%' or B.counselKind like '%5bj%' or B.counselKind like '%5bk%' ) and C.userGrade=2 $whereDate 
+							group by B.userIdx ORDER BY B.userIdx ASC limit $start_p,$pagePerNum";
+					break;
+									
+					case "5c": //3차완료
+					$sql = "SELECT A.idx,A.userId,A.userName,A.userNickname,A.mobile,B.adminIdx,Left(A.signdate,10) as signdate,C.userGrade 
+							FROM Member A inner join TM_info B on A.idx = B.userIdx 
+							INNER JOIN TM_customer C ON B.userIdx = C.userIdx
+							where C.userGrade=3 $whereDate 
+							group by B.userIdx ORDER BY B.userIdx ASC limit $start_p,$pagePerNum";
+					break;
+					
+					case "5ac": //1차 통화중
+					$sql = "SELECT A.idx,A.userId,A.userName,A.userNickname,A.mobile,B.adminIdx,Left(A.signdate,10) as signdate,C.userGrade 
+							FROM Member A inner join TM_info B on A.idx = B.userIdx 
+							INNER JOIN TM_customer C ON B.userIdx = C.userIdx
+							where B.counselKind like ('%$selCallStatus%') and C.userGrade=1 $whereDate 
+							group by B.userIdx ORDER BY B.userIdx ASC limit $start_p,$pagePerNum";
+					break;
+					
+					case "5bc": //2,3차 통화중
+					$sql = "SELECT A.idx,A.userId,A.userName,A.userNickname,A.mobile,B.adminIdx,Left(A.signdate,10) as signdate,C.userGrade 
+							FROM Member A inner join TM_info B on A.idx = B.userIdx 
+							INNER JOIN TM_customer C ON B.userIdx = C.userIdx
+							where B.counselKind like ('%$selCallStatus%') $whereDate 
+							group by B.userIdx ORDER BY B.userIdx ASC limit $start_p,$pagePerNum";
+					break;
+			}
+			
+	
+			
+
+	}
+}
+else //상담구분이 없으면...
+{
+	if($selAdmin) //관리자가 있으면...
+	{	
+			$sql = "SELECT A.idx,A.userId,A.userName,A.userNickname,A.mobile,B.adminIdx,Left(A.signdate,10) as signdate,B.userGrade  FROM Member A inner join TM_customer B on A.idx = B.userIdx where B.adminIdx=$selAdmin  group by B.userIdx ORDER BY B.idx DESC limit $start_p,$pagePerNum";
+
+	}
+	else //관리자가 없으면...
+	{
+			$sql = "SELECT A.idx,A.userId,A.userName,A.userNickname,A.mobile,B.adminIdx,Left(A.signdate,10) as signdate,B.userGrade  FROM Member A inner join TM_customer B on A.idx = B.userIdx group by B.userIdx ORDER BY B.idx desc limit $start_p,$pagePerNum";
+
+	}
+}
+
+//echo $sql;
+//exit;
+
+$tmpRs = mysql_query($sql);
+$rowCnt2 = 1;
+while($rs = mysql_fetch_array($tmpRs))
+{
+	$memInfo = "<a href='#' onClick='goHistory($rs[idx])'>".$rs[userName]."<br>[".$rs[userNickname]."]</a>";
+	$mobile = $rs[mobile];
+	//$signDate = $rs[signdate];
+	$signDate = $rs[userGrade];
+	if($signDate == "")
+	{
+		$signDate = "";
+	}
+	
+	
+	//최근 상담일과 상담 코드를 구한다. (함수 호출)
+	
+	$recentCounselInfo = getRecentCounselInfo($rs[idx]);
+	//5ca^$2010-09-06 09:25:54 
+	$arrRecentCounselInfo = explode("$",$recentCounselInfo);
+	
+	if($rdKind == "outbound")
+	{	
+		$sql2 = "SELECT COUNT(userIdx) as cnt FROM TM_info WHERE userIdx = $rs[idx] and counselKind LIKE ('%5%') GROUP BY adminIdx";	
+	}
+	else 
+	{
+		$sql2 = "SELECT COUNT(userIdx) as cnt FROM TM_info WHERE userIdx = $rs[idx] GROUP BY adminIdx";	
+	}
+	$tmpRs2 = mysql_query($sql2);
+	$sumCounsel = 0;
+	
+	while($rs2 = mysql_fetch_array($tmpRs2))
+	{
+		$sumCounsel = $rs2[cnt];
+		
+	}
+	if($selCallCnt) //아웃바운드 상담 횟수를 선택하고
+	{
+		if($selCallCnt == $sumCounsel) //선택 상담횟수랑 실제 상담횟수랑 일치하면
+		{
+			
+?>
+	<tr align="center">
+	<td><?=$rowCnt2++?></td>
+	<td><?=$memInfo?></td>
+	<td><?=$mobile?></td>
+	<td><?=$signDate?></td>
+	<td><?=getAdminName($rs[adminIdx])?></td>
+	<td><?=$arrRecentCounselInfo[1]?></td>
+	<td><?=$arrRecentCounselInfo[0]?><br>(<?=$arrRecentCounselInfo[2]?>)</td>	
+	<td><input type="button" value="선택" onclick="goOpen('<?=$rs[idx]?>','','','')"></td>
+	</tr>
+	<tr><td colspan="10" background="images/line.gif"></td></tr>
+	
+<?php
+		}
+		else if($selCallCnt == 4) //만약 선택 상담횟수가 4면 , 
+		{
+			if($sumCounsel >= 4) //실제 상담횟수가 4보다 크면 무조건 출력
+			{
+				
+?>
+				<tr align="center">
+				<td><?=$rowCnt2++?></td>
+				<td><?=$memInfo?></td>
+				<td><?=$mobile?></td>
+				<td><?=$signDate?></td>
+				<td><?=getAdminName($rs[adminIdx])?></td>
+				<td><?=$arrRecentCounselInfo[1]?></td>
+				<td><?=$arrRecentCounselInfo[0]?><br>(<?=$arrRecentCounselInfo[2]?>)</td>
+				
+				<td><input type="button" value="선택" onclick="goOpen('<?=$rs[idx]?>','','','')"></td>
+				</tr>
+				<tr><td colspan="10" background="images/line.gif"></td></tr>
+<?php
+			}
+		}
+	}
+	else 
+	{
+		?>
+		<tr align="center">
+		<td><?=$num--?></td>
+		<td><?=$memInfo?></td>
+		<td><?=$mobile?></td>
+		<td><?=$signDate?></td>
+		<td><?=getAdminName($rs[adminIdx])?></td>
+		<td><?=$arrRecentCounselInfo[1]?></td>
+		<td><?=$arrRecentCounselInfo[0]?><br>(<?=$arrRecentCounselInfo[2]?>)</td>
+		
+		<td><input type="button" value="선택" onclick="goOpen('<?=$rs[idx]?>','','','')"></td>
+		</tr>		
+		<tr><td colspan="10" background="images/line.gif"></td></tr>
+		<?php
+	}
+}
+?>
+<tr><td colspan="10" height="15" bgcolor="84b4b0"></td></tr>
+<tr>
+<td align="center" colspan="10">
+<? if($totalCount) pagSet('page',$page,$totalPage,$indexPerPage,$pageURL,$searchSet,$optionSet); ?>
+</td>
+</tr>
+</table>
+
+</BODY>
+</form>
+</td>
+</tr>
+</table>
+</HTML>

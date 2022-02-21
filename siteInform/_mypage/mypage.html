@@ -1,0 +1,100 @@
+<?php
+$imgPath = "/lani/siteInform/mypage/";
+?>
+<html>
+<head>
+<title>06 마이페이지</title>
+<meta http-equiv="Content-Type" content="text/html; charset=euc-kr">
+<script type="text/javascript">
+function showLayer(id)
+{
+	document.getElementById("div01").style.display = "inline";
+	
+	switch(id)
+	{
+		case 01:
+			document.getElementById("img01").src = "<?=$imgPath?>mypage01.gif";
+		break;
+
+		case 02:
+			document.getElementById("img01").src = "<?=$imgPath?>mypage02.gif";
+		break;
+		
+		case 03:
+			document.getElementById("img01").src = "<?=$imgPath?>mypage03.gif";
+		break;
+		
+		case 04:
+			document.getElementById("img01").src = "<?=$imgPath?>mypage04.gif";
+		break;
+		
+		case 05:
+			document.getElementById("img01").src = "<?=$imgPath?>mypage05.gif";
+		break;
+	}
+}
+function hideLayer(id)
+{
+	document.getElementById(id).style.display="none";
+}
+	
+
+</script>
+</head>
+<body bgcolor="#FFFFFF" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+<!-- Save for Web Slices (06 마이페이지.psd) -->
+<table id="__01" width="1027" height="1142" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td colspan="3">
+			<img src="images/mypage_01.gif" width="1027" height="357" alt=""></td>
+	</tr>
+	<tr>
+		<td rowspan="10">
+			<img src="images/mypage_02.gif" width="21" height="785" alt=""></td>
+		<td>
+				<div style="position:relative;"><img src="images/mypage_03.gif" width="118" height="24" alt="" onmouseover="showLayer(01);"><div id="div01" style="position:absolute;top:0px;left:160px;width:685px;height:600px;display:none;" onmouseout="hideLayer('div01');"><table cellpadding="0" cellspacing="" bgcolor="FFFFFF" width="685px" height="235px" border="0"><tr><td><img id="img01" src="<?=$imgPath?>mypage01.gif" border="0"  ></td></tr></table></div></div>
+
+			</td>
+		<td rowspan="10">
+			<img src="images/mypage_04.gif" width="888" height="785" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/mypage_05.gif" width="118" height="6" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/mypage_06.gif" width="118" height="20" alt="" onmouseover="showLayer(02);"></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/mypage_07.gif" width="118" height="8" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/mypage_08.gif" width="118" height="22" alt="" onmouseover="showLayer(03);"></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/mypage_09.gif" width="118" height="76" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/mypage_10.gif" width="118" height="23" alt="" onmouseover="showLayer(04);"></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/mypage_11.gif" width="118" height="68" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/mypage_12.gif" width="118" height="25" alt="" onmouseover="showLayer(05);"></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/mypage_13.gif" width="118" height="513" alt=""></td>
+	</tr>
+</table>
+<!-- End Save for Web Slices -->
+</body>
+</html>

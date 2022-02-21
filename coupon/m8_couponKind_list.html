@@ -1,0 +1,127 @@
+<?
+include_once $_SERVER['DOCUMENT_ROOT']."/admin/header8.php";
+?>
+<html>
+<head>
+<script type="text/javascript">
+
+
+
+function setIdx(idx)
+{
+	var f = document.form1;
+	document.getElementById("txtIdx").value = idx;
+}
+
+function del()
+{
+	if(document.getElementById("txtIdx").value)
+	{
+	
+		var f = document.form1;
+		f.target = "invFrame";
+		f.action = "m8_couponKind_delOk.php";
+		f.submit();
+	}
+	else
+	{
+		alert('삭제할 쿠폰 종류를 선택 하세요')
+	}
+}
+
+function modify()
+{	if(document.getElementById("txtIdx").value)
+	{
+		var f = document.form1;	
+		f.action = "m8_couponKind_Modify.html";
+		f.submit();
+	}
+	else
+	{
+		alert('수정할 쿠폰 종류를 선택 하세요')
+	}
+	
+}
+</script>
+
+</head>
+<body>
+<form name="form1" method="POST">
+<TABLE width="920" cellpadding=0 cellspacing=0 border=0>
+<tr height=10><td></td></tr>
+<tr>
+	<td>
+		<TABLE width="100%" cellpadding=0 cellspacing=0 border=0>
+		<TR>
+			<TD></TD>
+			<TD valign="bottom" align="right"><img src="/admin/images/icon_location.gif" align="absmiddle"> 외부사이트관리 &gt; 쿠폰 종류관리&nbsp;</TD>
+		</TR>
+		</TABLE>
+	</td>
+</tr>
+</table>
+<br>
+<table width="920" cellpadding=0 cellspacing=0 border=0>
+<tr>
+<td align="left" colspan="20">
+
+<img src="img/newCouponKind.gif" style="cursor:hand;" onclick="location.href = 'm8_couponKind_Reg.html'">
+&nbsp;&nbsp;
+<img src="img/delCouponKind.gif" style="cursor:hand;" onclick="del()">
+&nbsp;&nbsp;
+<img src="img/modCouponKind.gif" style="cursor:hand;" onclick="modify();">
+<font color="Red">*수정/삭제는 1개의 쿠폰만 가능합니다.</font>
+</td>
+<td align="right" colspan="10"><a href="m8_coupon_list.php?searchflag=1">[목록]</a></td>
+</tr>
+</table>
+<table width="920" cellpadding=0 cellspacing=0 border=0>
+<tr>
+<tr bgcolor="AAAAAA" align="center">
+<td></td>
+<td height="25px" style="color:FFFFFF">순번</td>
+<td height="25px" style="color:FFFFFF">종류</td>
+<td height="25px" style="color:FFFFFF">할인율/할인금액</td>
+<td height="25px" style="color:FFFFFF">할인구분</td>
+<td height="25px" style="color:FFFFFF">등록일</td>
+</tr>
+<?php
+$sql = "select A.idx,A.kind,A.dcValue,A.dcType,A.regDate,A.priceLinkage from 502CouponKind A where delFlag='N' order by A.idx DESC";
+$tmpRs = mysql_query($sql);
+$rowCnt = 1;
+while ($rs = mysql_fetch_array($tmpRs))
+{	switch ($rs[dcType])		//쿠폰 할인 종류  %로 할인 할 지, 금액으로 할인 할 지
+	{
+		case "1":
+			$dcType = "%";			
+		break;
+		case "2":
+			$dcType = "원";			
+		break;
+	}
+	$dcValue = $rs[dcValue];
+
+	$priceLinkage = $rs[priceLinkage];
+	$kind = $rs[kind];
+	if($priceLinkage=='Y') $kindR = '<font color=blue>'.$kind.'</font>';
+	else $kindR = $kind;
+	
+?>
+<tr align="center">
+<td><input type="checkbox" value="<?=$rs["idx"]?>" name="chkIdx" onclick="setIdx(this.value);"></td>
+<td height="25px"><?=$rowCnt++?></td>
+<td height="25px"><?= $kindR ?></td>
+<td height="25px"><?=$dcValue?></td>
+<td height="25px"><?=$dcType?></td>
+<td height="25px"><?=$rs["regDate"]?></td>
+</tr>	
+<tr><td colspan="21" height="1" bgcolor="AAAAAA"></td></tr>
+<?php
+}
+?>
+</table>
+<input type="hidden" name="txtIdx" size="10" value="">
+</form>
+<iframe name="invFrame" width="0px" height="0px"></iframe>
+</body>
+</html>

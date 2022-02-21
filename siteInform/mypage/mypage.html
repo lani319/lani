@@ -1,0 +1,109 @@
+<html>
+<head>
+<title>mypage</title>
+<meta http-equiv="Content-Type" content="text/html; charset=euc-kr">
+<script type="text/javascript">
+function showLayer(id)
+{
+	document.getElementById("div01").style.display = "inline";
+	
+	switch(id)
+	{
+		case 01:
+			document.getElementById("img01").src = "<?=$imgPath?>mypage01.gif";
+		break;
+
+		case 02:
+			document.getElementById("img01").src = "<?=$imgPath?>mypage02.gif";
+		break;
+		
+		case 03:
+			document.getElementById("img01").src = "<?=$imgPath?>mypage03.gif";
+		break;
+		
+		case 04:
+			document.getElementById("img01").src = "<?=$imgPath?>mypage04.gif";
+		break;
+		
+		case 05:
+			document.getElementById("img01").src = "<?=$imgPath?>mypage05.gif";
+		break;
+		
+		case 06:
+			document.getElementById("img01").src = "<?=$imgPath?>mypage06.gif";
+		break;
+	}
+}
+function hideLayer(id)
+{
+	document.getElementById(id).style.display="none";
+}
+	
+
+</script>
+</head>
+<body bgcolor="#FFFFFF" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+<? include_once $_SERVER['DOCUMENT_ROOT']."/lani/siteInform/topMenu.php"; ?>
+<!-- Save for Web Slices (mypage.psd) -->
+<table id="__01" width="1026" height="1250" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td colspan="2">
+			<img src="images/mypage_01.gif" width="1025" height="302" alt=""></td>
+		<td>
+			<img src="images/&#xc2a4;&#xd398;&#xc774;&#xc11c;.gif" width="1" height="302" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/mypage_02.gif" width="186" height="49" alt=""></td>
+		<td rowspan="7">
+		<div style="position:relative;"><img src="images/mypage_03.gif" width="839" height="470" alt=""><div id="div01" style="position:absolute;top:0px;left:0px;width:685px;height:600px;display:none;" onmouseout="hideLayer('div01');"><table cellpadding="0" cellspacing="" bgcolor="FFFFFF" width="685px" height="235px" border="0"><tr><td><img id="img01" src="<?=$imgPath?>mypage01.gif" border="0"  ></td></tr></table></div></div>
+			</td>
+		<td>
+			<img src="images/&#xc2a4;&#xd398;&#xc774;&#xc11c;.gif" width="1" height="49" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/mypage_04.gif" width="186" height="30" alt="" onmouseover="showLayer(01);"></td>
+		<td>
+			<img src="images/&#xc2a4;&#xd398;&#xc774;&#xc11c;.gif" width="1" height="30" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/mypage_05.gif" width="186" height="29" alt=""  onmouseover="showLayer(02);"></td>
+		<td>
+			<img src="images/&#xc2a4;&#xd398;&#xc774;&#xc11c;.gif" width="1" height="29" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/mypage_06.gif" width="186" height="27" alt=""  onmouseover="showLayer(06);"></td>
+		<td>
+			<img src="images/&#xc2a4;&#xd398;&#xc774;&#xc11c;.gif" width="1" height="27" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/mypage_07.gif" width="186" height="28" alt=""  onmouseover="showLayer(04);"></td>
+		<td>
+			<img src="images/&#xc2a4;&#xd398;&#xc774;&#xc11c;.gif" width="1" height="28" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/mypage_08.gif" width="186" height="27" alt=""  onmouseover="showLayer(05);"></td>
+		<td>
+			<img src="images/&#xc2a4;&#xd398;&#xc774;&#xc11c;.gif" width="1" height="27" alt=""></td>
+	</tr>
+	<tr>
+		<td rowspan="2">
+			<img src="images/mypage_09.gif" width="186" height="758" alt=""></td>
+		<td>
+			<img src="images/&#xc2a4;&#xd398;&#xc774;&#xc11c;.gif" width="1" height="280" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/mypage_10.gif" width="839" height="478" alt=""></td>
+		<td>
+			<img src="images/&#xc2a4;&#xd398;&#xc774;&#xc11c;.gif" width="1" height="478" alt=""></td>
+	</tr>
+</table>
+<!-- End Save for Web Slices -->
+</body>
+</html>

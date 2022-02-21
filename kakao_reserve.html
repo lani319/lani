@@ -1,0 +1,41 @@
+
+<head>
+<script type="text/javascript">
+
+function setNumber()
+{
+	var form = document.form1;
+	var num1 = document.getElementById("mobile1").value;
+	var num2 = document.getElementById("mobile2").value;
+	var num3 = document.getElementById("mobile3").value;
+	
+	form1.mobileReseult.value = num1+""+num2+""+num3;
+	
+	
+}
+
+</script>
+
+</head>
+
+<table width="350px" height="200px" border="1">
+<tr>
+<td>연락처 : </td>
+<td>
+<input type="text" name="mobile1" id="mobile1" size="3" tabindex="1">
+-
+<input type="text" name="mobile2" id="mobile2" size="4" tabindex="2">
+-
+<input type="text" name="mobile3" id="mobile3" size="4" tabindex="3"> 
+</td>
+</tr>
+<tr>
+<td colspan="2"><input type="button" value="카카오톡 오픈채팅 신청" onClick="setNumber();"></td>
+</tr>
+
+
+</table>
+
+<form name="form1" method="POST" target="invFrm">
+<input type="text" name="mobileResult">
+</form>

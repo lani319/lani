@@ -1,0 +1,43 @@
+<?php
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+?>
+<script type="text/javascript">
+function goDel(idx)
+{
+	location.href = "admin_delOK.php?idx="+idx;
+}
+</script>
+<table width="750px">
+<tr height=15px>
+<td>순번</td>
+<td>이름</td>
+<td>등록일</td>
+<td>누적 상담수</td>
+<td></td>
+</tr>
+<tr><td colspan="5" height="1" bgcolor="FF33CC"></td></tr>
+<tr><td colspan="5" height="1" bgcolor="FF33CC"></td></tr>
+
+<?php
+$query = "select * from TM_admin order by idx desc";
+$tmpRs = mysql_query($query);
+$rs = mysql_fetch_array($tmpRs);
+$rowCnt = mysql_num_rows($tmpRs);
+?>
+
+<tr>
+<td><?=$rowCnt--?></td>
+<td><?=$rs[adminName]?></td>
+<td><?=$rs[regDate]?></td>
+<td><?=$rs[userCnt]?></td>
+<td><input type="button" value="삭제" onclick="goDel(<?=$rs[idx]?>)"></td>
+</tr>
+<tr><td colspan="5" height="1" bgcolor="FF33CC"></td></tr>
+
+</table>

@@ -1,0 +1,146 @@
+*신규 상장된 종목의 적정주가를 입력하는 화면입니다. 
+<br><br>
+<form action="insertNewJongmok_ok.php" method="POST">
+<table cellpadding=1 cellspacing=1 border=1 width="800px">
+<tr>
+<td width="200px">종목명</td>
+<td><input type="text" id="txtName" name="txtName" size="20" tabindex=1></td>
+</tr>
+
+<tr>
+<td>종목코드</td>
+<td><input type="text" id="txtCode" name="txtCode" size="6" tabindex=2>
+"A" 빼고 숫자만 입력 
+</td>
+</tr>
+
+<tr>
+<td>업종(코스피)</td>
+<td>
+<select id="cmbTypeKospi" name="cmbTypeKospi"  tabindex=3>
+	<option value="--" selected>---
+	<option value="건설업"> 건설
+	<option value="금융업"> 금융
+	<option value="기계"> 기계
+	<option value="보험">보험
+	<option value="비금속광물">비금속광물
+	<option value="서비스업">서비스업
+	<option value="섬유의복">섬유의복
+	<option value="운송장비">운송장비
+	<option value="운수창고">운수창고
+	<option value="유통업">유통
+	<option value="음식료품">음식료
+	<option value="의료정밀">의료정밀
+	<option value="의약품">의약품
+	<option value="전기가스업">전기가스
+	<option value="전기 전자">전기전자
+	<option value="종이 목재">종이목재
+	<option value="증권">증권
+	<option value="철강 금속">철강금속
+	<option value="통신업">통신업
+	<option value="화학">화학
+	<option value="은행">은행
+</select>
+</td>
+</tr>
+
+<tr>
+<td>업종(코스닥)</td>
+<td>
+	<select id="cmbTypeKosdaq" name="cmbTypeKosdaq"  tabindex=4>
+	<option value="--" selected>---
+	<option value="오락 문화"> 오락문화
+	<option value="통신서비스"> 통신서비스
+	<option value="방송서비스"> 방송서비스
+	<option value="인터넷">인터넷
+	<option value="디지털컨텐츠">디지털컨텐츠
+	<option value="소프트웨어">소프트웨어
+	<option value="컴퓨터서비스">컴퓨터서비스
+	<option value="통신장비">통신장비
+	<option value="정보기기">정보기기
+	<option value="반도체">반도체
+	<option value="IT부품">IT부품
+	<option value="음식료 담배">음식료 담배
+	<option value="섬유 의류">섬유 의류
+	<option value="종이 목재">종이 목재
+	<option value="출판 매체복제">출판 매체복제
+	<option value="화학">화학
+	<option value="제약">제약
+	<option value="금속">금속
+	<option value="기계 장비">기계장비
+	<option value="일반전기전자">일반전기전자
+	<option value="의료 정밀기기">의료정밀기기
+	<option value="운송장비 부품">운송장비부품
+	<option value="기타 제조">기타제조
+	<option value="건설">건설
+	<option value="유통">유통
+	<option value="운송">운송
+	<option value="금융">금융
+	<option value="기타">기타
+	<option value="비금속">비금속
+	</select>
+</td>
+</tr>
+
+<tr>
+<td>현재가(공모가)</td>
+<td><input type="text" id="txtCurrentPrice" name="txtCurrentPrice" size="10"  tabindex=5>원</td>
+</tr>
+
+<tr>
+<td>발행주식</td>
+<td><input type="text" id="txtStockAmount" name="txtStockAmount" size="20"  tabindex=6>천주</td>
+</tr>
+
+<tr>
+<td>자본총계</td>
+<td><input type="text" id="txtCurrentJachong" name="txtCurrentJachong" size="20"  tabindex=7>억 원</td>
+</tr>
+
+<tr>
+<td>6개월 기관 수급</td>
+<td><input type="text" id="txtMajorAmount" name="txtMajorAmount" size="20"  tabindex=8></td>
+</tr>
+
+<tr>
+<td>6개월 외국인 수급</td>
+<td><input type="text" id="txtForeignAmount" name="txtForeignAmount" size="20"  tabindex=9></td>
+</tr>
+
+<tr>
+<td>지수추세</td>
+<td>
+	<select id="cmbStockDirection" name="cmbStockDirection"  tabindex=10>
+	<option value="0.125">상승
+	<option value="-0.125">하락
+	</select>
+</td>
+</tr>
+
+<tr>
+<td>업종추세</td>
+<td>
+	<select id="cmbTypeDirection" name="cmbTypeDirection"  tabindex=11>
+	<option value="0.125">상승
+	<option value="-0.125">하락
+	</select>
+</td>
+</tr>
+
+<tr>
+<td>코스피 코스닥 구분</td>
+<td>
+	<select id="cmbType" name="cmbType"  tabindex=12>
+	<option value="KOSPI">코스피
+	<option value="KOSDAQ">코스닥
+	</select>
+</td>
+</tr>
+<tr>
+<td colspan=2>
+<input type="submit">
+</td>
+</tr>
+
+</table>
+</form>

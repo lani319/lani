@@ -1,0 +1,99 @@
+<?php
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+
+/*
+업종별 적정주가
+width = 790 최대사이즈
+*/
+
+if(!$_COOKIE['_CKE_USER_ID']){
+	popupMsg("평택촌놈 적정주가는 로그인후 이용이 가능합니다. 회원가입 후 이용 바랍니다.");
+	echo "<script> top.location.href='http://www.502.co.kr/member' </script>";
+	exit();
+}
+
+$memInfo = get_meminfo($_COOKIE["_CKE_USER_UID"], "gradeLevel");
+
+//echo $memInfo[0];
+
+if($memInfo[0] == "1")
+{
+	$actionUrl = "contents_01_201706.html";
+}else{
+	$actionUrl = "contents_01_201706_free.html";
+}
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+?>
+
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="css/top_menu.css">
+<script type="text/javascript">
+function goSearch()
+{
+	var f = document.frm;
+	var keyword = document.getElementById("searchKeyword");
+	if(keyword.value.length >1)
+	{
+		f.submit();
+	}else{
+		alert("종목코드 또는 종목명을 2자 이상 입력해 주세요.")
+		return false;
+	}
+	
+}
+function window::onload() {
+   document.getElementById('searchKeyword').focus();
+}
+
+function goPage(num)
+{	
+	var url = "contents_"+num+".html";	
+	parent.main01.contents.location.href=url;
+	
+}
+</script>
+</head>
+<body>
+<form name="frm" target="frmResult" action="<?=$actionUrl?>" method="POST">
+<table width="900px"border="0">
+<tr>
+<td width="10px">&nbsp;</td>
+<td align="left">
+<!--<img src="img/small_ci.jpg">-->
+<img src="http://www.502.co.kr/upload_file/WImgPost/2017/07/1501129848714.jpg"><br><br>
+<input type="text" size="30" name="searchKeyword" id="searchKeyword" class="input05">
+<input type="submit" class="btnSearch" onclick="goSearch();" onsubmit="goSearch();" value="검 색">
+<br>
+<br>
+<br>
+<font size="3" color="red"><b>*종목명 또는 종목코드를 입력 후 엔터키 누르거나 검색 클릭
+<br><br>
+<font size="3" color="black">*매달 1회 전체종목 업데이트, 신규상장주 당일 업로드<br><br>적정주가 산출에 필요한 정보 미 제공시 적정주가 0원으로 표출
+<br><br>
+<font size="3" color="blue">*우선주, 스팩, 선박투자회사 제외/스팩에서 변경 상장, 종목명 변경 등이<br><br> 실시간 제공되지 않을 수도 있습니다.
+</td>
+</tr>
+</table>
+</form>
+<table width="700px"border="0">
+<tr>
+<td width="10px">&nbsp;</td>
+<td align="left">
+<iframe name="frmResult" width="600px" height="800px" frameborder="0"></iframe>
+</td>
+</tr>
+</table>
+
+</body>
+
+</html>
+
+

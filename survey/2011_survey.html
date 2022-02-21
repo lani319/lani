@@ -1,0 +1,269 @@
+<?php
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+
+
+$userID = $_COOKIE["_CKE_USER_ID"];
+
+$sql = "select count(idx) as cnt from 2011Survey where userId = '$userID'";
+$tmpRs = mysql_query($sql);
+$rs= mysql_fetch_array($tmpRs);
+if($rs[cnt] != 0)
+{
+	echo "<script>alert('이미 응모하셨습니다. 당첨자는 3월 7일 발표됩니다.');location.href='/index.html';</script>";
+	exit;
+}
+else 
+{
+	echo "<script>alert('로그인을 안 하신 회원께서는, 설문 마지막에 아이디를 입력 해 주시면 됩니다.');</script>";
+}
+?>
+
+
+<html>
+<head>
+<script type="text/javascript">
+
+var cnt;
+var i;
+var j;
+var f;
+
+//응답변수
+var A1 = 0; 
+var A2 = 0;
+var A3 = 0;
+var A4_1 = 0;
+var A4_2 = 0;
+var A4_3 = 0;
+var A5 = 0;
+
+
+function checkForm()
+{
+	f = document.form1;
+	
+	
+	if(A1==0)
+	{
+		alert('1번 문항에 응답 해 주세요');		
+		return;
+	}
+	else if(A2 == 0)
+	{
+		alert('2번 문항에 응답 해 주세요');		
+		return;
+	}
+	else if(A3 == 0)
+	{
+		alert('3번 문항에 응답 해 주세요');		
+		return;
+	}
+	else if(A4_1 == 0 && A4_2 == 0 && A4_3 == 0)
+	{
+		alert('4번 문항에 응답 해 주세요');		
+		return;
+	}	
+	else if(A5 == 0)
+	{
+		alert('5번 문항에 응답 해 주세요');		
+		return;
+	}
+	if(A1 != 5)
+	{
+		document.getElementById("txtDetail1").value = A1+"$"+A2+"$"+A3+"$"+A4_1+"^"+A4_2+"^"+A4_3+"$"+A5+"$";
+	}
+	else
+	{
+		document.getElementById("txtDetail1").value = document.getElementById("txtq1_5").value+"$"+A2+"$"+A3+"$"+A4_1+"^"+A4_2+"^"+A4_3+"$"+A5+"$";
+	}
+	
+	f.action = "2011_survey2.html";
+	f.submit();
+	return;
+}
+function checkValue(name,value)
+{
+	switch(name)
+	{
+		case "rdq1":
+		A1 = value;
+		if(value == 5)
+		{
+			document.getElementById("txtq1_5").style.display = "inline";
+		}
+		else
+		{
+			document.getElementById("txtq1_5").style.display = "none";
+			document.getElementById("txtq1_5").value = "경위를 입력 해 주세요";
+		}
+		break;
+		
+		case "rdq2":
+		A2 = value;
+		
+		break;
+		
+		case "rdq3":
+		A3 = value;
+		break;
+		
+		case "selq4_1":
+		A4_1 = value;
+		A4_2 = 0;
+		A4_3 = 0;
+		document.getElementById("selq4_2").value = "--";
+		document.getElementById("selq4_3").value = "--";
+		break;
+		
+		case "selq4_2":
+		A4_1 = 0;
+		A4_2 = value;
+		A4_3 = 0;
+		document.getElementById("selq4_1").value = "--";
+		document.getElementById("selq4_3").value = "--";
+		break;
+		
+		case "selq4_3":
+		A4_1 = 0;
+		A4_2 = 0;
+		A4_3 = value;
+		document.getElementById("selq4_1").value = "--";
+		document.getElementById("selq4_2").value = "--";
+		break;
+		
+		case "rdq5":
+		A5 = value;
+		break;
+	}
+	//alert(A1+'_'+A2+'_'+A3+'_'+A4_1+'_'+A4_2+'_'+A4_3+'_'+A5);
+}
+
+</script>
+
+</head>
+<body style="margin-left:0px;margin-top:0px">
+<form name="form1" method="POST">
+<table width="1020" height="100%" cellpadding="0" cellspacing="0">
+<tr>
+<td height="209"><img src="img/top.jpg"></td>
+</tr>
+<tr>
+<td style="background-image:url(img/center.jpg);" >
+<table width="100%">
+<tr>
+<td width="50px"></td>
+<td>
+	<table width="100%">
+	<tr>
+	<td>
+	<img src="img/q1.jpg" border="0"><!--1. www.502.co.kr [평택촌놈] 을 알게된 경위는 어떻게 되십니까?--><br><br>
+	<input type="radio" name="rdq1" id="rdq1_1" value="1" onclick="checkValue(this.name,this.value);">tv(광고,인터뷰)
+	<input type="radio" name="rdq1" id="rdq1_2" value="2" onclick="checkValue(this.name,this.value);">언론기사(잡지,신문,인터넷기사) 
+	<input type="radio" name="rdq1" id="rdq1_3" value="3" onclick="checkValue(this.name,this.value);">지인의 소개
+	<input type="radio" name="rdq1" id="rdq1_4" value="4" onclick="checkValue(this.name,this.value);">인터넷검색(검색창이용) 
+	<input type="radio" name="rdq1" id="rdq1_5" value="5" onclick="checkValue(this.name,this.value);">기타(직접입력)
+	<br>
+	<input type="text" name="txtq1_5" id="txtq1_5" size="50" value="기타:" style="display:none;">
+	</td>
+	</tr>	
+	<tr><td height="30px"></td></tr>
+	<tr>
+	<td>
+	<img src="img/q2.jpg" border="0"><!--2. 귀하의 성별은 어떻게 되십니까? (가족 명의로 가입 시에는 실사용자)--> <br>
+	<input type="radio" name="rdq2" id="rdq2_1" value="1" onclick="checkValue(this.name,this.value);"> 남성 
+	<input type="radio" name="rdq2" id="rdq2_2" value="2" onclick="checkValue(this.name,this.value);"> 여성
+	</td>	
+	</tr>
+	<tr><td height="30px"></td></tr>
+	<tr>
+	<td>
+	<img src="img/q3.jpg" border="0"><!--3. 귀하의 나이는 어떻게 되십니까? (가족 명의로 가입 시에는 실사용자)--><br><br>
+	<input type="radio" name="rdq3" id="rdq3_1" value="1" onclick="checkValue(this.name,this.value);"> 10~19세 
+	<input type="radio" name="rdq3" id="rdq3_2" value="2" onclick="checkValue(this.name,this.value);"> 20~29세 
+	<input type="radio" name="rdq3" id="rdq3_3" value="3" onclick="checkValue(this.name,this.value);"> 30~39세 
+	<input type="radio" name="rdq3" id="rdq3_4" value="4" onclick="checkValue(this.name,this.value);"> 40~49세 
+	<input type="radio" name="rdq3" id="rdq3_5" value="5" onclick="checkValue(this.name,this.value);"> 50~59세 
+	<input type="radio" name="rdq3" id="rdq3_6" value="6" onclick="checkValue(this.name,this.value);"> 60~69세 
+	<input type="radio" name="rdq3" id="rdq3_7" value="7" onclick="checkValue(this.name,this.value);"> 70세이상
+	</td>
+	</tr>
+	<tr><td height="30px"></td></tr>
+	<tr>
+	<td>
+	<img src="img/q4.jpg" border="0"><!--4. 귀하의 직종은 어떻게 되십니까?-->	<br>
+	<b>1. 급여소득자 </b>
+	<select name="selq4_1" id="selq4_1" onchange="checkValue(this.name,this.value);">
+		<option value="--" selected>--</option>
+		<option value="1">공기업,공공단체</option>
+		<option value="2">공무원</option>
+		<option value="3">교육계</option>
+		<option value="4">금융계</option>
+		<option value="5">언론계</option>
+		<option value="6">의료계</option>
+		<option value="7">일반기업체(회사원)</option>
+		<option value="8">전문직</option>	
+	</select>
+	
+	<b>2. 자영업</b>
+	<select name="selq4_2" id="selq4_2" onchange="checkValue(this.name,this.value);">
+		<option value="--" selected>--</option>
+		<option value="1">건설업</option>
+		<option value="2">금융,보험업</option>
+		<option value="3">농업,임업,수산업,광업</option>
+		<option value="4">도소매,수리업</option>
+		<option value="5">부동산,임대,개인서비스</option>
+		<option value="6">숙박,음식업,운수,창고,통신업</option>
+		<option value="7">전기,가스,수도,제조업</option>		
+	</select>
+	
+	<b>3. 전업투자자/기타</b>
+	<select name="selq4_3" id="selq4_3" onchange="checkValue(this.name,this.value);">
+		<option value="--" selected>--</option>
+		<option value="1">정년퇴직자</option>
+		<option value="2">주부</option>
+		<option value="3">학생</option>
+		<option value="4">전업투자자</option>
+		<option value="5">기타/해당없음</option>
+		
+	</select>
+	</td>
+	</tr>
+	<tr><td height="30px"></td></tr>
+	<tr>
+	<td>
+	<img src="img/q5.jpg" border="0"><!--5. 현재 투자금은 어떻게 되십니까?--> <br>
+	<input type="radio" name="rdq5" id="rdq5_1" value="1" onclick="checkValue(this.name,this.value);">5억원 초과 
+	<input type="radio" name="rdq5" id="rdq5_2" value="2" onclick="checkValue(this.name,this.value);">3억원 초과 ~ 5억원 이하 
+	<input type="radio" name="rdq5" id="rdq5_3" value="3" onclick="checkValue(this.name,this.value);">1억원 초과 ~3 억원 이하 
+	<br><br>
+	<input type="radio" name="rdq5" id="rdq5_4" value="4" onclick="checkValue(this.name,this.value);">5000만원 초과 ~ 1억원 이하 
+	<input type="radio" name="rdq5" id="rdq5_5" value="5" onclick="checkValue(this.name,this.value);">2000만원 초과 ~ 5000만원 이하 
+	<input type="radio" name="rdq5" id="rdq5_6" value="6" onclick="checkValue(this.name,this.value);">2000만원 이하
+	</td>
+	</tr>
+	<tr><td height="15px"></td></tr>
+	<tr><td align="center"><img src="img/bn_next.gif" onclick="checkForm();" style="cursor:hand"></td></tr>
+	</table>
+</td>
+<td width="50px"></td>
+
+</tr>
+
+</table>
+
+</td>
+</tr>
+<tr>
+<td height="110"><img src="img/bottom.jpg"></td>
+</tr>
+</table>
+
+<input type="hidden" name="txtDetail1" id="txtDetail1" size="50">
+</form>
+</body>
+</html>

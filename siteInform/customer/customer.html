@@ -1,0 +1,108 @@
+<?php
+$imgPath = "/lani/siteInform/customer/";
+?>
+
+<html>
+<head>
+<title>05 고객센터</title>
+<meta http-equiv="Content-Type" content="text/html; charset=euc-kr">
+<script type="text/javascript">
+function showLayer(id)
+{
+	document.getElementById("div01").style.display = "inline";
+	
+	switch(id)
+	{
+		case 01:
+			document.getElementById("img01").src = "<?=$imgPath?>customer01.gif";
+		break;
+
+		case 02:
+			document.getElementById("img01").src = "<?=$imgPath?>customer02.gif";
+		break;
+		
+		case 03:
+			document.getElementById("img01").src = "<?=$imgPath?>customer03.gif";
+		break;
+		
+		case 04:
+			document.getElementById("img01").src = "<?=$imgPath?>customer04.gif";
+		break;
+	}
+}
+function hideLayer(id)
+{
+	document.getElementById(id).style.display="none";
+}
+	
+
+</script>
+</head>
+<body bgcolor="#FFFFFF" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+<!-- Save for Web Slices (05 고객센터.psd) -->
+<table id="__01" width="1027" height="1143" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td>
+			<img src="images/customer_01.gif" width="197" height="464" alt=""></td>
+		<td>
+			<img src="images/customer_02.gif" width="289" height="464" alt=""></td>
+		<td>
+			<img src="images/customer_03.gif" width="12" height="464" alt=""></td>
+		<td>
+			<img src="images/customer_04.gif" width="287" height="464" alt=""></td>
+		<td>
+			<img src="images/customer_05.gif" width="242" height="464" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/customer_06.gif" width="197" height="148" alt=""></td>
+		<td><div style="position:relative;"><img src="<?=$imgPath?>images/customer_07.gif" width="289" height="148" alt="" onmouseover="showLayer(01);"><div id="div01" style="position:absolute;top:0px;left:0px;width:600px;height:310px;display:none;" onmouseout="hideLayer('div01');"><table cellpadding="0" cellspacing="" bgcolor="FFFFFF" width="600px" height="310px" border="0">
+			<tr><td><img id="img01" src="<?=$imgPath?>customer01.gif" border="0"  ></td></tr></table></div></div>			
+			</td>
+		<td>
+			<img src="images/customer_08.gif" width="12" height="148" alt=""></td>
+		<td>
+			<img src="<?=$imgPath?>images/customer_09.gif" width="287" height="148" alt="" onmouseover="showLayer(02);"></td>
+		<td>
+			<img src="images/customer_10.gif" width="242" height="148" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/customer_11.gif" width="197" height="7" alt=""></td>
+		<td>
+			<img src="images/customer_12.gif" width="289" height="7" alt=""></td>
+		<td>
+			<img src="images/customer_13.gif" width="12" height="7" alt=""></td>
+		<td>
+			<img src="images/customer_14.gif" width="287" height="7" alt=""></td>
+		<td>
+			<img src="images/customer_15.gif" width="242" height="7" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/customer_16.gif" width="197" height="147" alt=""></td>
+		<td>
+			<img src="<?=$imgPath?>images/customer_17.gif" width="289" height="147" alt="" onmouseover="showLayer(03);"></td>
+		<td>
+			<img src="images/customer_18.gif" width="12" height="147" alt=""></td>
+		<td>
+			<img src="<?=$imgPath?>images/customer_19.gif" width="287" height="147" alt="" onmouseover="showLayer(04);"></td>
+		<td>
+			<img src="images/customer_20.gif" width="242" height="147" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/customer_21.gif" width="197" height="377" alt=""></td>
+		<td>
+			<img src="images/customer_22.gif" width="289" height="377" alt=""></td>
+		<td>
+			<img src="images/customer_23.gif" width="12" height="377" alt=""></td>
+		<td>
+			<img src="images/customer_24.gif" width="287" height="377" alt=""></td>
+		<td>
+			<img src="images/customer_25.gif" width="242" height="377" alt=""></td>
+	</tr>
+</table>
+<!-- End Save for Web Slices -->
+</body>
+</html>

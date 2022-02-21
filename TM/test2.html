@@ -1,0 +1,51 @@
+<?php
+//전문가 유료회원 대상자 (건수 / 임대리님)
+
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+
+
+$sql = "SELECT B.exp_idx,B.mem_idx,A.userId,B.enddate,B.regDate,B.settle_mode FROM Member A inner join Member_expert B on A.idx = B.mem_idx WHERE B.regDate BETWEEN '2010-08-01 00:00:00' AND '2010-09-17 23:59:59' group by B.mem_idx order by regDate ASC";
+
+//$sql = "SELECT A.userId,B.* FROM Member A INNER JOIN Member_expert B ON A.idx = B.mem_idx where left(regDate,10) > '2010-09-13' ORDER BY regDate DESC";
+
+$tmpRs = mysql_query($sql);
+
+?>
+
+<table cellpadding="0" cellspacing="0" border="1" width="800px">
+<tr align="center">
+<td>전문가</td>
+<td>회원</td>
+<td>회원아이디</td>
+<td>종료일</td>
+<td>등록일</td>
+<td>종류</td>
+</tr>
+
+<?php
+while($rs = mysql_fetch_array($tmpRs))
+{
+	
+	$dateArray = getdate($rs[enddate]);
+	$endDate = $dateArray["year"]."-".$dateArray["mon"]."-".$dateArray["mday"];
+?>
+
+<tr align="center">
+<td><?=$rs[exp_idx]?></td>
+<td><?=$rs[mem_idx]?></td>
+<td><?=$rs[userId]?></td>
+<td><?=$endDate?></td>
+<td><?=$rs[regDate]?></td>
+<td><?=$rs[settle_mode]?></td>
+</tr>
+
+<?php
+}
+
+?>

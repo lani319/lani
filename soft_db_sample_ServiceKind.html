@@ -1,0 +1,67 @@
+<?php
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+
+?>
+
+<?php
+//회원정보
+$sql = "select * from service_kind order by idx DESC limit 500";
+$tmpRs = mysql_query($sql);
+?>
+<table cellpadding=1 cellspacing=1 border=1>
+<tr>
+<td>idx</td>
+<td>service_orderID</td>
+<td>service_name</td>
+<td>service_comment</td>
+<td>service_price</td>
+<td>service_month</td>
+<td>service_stats</td>
+<td>regDate</td>
+<td>use_card</td>
+<td>use_bank</td>
+<td>service_comment2</td>
+<td>expert_idx</td>
+<td>mem_count</td>
+<td>refund</td>
+<td>weeks_use</td>
+<td>settle_spc</td>
+<td>daily_use</td>
+<td>admin_user</td>
+</tr>
+<?php
+
+while($rs = mysql_fetch_array($tmpRs))
+{
+	?>
+<tr>
+<td><?=$rs[idx]?></td>
+<td><?=$rs[service_orderID]?></td>
+<td><?=$rs[service_name]?></td>
+<td><?=$rs[service_comment]?></td>
+<td><?=$rs[service_price]?></td>
+<td><?=$rs[service_month]?></td>
+<td><?=$rs[service_stats]?></td>
+<td><?=$rs[regDate]?></td>
+<td><?=$rs[use_card]?></td>
+<td><?=$rs[use_bank]?></td>
+<td><?=$rs[service_comment2]?></td>
+<td><?=$rs[expert_idx]?></td>
+<td><?=$rs[mem_count]?></td>
+<td><?=$rs[refund]?></td>
+<td><?=$rs[weeks_use]?></td>
+<td><?=$rs[settle_spc]?></td>
+<td><?=$rs[daily_use]?></td>
+<td><?=$rs[admin_user]?></td>
+</tr>
+	
+	<?php
+}
+?>
+

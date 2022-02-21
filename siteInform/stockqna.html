@@ -1,0 +1,80 @@
+<?php
+$imgPath = "/lani/siteInform/discuss/";
+?>
+<html>
+<head>
+<title>www.502.co.kr 웹사이트 개편 안내 </title>
+<meta http-equiv="Content-Type" content="text/html; charset=euc-kr">
+<script type="text/javascript">
+function showLayer(id)
+{
+	switch(id)
+	{
+		case 1:
+			document.getElementById("div01").style.display = "inline";
+			document.getElementById("div02").style.display = "none";
+		break;
+
+		case 2:
+			document.getElementById("div01").style.display = "none";
+			document.getElementById("div02").style.display = "inline";
+		break;
+	}
+}
+function hideLayer(id)
+{
+	document.getElementById(id).style.display="none";
+}
+</script>
+</head>
+<body bgcolor="#FFFFFF" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+<? include_once $_SERVER['DOCUMENT_ROOT']."/lani/siteInform/topMenu.php"; ?>
+<!-- Save for Web Slices (03 종목토론실.psd) -->
+<table id="__01" width="1027" height="1124" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td>
+			<img src="images/discuss_01.gif" width="198" height="697" alt=""></td>
+		<td>
+			<img src="images/discuss_02.gif" width="594" height="697" alt=""></td>
+		<td>
+			<img src="images/discuss_03.gif" width="235" height="697" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/discuss_04.gif" width="198" height="180" alt=""></td>
+		<td>
+		<div style="position:relative;"><img src="images/discuss_05.gif" width="594" height="180" alt="" onmouseover="showLayer(1);"><div id="div01" style="position:absolute;top:-10px;left:0px;width:685px;height:600px;display:none;" onmouseout="hideLayer('div01');"><table cellpadding="0" cellspacing="" bgcolor="FFFFFF" border="0"><tr><td><img id="img01" src="<?=$imgPath?>discuss01.gif" border="0"  ></td></tr></table></div></div>
+			</td>
+		<td>
+			<img src="images/discuss_06.gif" width="235" height="180" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/discuss_07.gif" width="198" height="16" alt=""></td>
+		<td>
+			<img src="images/discuss_08.gif" width="594" height="16" alt=""></td>
+		<td>
+			<img src="images/discuss_09.gif" width="235" height="16" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/discuss_10.gif" width="198" height="179" alt=""></td>
+		<td>
+		<div style="position:relative;"><img src="images/discuss_11.gif" width="594" height="179" alt="" onmouseover="showLayer(2);"><div id="div02" style="position:absolute;top:0px;left:0px;width:685px;height:600px;display:none;" onmouseout="hideLayer('div02');"><table cellpadding="0" cellspacing="" bgcolor="FFFFFF" border="0">
+				<tr><td><img id="img02" src="<?=$imgPath?>discuss02.gif" border="0"  ></td></tr></table></div></div>		
+			</td>
+		<td>
+			<img src="images/discuss_12.gif" width="235" height="179" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/discuss_13.gif" width="198" height="52" alt=""></td>
+		<td>
+			<img src="images/discuss_14.gif" width="594" height="52" alt=""></td>
+		<td>
+			<img src="images/discuss_15.gif" width="235" height="52" alt=""></td>
+	</tr>
+</table>
+<!-- End Save for Web Slices -->
+</body>
+</html>

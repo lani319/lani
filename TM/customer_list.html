@@ -1,0 +1,628 @@
+<?php
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+
+
+/* 총 게시물수 구하기 */
+	if(!$page){ $page = 1 ; }
+	$pagePerNum = 20; // 한 페이지당 레코드 갯수
+	$indexPerPage = 10; // 한페이지에 표시될 인덱스 갯수
+	$searchSet ="&mode=$mode&admin=$admin&search=$search&blackList=$blackList";	
+	switch ($mode)
+{
+	case "Member":
+		$sql = "SELECT count(B.idx) as cnt FROM Member A INNER JOIN TM_info B ON A.idx=B.userIdx $addWhere1 group by A.userID";
+		break;
+	case "NonMember":
+		$sql = "select count(idx) as cnt from TM_info_NonMember  $addWhere2 group by nonMemberSSN";
+		break;
+	case "TargetMember": //상담 대상 전체 회원
+		if($admin) //상담원에 할당 된 회원만 출력
+		{
+			$sql = "SELECT count(A.idx) as cnt";
+			$sql = $sql."	FROM Member A ";
+			$sql = $sql."	INNER JOIN TM_customer C ";
+			$sql = $sql."		ON A.idx = C.userIdx  ";
+			$sql = $sql."	LEFT OUTER JOIN TM_info B "; 
+			$sql = $sql."		ON C.userIdx = B.userIdx ";
+			$sql = $sql."	WHERE C.adminIdx=$admin GROUP BY C.userIdx";
+		}	
+		else //전체 회원 다 출력
+		{
+			$sql = "SELECT count(A.idx) as cnt";
+			$sql = $sql."	FROM Member A ";
+			$sql = $sql."	INNER JOIN TM_customer C ";
+			$sql = $sql."		ON A.idx = C.userIdx  ";
+			$sql = $sql."	LEFT OUTER JOIN TM_info B "; 
+			$sql = $sql."		ON C.userIdx = B.userIdx GROUP BY C.userIdx";
+		}
+		break;
+	default:
+		$sql = "SELECT count(A.idx) as cnt FROM Member A INNER JOIN TM_info B ON A.idx=B.userIdx $addWhere1 group by A.userID";
+		break;
+}
+
+	$tmpRs = mysql_query($sql);
+	$totalCount = mysql_num_rows($tmpRs);
+	$totalPage = ceil($totalCount/$pagePerNum) ;
+	$start = $pagePerNum*($page-1);
+	
+	
+	
+	
+	
+	
+	
+$addWhere1 = "";
+$addWhere2 = "";
+
+if($admin!="")
+{
+	$addWhere1 = " where B.adminIdx = '$admin'";
+	$addWhere2 = " where adminIdx = '$admin'";
+}
+
+if($search)
+{
+	if($addWhere1)
+	{
+		$addWhere1 = " and B.processResult = '$search'";	
+	}
+	else 
+	{
+		$addWhere1 = " where B.processResult = '$search'";
+	}
+	
+	if($addWhere2)
+	{
+		$addWhere2 = " and processResult = '$search'";	
+	}
+	else 
+	{
+		$addWhere2 = " where processResult = '$search'";
+	}
+	
+	
+}
+
+if($mode == "")
+{
+	$mode = "Member";
+}
+
+if($blackList)
+{
+	if($addWhere1)
+	{
+		$addWhere1 = " and B.blackList = '$blackList'";
+	
+	}
+	else 
+	{
+		$addWhere1 = " where B.blackList = '$blackList'";
+		
+	}
+	
+	if($addWhere2)
+	{
+		$addWhere2 = " and blackList = '$blackList'";	
+	}
+	else 
+	{
+		$addWhere2 = " where blackList = '$blackList'";
+	}
+}
+
+// 해당하는 내용만 출력
+
+if($_COOKIE['_CKE_USER_ID'] != "ayh319" && $_COOKIE['_CKE_USER_ID'] != "seodh0070" && $_COOKIE['_CKE_USER_ID'] == "tndls5" && $_COOKIE['_CKE_USER_ID'] == "jinsuk930")
+{
+	if($addWhere1)
+	{
+		$addWhere1 = " and B.blackList = '$blackList'";
+	
+	}
+	else 
+	{
+		$addWhere1 = " where B.blackList = '$blackList'";
+		
+	}
+	
+	if($addWhere2)
+	{
+		$addWhere2 = " and blackList = '$blackList'";	
+	}
+	else 
+	{
+		$addWhere2 = " where blackList = '$blackList'";
+	}
+}
+
+switch ($mode)
+{
+	case "Member":
+		$sql = "SELECT A.userID,A.userName,A.userNickname,A.mobile,B.* FROM Member A INNER JOIN TM_info B ON A.idx=B.userIdx $addWhere1 group by A.userID ORDER BY B.recentDate DESC LIMIT $start,$pagePerNum";
+		break;
+	case "NonMember":
+		$sql = "select * from TM_info_NonMember  $addWhere2 group by nonMemberSSN order by idx desc LIMIT $start,$pagePerNum";
+		break;
+	case "TargetMember": //상담 대상 전체 회원
+		if($admin) //상담원에 할당 된 회원만 출력
+		{
+			$sql = "SELECT A.userName,A.userNickname,A.mobile,A.userId,C.adminIdx,A.idx as memIdx, B.* ";
+			$sql = $sql."	FROM Member A ";
+			$sql = $sql."	INNER JOIN TM_customer C ";
+			$sql = $sql."		ON A.idx = C.userIdx  ";
+			$sql = $sql."	LEFT OUTER JOIN TM_info B "; 
+			$sql = $sql."		ON C.userIdx = B.userIdx ";
+			$sql = $sql."	WHERE C.adminIdx=$admin GROUP BY C.userIdx order by recentDate desc limit $start,$pagePerNum";
+		}	
+		else //전체 회원 다 출력
+		{
+			$sql = "SELECT A.userName,A.userNickname,A.mobile,A.userId,C.adminIdx,A.idx as memIdx, B.* ";
+			$sql = $sql."	FROM Member A ";
+			$sql = $sql."	INNER JOIN TM_customer C ";
+			$sql = $sql."		ON A.idx = C.userIdx  ";
+			$sql = $sql."	LEFT OUTER JOIN TM_info B "; 
+			$sql = $sql."		ON C.userIdx = B.userIdx GROUP BY C.userIdx";
+			$sql = $sql."	order by recentDate desc limit $start,$pagePerNum";
+		}
+		break;
+	default:
+		$sql = "SELECT A.userID,A.userName,A.userNickname,A.mobile,B.* FROM Member A INNER JOIN TM_info B ON A.idx=B.userIdx $addWhere1 group by A.userID ORDER BY B.recentDate DESC LIMIT $start,$pagePerNum";
+		break;
+}
+//echo $sql;
+
+
+
+
+
+$tmpRs = mysql_query($sql);
+$rowCnt = mysql_num_rows($tmpRs);
+$totalRow = $rowCnt;
+$rowCnt = $rowCnt*$page;
+
+
+
+
+function getAdminName($adminCode)
+{
+	$sql = "select userName,userNickname from Member where idx=$adminCode";
+	$tmpRs = mysql_query($sql);
+	$rs = mysql_fetch_array($tmpRs);
+	
+	return $rs[userNickname]."($rs[userName])";
+}
+
+
+
+if($selYear == "")
+{
+	$selYear  = date("Y");
+}
+
+if($selMonth == "")
+{
+	$selMonth  = date("m");
+}
+
+if($selDay == "")
+{
+	$selDay  = date("d");
+}
+?>
+
+<script type="text/javascript">
+function goOpen(idx,mode,ssn,mobile)
+{
+	var url = "_counsel.html?idx="+idx;
+	if(idx == 'null')
+	{
+		url = "_counsel.html";
+	}
+	if(mode=="NonMember")
+	{
+		url = "_counsel.html?idx="+idx+"&mode="+mode+"&SSN="+ssn+"&mobile="+mobile;		
+	}
+	
+	var x = window.screen.width-20;	
+	 var y = window.screen.height-100;
+ 	var win = window.open(url,"_new","menubar=no, toolbar=no, location=no, status=no, resizable=1, top=0,left=0, scrollbars=yes,width=" + x + ", height=" + y);
+
+} 
+
+function goSearch()
+{
+	
+	var mode = document.getElementById("selMember").value;
+	var search = document.getElementById("selProcessResult").value;
+	var blackList = document.getElementById("selBlackList").value;
+	var url = "customer_list.html?mode="+mode+"&search="+search+"&blackList="+blackList+"&admin=<?=$admin?>";
+	
+	location.href = url;
+	
+}
+
+function getAllMemberList(value)
+{
+	
+	var url = "customer_list.html?mode="+value+"&admin=<?=$admin?>";;
+	
+	location.href = url;
+}
+
+function showLayer(num,id,imgId)
+{
+	
+	
+	
+	var i=0;
+	var x = "div_";
+	var tmpId = "";
+	
+	
+	var imageX = "Arrow_";
+	var tmpImageId = "";
+	
+	var instrNum = 0;
+	var imgPath = "";
+	
+	for(i=0 ; i<num;i++)
+	{
+		tmpId = x+i;
+		document.getElementById(tmpId).style.display = "none";
+		
+		tmpimageId = imageX+i;
+		document.getElementById(tmpimageId).src = "images/downArrow.gif";
+		imgPath = document.getElementById(tmpimageId).src;
+		
+		instrNum = imgPath.indexOf("upArrow",1);
+		
+	}
+	
+		document.getElementById(id).style.display = "inline";
+		document.getElementById(imgId).src = "images/upArrow.gif";
+	
+}
+
+</script>
+
+<link rel="stylesheet" href="table.css" type="text/css" />
+<link rel="stylesheet" href="/css/502style.css" type="text/css" />
+<body style="margin-left:20;margin-top:20;font-size:12px">
+<form name="form1">
+<!--
+회원구분 : 
+<select name="selTargetMember" id="selTargetMember"  style="height:40px; width:200px;" onchange="getAllMemberList(this.value);">
+<option value="">--</option>
+<option value="TargetMember" <?php if($mode=="TargetMember") echo " selected" ?>>상담대상 전체회원</option>
+</select>
+-->
+상담날짜 :
+<select name="selYear" id="selYear"  style="height:40px;">
+<?php
+for($i=2010 ; $i<=2012 ; $i++)
+{
+	if($selYear == $i)
+	{
+		echo "<option value='$i' selected>$i</option>";
+	}
+	else 
+	{
+		echo "<option value='$i'>$i</option>";	
+	}
+	
+}
+?>
+
+</select>년
+<select name="selMonth" id="selMonth"  style="height:40px;">
+<?php
+for($i=1 ; $i<=12 ; $i++)
+{
+	if($selMonth == $i)
+	{
+		echo "<option value='$i' selected>$i</option>";
+	}
+	else 
+	{
+		echo "<option value='$i'>$i</option>";	
+	}
+	
+}
+?>
+</select>월
+<select name="selDay" id="selDay"  style="height:40px;">
+<?php
+for($i=1 ; $i<=31 ; $i++)
+{
+	if($selDay == $i)
+	{
+		echo "<option value='$i' selected>$i</option>";
+	}
+	else 
+	{
+		echo "<option value='$i'>$i</option>";	
+	}
+	
+}
+?>
+</select>일
+
+<font color="FFFFFF">______</font>
+
+구분 : 
+<select name="selMember" id="selMember"  style="height:40px; width:200px;">
+<option value="">--</option>
+<option value="Member" <?php if($mode=="Member") echo " selected" ?>>회원</option>
+<option value="NonMember" <?php if($mode=="NonMember") echo " selected" ?>>비회원</option>
+</select>
+<font color="FFFFFF">______</font>
+처리결과 :
+<select name="selProcessResult"  id="selProcessResult" style="height:40px; width:100px;">
+<option value="">--</option>
+<option value="Complete"  <?php if($search=="Complete") echo " selected" ?>>처리</option>
+<option value="Fail" <?php if($search=="Fail") echo " selected" ?>>미처리</option>
+<option value="Transfer" <?php if($search=="Transfer") echo " selected" ?>>이관</option>
+</select>
+<font color="FFFFFF">______</font>
+블랙리스트:
+<select name="selBlackList"  id="selBlackList" style="height:40px; width:100px;">
+<option value="">--</option>
+<option value="B"  <?php if($blackList=="B") echo " selected" ?>>블랙리스트</option>
+
+</select>
+<font color="FFFFFF">______</font>
+<img src="images/btnSearch_member.gif" border="0" style="cursor:hand;" onclick="goSearch();" onmouseover="this.src = 'images/_btnSearch_member.gif'" onmouseout="this.src = 'images/btnSearch_member.gif'">
+
+<table width="1200" cellpadding="0" cellspacing="0" border="1" class="table_basic">
+<tr align="center">
+<th width="40px" align="center" valign="bottom"><img src="images/top01.gif"></th>
+<th width="100px" align="center" valign="bottom"><img src="images/top02.gif"></th>
+<th width="100px" align="center" valign="bottom"><img src="images/top03.gif"></th>
+<th width="100px" align="center" valign="bottom"><img src="images/top04.gif"></th>
+<th width="100px" align="center" valign="bottom"><img src="images/top05.gif"></th>
+<th width="150px" align="center" valign="bottom"><img src="images/top06.gif"></th>
+<th align="center" valign="bottom"><img src="images/top07.gif"></th>
+<th width="100px" align="center" valign="bottom"><img src="images/top08.gif"></th>
+<td>
+<img src="images/btnWinOpen.gif" border="0" style="cursor:hand;" onclick="goOpen('null');" onmouseover="this.src = 'images/_btnWinOpen.gif'" onmouseout="this.src = 'images/btnWinOpen.gif'">
+</td>
+</tr>
+<tr><td colspan="10" height="1" bgcolor="FF33CC"></td></tr>
+<?php
+if($rowCnt == 0)
+{
+	echo "<tr><td colspan=10 align=center>등록 된 상담 기록이 없습니다.</td></tr>";
+}
+else 
+{
+	$cnt = 0;
+	while($rs = mysql_fetch_array($tmpRs))
+	{
+		if($mode == "TargetMember") //상담대상 전체회원일 경우
+		{
+			if($rs[adminIdx]!="")
+			{
+				$adminNickName = getAdminName($rs[adminIdx]);
+			}
+			else 
+			{
+				$adminNickName = "";
+			}
+			if($rs[counselKind])
+			{
+				$counselKindCode = "";
+				$counselKindDetail = "";
+				$arrKind = explode("^",$rs[counselKind]);
+				$arrKindDetail = explode("^",$rs[counselKindDetail]);
+				for($i = 0 ; $i<sizeof($arrKind); $i++)
+				{
+					$counselKindCode  = $counselKindCode." ".$arrKind[$i];
+					$counselKindDetail  = $counselKindDetail." ".$arrKindDetail[$i];
+				}
+			}
+			else 
+			{
+				$counselKindCode = "";
+				$counselKindDetail = "";
+			}
+			
+			if($rs[memo])
+			{
+				$memo = $rs[memo];	
+			}
+			else 
+			{
+				$memo = "";
+			}
+				$userName = $rs[userName];
+				$userNickname = $rs[userNickname];
+				$mobile = $rs[mobile];
+				$userIdx = $rs[memIdx];
+		}
+		else 
+		{
+			$adminNickName = getAdminName($rs[adminIdx]);
+			$arrKind = explode("^",$rs[counselKind]);
+			$arrKindDetail = explode("^",$rs[counselKindDetail]);
+			$counselKindCode = "";
+			$counselKindDetail = "";
+			$memo = $rs[memo];
+					
+			for($i = 0 ; $i<sizeof($arrKind); $i++)
+			{
+				$counselKindCode  = $counselKindCode." ".$arrKind[$i];
+				$counselKindDetail  = $counselKindDetail." ".$arrKindDetail[$i];
+			}
+					
+			if($mode == "Member" || $mode == "")
+			{
+				$userName = $rs[userName];
+				$userNickname = $rs[userNickname];
+				$mobile = $rs[mobile];
+			}
+			else
+			{
+				$userName = $rs[nonMemberName];
+				$userNickname = $rs[nonMemberSSN];
+				$mobile = $rs[nonMemberMobile];
+			}
+			$counselKindDetail = "[".$counselKindDetail."]";
+			$userIdx = $rs[userIdx];
+		}
+		
+		//공통 부분
+		if($rs[blackList] == "B")
+		{
+			$bgColor = "6a6a6a";
+		}
+		else 
+		{
+			$bgColor = "FFFFFF";
+		}
+	?>
+		
+	<tr align="center" bgcolor="<?=$bgColor?>">
+	<td width="40px"><?=$rowCnt--?>&nbsp;<a href="#" onclick="showLayer(<?=$totalRow?>,'div_<?=$cnt?>','Arrow_<?=$cnt?>')"><img src="images/downArrow.gif" border="0" id="Arrow_<?=$cnt?>"></a></td>
+	<td><?=$userName?></td>
+	<td width="100px"><?=$userNickname?></td>
+	<td width="100px"><?=$mobile?></td>
+	<td width="100px"><?=$rs[recentDate]?></td>
+	<td width="150px">	
+	<?=$counselKindCode?>
+	<br>
+	<?=$counselKindDetail?>
+	</td>
+	<td><?=$memo?></td>
+	<td width="100px"><?=$adminNickName?></td>
+	<td width="100px">
+	<?php
+	if($mode == "NonMember")
+	{
+	?>
+	<input type="button" value="선택" onclick="goOpen('<?=$userName?>','NonMember','<?=$userNickname?>','<?=$mobile?>')">
+	<?php
+	}
+	else 
+	{
+	?>
+	<input type="button" value="선택" onclick="goOpen('<?=$userIdx?>','','','')">
+	<?php
+	}
+	?>
+	
+	</td>
+	
+	</tr>
+	<tr>
+	<td></td>
+	<td colspan="10">
+	<div id="div_<?=$cnt?>" style="display:none;">
+	<table cellpadding="0" cellspacing="0" width="100%">
+			<tr bgcolor="E9EEF6" align="center">
+			<td style="color:#000000" width="150px">상담일</td>
+			<td style="color:#000000" width="200px">상담코드</td>
+			<td style="color:#000000" width="150px">상담원</td>
+			<td style="color:#000000" width="150px">상태</td>
+			<td style="color:#000000">메모</td>
+			</tr>
+		<?php
+		switch ($mode)
+		{
+			case "Member":
+				$sql = "select B.*,A.userName,A.userNickname from Member A inner join TM_info B on A.idx = B.adminIdx where B.userIdx=$userIdx order by B.idx desc";
+				break;
+			case "NonMember":
+				$sql = "select B.*,A.userName,A.userNickname from Member A inner join TM_info_NonMember B on A.idx = B.adminIdx where nonMemberName =  '$userName' and nonMemberSSN = '$userNickname' order by B.idx desc";
+				break;
+			case "TargetMember":
+				$sql = "select B.*,A.userName,A.userNickname from Member A inner join TM_info B on A.idx = B.adminIdx where B.userIdx=$userIdx order by B.idx desc";
+				break;
+		}
+		//echo $sql;
+		$tmpRs2 = mysql_query($sql);
+		//$rowNum = mysql_num_rows($tmpRs2);
+		if($userIdx=="")
+		{
+			echo "<tr><td colspan='10' align='center'>상담 내역이 없습니다.</td></tr>";
+		}
+		else 
+		{
+			while($rs2 = mysql_fetch_array($tmpRs2))
+			{
+				$recentDate = $rs2[recentDate];
+				$counselKind = $rs2[counselKind];
+				$memo = $rs2[memo];
+				$adminName = $rs2[userName];
+				$adminNickName = $rs2[userNickname];
+				$arrKind = explode("^",$counselKind);
+				$arrKindDetail = explode("^",$rs2[counselKindDetail]);
+				$counselKindCode = "";
+				$counselKindDetail = "";
+				$nonMemberName = $rs2[nonMemberName];
+				$nonMemberMobile = $rs2[nonMemberMobile];
+				$nonMembers2SN = $rs2[nonMembers2SN];
+				$processResult = $rs2[processResult];
+				if($processResult == "")
+				{
+					$processResult = "Complete";
+				}
+				
+				switch ($processResult)
+				{
+					case "Complete":
+						$processResult = "처리";
+						$bgColor="FFFFFF";
+						break;
+					case "Fail":
+						$processResult = "<font color='red'>미처리</font>";
+						$bgColor="ffe2a5";
+						break;
+					case "Transfer":
+						$processResult = "<font color='blue'>이관</font>";
+						$bgColor="dbe9fc";
+						break;
+				}
+						
+				for($i = 0 ; $i<sizeof($arrKind); $i++)
+				{
+					$counselKindCode  = $counselKindCode." ".$arrKind[$i];
+					$counselKindDetail  = $counselKindDetail." ".$arrKindDetail[$i];
+				}
+			?>
+				<tr bgcolor="<?=$bgColor?>">
+				<td align="center"><?=$recentDate?></td>
+				<td align="center"><?=$counselKindCode?><br><?=$counselKindDetail?></td>
+				<td align="center"><?=$adminName?><br><?=$adminNickName?></td>
+				<td align="center"><?=$processResult?></td>
+				<td><?=$memo?></td>
+				</tr>
+			<?php	
+			}
+		}
+		?>
+	</table>
+	</div>
+	</td>	
+	</tr>
+	<tr><td colspan="10" height="1" bgcolor="bluesky"></td></tr>
+	
+	<?php
+	$cnt++;
+	}
+}
+?>
+<tr><td colspan="10" align="center">
+<? if($totalCount) pagSet('page',$page,$totalPage,$indexPerPage,$pageURL,$searchSet,$optionSet); ?>
+[<?=$page?>/<?=$totalPage?>]
+</td></tr>
+</table>
+</form>
+</body>

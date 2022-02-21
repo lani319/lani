@@ -1,0 +1,233 @@
+<?
+include_once $_SERVER['DOCUMENT_ROOT']."/admin/header8.php";
+
+
+//상품선택, 현재 결제페이지에서 결제가능한 상품 목록
+$SQL = "SELECT * FROM `service_kind` where service_stats='Y' order by expert_idx desc, service_month asc";
+$result = mysql_query($SQL) or die(mysql_error());
+$orderArray = array();
+$a = 0;
+while($Rs = mysql_fetch_array($result)){
+	if($Rs['weeks_use']=='D') $order_month = $Rs['service_month'].' 일';
+	else $order_month = $Rs['service_month'].' 개월';
+
+	$orderArray[$a]['expert_name'] = $_EXPERT_NICKNAME[$Rs[expert_idx]];
+	$orderArray[$a]['order_title'] = stripslashes($Rs['service_name']);
+	$orderArray[$a]['order_month'] = $order_month;
+	$orderArray[$a]['order_num'] = $Rs['service_orderID'];
+	$orderArray[$a]['priminum_gubun'] = 'primium';
+	$a++;
+}
+$b = count($orderArray) - 1;
+
+$SQL = "select * from investment_single_service_kind where service_stats='Y' and spc_gubun='B' and refund = 'N'  order by expert_idx desc, service_month asc";
+$result = mysql_query($SQL) or die(mysql_error());
+while($Rs = mysql_fetch_array($result)){
+	$order_month = $Rs['service_month'].' 개월';
+
+	$orderArray[$b]['expert_name'] = $_EXPERT_NICKNAME[$Rs[expert_idx]];
+	$orderArray[$b]['order_title'] = stripslashes($Rs['service_name']);
+	$orderArray[$b]['order_month'] = $order_month;
+	$orderArray[$b]['order_num'] = $Rs['service_orderID'];
+	$orderArray[$b]['priminum_gubun'] = 'sms';
+	$b++;
+}
+
+?>
+<html>
+<head>
+<script type="text/javascript">
+function reg()
+{
+	var f = document.form1;
+	f.submit();
+}
+
+function linkage_check(value){
+	if(value=='Y'){
+		document.getElementById('coupon1').style.display = 'block'; 
+		
+		document.getElementById('coupon2').style.display = 'none'; 
+		document.getElementById('coupon2_2').style.display = 'none'; 
+		document.getElementById('coupon4').style.display = 'none'; 
+		document.getElementById('coupon4_2').style.display = 'none'; 
+		document.getElementById('coupon5').style.display = 'none'; 
+
+		var orderCheck = document.getElementsByName('orderid')
+		var orderCheckR  = orderCheck[0].checked;
+		if(orderCheckR==true) order_check('Y');
+		else order_check('N');
+
+		
+
+	}else{
+		document.getElementById('coupon2').style.display = 'block'; 
+		document.getElementById('coupon2_2').style.display = 'block'; 
+		document.getElementById('coupon4').style.display = 'block'; 
+		document.getElementById('coupon4_2').style.display = 'block'; 
+		document.getElementById('coupon5').style.display = 'block'; 
+		document.getElementById('coupon5_2').style.display = 'block';
+		
+		document.getElementById('coupon1').style.display = 'none';
+		document.getElementById('coupon1_2').style.display = 'none';
+		document.getElementById('coupon3').style.display = 'none';
+		document.getElementById('coupon3_2').style.display = 'none'; 
+		document.getElementById('coupon6').style.display = 'none'; 
+		document.getElementById('coupon6_2').style.display = 'none'; 
+		document.getElementById('coupon7').style.display = 'none'; 
+		document.getElementById('coupon7_2').style.display = 'none'; 
+		document.getElementById('coupon8').style.display = 'none'; 
+		document.getElementById('coupon8_2').style.display = 'none'; 
+
+
+	}
+}
+
+function order_check(value){
+	if(value=='Y'){
+		document.getElementById('coupon3').style.display = 'block';
+		document.getElementById('coupon3_2').style.display = 'block'; 
+		document.getElementById('coupon2').style.display = 'block'; 
+		document.getElementById('coupon2_2').style.display = 'block';
+		document.getElementById('coupon1_2').style.display = 'block';
+
+		document.getElementById('coupon4').style.display = 'none'; 
+		document.getElementById('coupon4_2').style.display = 'none'; 
+		document.getElementById('coupon5').style.display = 'none'; 
+		document.getElementById('coupon5_2').style.display = 'none'; 
+		document.getElementById('coupon6').style.display = 'none'; 
+		document.getElementById('coupon6_2').style.display = 'none'; 
+		document.getElementById('coupon7').style.display = 'none'; 
+		document.getElementById('coupon7_2').style.display = 'none'; 
+		document.getElementById('coupon8').style.display = 'none'; 
+		document.getElementById('coupon8_2').style.display = 'none'; 
+		
+		
+	}else{
+		document.getElementById('coupon1_2').style.display = 'block';
+		document.getElementById('coupon2').style.display = 'block'; 
+		document.getElementById('coupon2_2').style.display = 'block'; 
+		document.getElementById('coupon4').style.display = 'block'; 
+		document.getElementById('coupon4_2').style.display = 'block'; 
+		document.getElementById('coupon5').style.display = 'block'; 
+		document.getElementById('coupon5_2').style.display = 'block'; 
+		document.getElementById('coupon6').style.display = 'block'; 
+		document.getElementById('coupon6_2').style.display = 'block'; 
+		document.getElementById('coupon7').style.display = 'block'; 
+		document.getElementById('coupon7_2').style.display = 'block'; 
+		document.getElementById('coupon8').style.display = 'block'; 
+		document.getElementById('coupon8_2').style.display = 'block'; 
+
+		document.getElementById('coupon3').style.display = 'none';
+		document.getElementById('coupon3_2').style.display = 'none'; 
+		
+		
+	}
+}
+</script>
+</head>
+<body onload="document.getElementById('txtCouponKind').focus();">
+<form name="form1" method="POST" action = "m8_couponKind_regOK_test.php" target="invFrame">
+<TABLE width="920" cellpadding=0 cellspacing=0 border=0>
+<tr height=10><td></td></tr>
+<tr>
+	<td>
+		<TABLE width="100%" cellpadding=0 cellspacing=0 border=0>
+		<TR>
+			<TD></TD>
+			<TD valign="bottom" align="right"><img src="/admin/images/icon_location.gif" align="absmiddle"> 외부사이트관리 &gt; 쿠폰종류등록&nbsp;</TD>
+		</TR>
+		</TABLE>
+	</td>
+</tr>
+</table>
+<table cellpadding="0" cellspacing="0" border="0" width="650px" height="400px">
+<tr>
+<td align="left">*쿠폰 종류 신규발행</td>
+<td align="left"><a href="m8_couponKind_list.html">[목록]</a></td>
+</tr>
+
+<tr>
+<td>결제페이지 연동</td>
+<td width="75%"><input type="radio" name="priceLinkage" value="Y" onclick="linkage_check(this.value);" checked>연동&nbsp;&nbsp;<input type="radio" name="priceLinkage" onclick="linkage_check(this.value);" value="N">미연동</td>
+</tr>
+
+<tr><td colspan="2" bgcolor="AAAAAA" height="1px"></td></tr>
+
+<tr id="coupon1">
+<td>상품선택 여부</td>
+<td width="75%"><input type="radio" name="orderidYN" value="Y" onclick="order_check(this.value);">선택&nbsp;&nbsp;<input type="radio" name="orderidYN" value="N" onclick="order_check(this.value);" checked>미선택</td>
+</tr>
+
+<tr id="coupon1_2"><td colspan="2" bgcolor="AAAAAA" height="1px"></td></tr>
+
+<tr id="coupon2">
+<td>쿠폰종류</td>
+<td><input type="text" size="50" name="txtCouponKind" id="txtCouponKind" tabindex="1"></td>
+</tr>
+<tr id="coupon2_2"><td colspan="2" bgcolor="AAAAAA" height="1px"></td></tr>
+
+<tr id="coupon3" style="display:none;">
+<td>상품선택</td>
+<td>
+<select name="orderid">
+	<option value="0" selected>상품을 선택해주세요
+<?php 
+	foreach($orderArray as $key => $val ){ ?>
+	<option value="<?php echo $val['priminum_gubun']; ?>_<?php echo $val['order_num']; ?>" >[<?php echo $val['expert_name']; ?>]<?php echo $val['order_title']; ?>&nbsp;<?php echo $val['order_month']; ?>
+<?php } ?>
+</select>
+</td>
+</tr>
+<tr id="coupon3_2" style="display:none;"><td colspan="2" bgcolor="AAAAAA" height="1px"></td></tr>
+
+
+<tr id="coupon4">
+<td>할인종류</td>
+<td>
+<input type="radio" name="rdDcType" value="1" checked>%(퍼센트)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="radio" name="rdDcType" value="2">원(가격)
+</td>
+</tr>
+<tr id="coupon4_2"><td colspan="2" bgcolor="AAAAAA" height="1px"></td></tr>
+
+
+<tr id="coupon5">
+<td>할인비율 / 할인금액</td>
+<td><input type="text" size="10" name="txtDcValue" tabindex="2">&nbsp;&nbsp;&nbsp;(% / 원)</td>
+</tr>
+</tr>
+<tr id="coupon5_2"><td colspan="2" bgcolor="AAAAAA" height="1px"></td></tr>
+
+
+
+<tr id="coupon6">
+<td>전문가 선택</td>
+<td><input type="radio" name="expert_idx" value="0" checked >구분없음&nbsp;&nbsp;<input type="radio" name="expert_idx" value="34904">평택촌놈&nbsp;&nbsp;<input type="radio" name="expert_idx" value="26439">김태희</td>
+</tr>
+</tr>
+<tr id="coupon6_2"><td colspan="2" bgcolor="AAAAAA" height="1px"></td></tr>
+
+
+<tr id="coupon7">
+<td>결제기간</td>
+<td><input type="radio"  name="coupon_month" value="0" checked>구분없음&nbsp;&nbsp;<input type="radio" name="coupon_month" value="3">3개월 이상&nbsp;&nbsp;<input type="radio" name="coupon_month" value="6">6개월 이상</td>
+</tr>
+</tr>
+<tr id="coupon7_2"><td colspan="2" bgcolor="AAAAAA" height="1px"></td></tr>
+
+
+<tr id="coupon8">
+<td>상품 구분</td>
+<td><input type="radio" name="primiumGubun" value=""  checked>구분없음&nbsp;&nbsp;<input type="radio" name="primiumGubun" value="primium">인터넷 방송만&nbsp;&nbsp;<input type="radio" name="primiumGubun" value="sms">SMS만</td>
+</tr>
+<tr id="coupon8_2"><td colspan="2" bgcolor="AAAAAA" height="1px"></td></tr>
+
+
+<tr><td colspan="2" align="center"><img src="img/submit.gif" style="cursor:hand;" onclick="reg();"></td></tr>
+</table>
+</body>
+</form>
+<iframe name="invFrame"  width="0px" height="0px"></iframe>
+</html>

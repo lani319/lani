@@ -1,0 +1,941 @@
+<?php
+/*
+1. idx가 있으면 회원 정보를 가져와서 뿌려준다
+*/
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+
+
+if($_COOKIE['_CKE_USER_ID'] == "")
+{
+	echo "<script>alert('로그인 후 이용해주세요.');location.href='/index.html';</script>";
+}
+else 
+{
+	//상담관리자 체크(일반 관리자 랑 상담관리자 체크 병행)
+	$memId = $_COOKIE['_CKE_USER_ID'];
+	$sql = "select count(idx) as cnt from Member where Level < 1 and member_state='Y' and userId='$memId'";
+	$tmpRs = mysql_query($sql);
+	$rs = mysql_fetch_array($tmpRs);
+	if($rs[cnt]<1)
+	{
+		$sql2 = "select count(idx) as cnt from TM_admin where adminID='$memId'";
+		$tmpRs2 = mysql_query($sql2);
+		$rs2 = mysql_fetch_array($tmpRs2);
+		if($rs2[cnt]<1)
+		{
+			echo "<script>alert('관리자만 이용 가능합니다.');location.href='/index.html';</script>";
+		}
+	}
+}
+?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=euc-kr" />
+<title>502 Customer Relationship Management System</title>
+<head>
+<!-- J쿼리 내용 -->
+<!-- 달력 -->
+
+
+<!-- 스크롤 -->
+<script type="text/javascript" src="js/jquery-1.3.1.min.js"></script>
+<script type="text/javascript" src="js/jquery.scrollTo.js"></script>
+<!-- 자바스크립트 내용 -->
+<script type="text/javascript">
+<!--
+//입력 폼 체크
+function chkForm(grade)
+{
+	var f = document.form1;
+	var pf = parent.form1;
+	
+	//여기에 필수 입력 값 체크
+	//회원 비 회원 값 체크
+	if(f.userIdx.value == "" && f.nonMemberName.value == "" )
+	{
+		alert('회원 또는 비회원 정보를 조회 해 주세요');
+		document.getElementById("userInfo").focus();
+		return;
+	}
+	
+	//상담코드체크
+	if(f.counselKind.value == "")
+	{
+		alert('상담코드를 체크 해 주세요');
+		document.getElementById("txtQuery").focus();
+		return;
+	}
+	
+	//예약하고 시간대 체크
+	if(document.getElementById('datepicker').value != "")
+	{
+		if(f.txtReservationTime.value == "")
+		{
+			alert('예약 시간대를 체크 해 주세요');
+			return;
+		}
+	}
+	
+	//처리 결과에 따른 체크
+	//미처리 이관은 메모를 반드시 작성해야 함
+	/*
+	if(f.processResult.value != "Complete")
+	{
+		if(document.getElementById("txtMemo").value == "")
+		{
+			alert('사유를 입력 해 주세요');
+			document.getElementById("txtMemo").focus();
+			return;
+		}
+	}
+	*/
+	
+	
+	f.adminIdx.value = "<?=$_COOKIE['_CKE_USER_UID']?>";
+	f.reserveDate.value = document.getElementById('datepicker').value;
+	f.recentDate.value = document.getElementById("txtCounselTime").value;
+	f.recentEndDate.value = "now()";	
+	f.memo.value = document.getElementById("txtMemo").value;
+	f.counselTime.value = document.getElementById("txtCounselTime").value;
+	
+	f.counselTimebyNumber.value = sumTimeCnt;
+	
+	f.txtReserveHour.value = document.getElementById("reserveHour").value;
+	f.txtReserveMin.value = document.getElementById("reserveMin").value;
+	
+	f.txtUserGrade.value = grade;
+	
+	f.action = "counsel_ok.php";
+	f.submit();
+}
+
+
+ 
+ //처리결과
+ function setProcessResult(value)
+ {
+ 	document.getElementById("processResult").value = value;
+ 	document.getElementById("txtMemo").focus();
+ }
+ 
+ 
+ function showDivNonMemberInfo(mode)
+ {
+ 	if(mode == 'show')
+ 	{
+ 		document.getElementById("divNonMember").style.display = "inline"; //div 숨긴다
+ 	}
+ 	else
+ 	{
+ 		document.getElementById("divNonMember").style.display = "none"; //div 숨긴다 		
+ 	}
+ }
+ 
+ //비회원 정보 입력 완료
+ function setNonMemberInfo()
+ {
+ 	document.getElementById("nonMemberName").value = document.getElementById("txtNonMemberName").value;
+ 	document.getElementById("nonMemberMobile").value = document.getElementById("txtNonMemberMobile1").value+"-"+document.getElementById("txtNonMemberMobile2").value+"-"+document.getElementById("txtNonMemberMobile3").value;
+ 	document.getElementById("nonMemberSSN").value = document.getElementById("txtNonMemberSSN").value;
+ 	document.getElementById("nonMemberFlag").value = "T"; 	
+ 	document.getElementById("divNonMember").style.display = "none"; //div 숨긴다
+ 	
+ 	divDisplayNonMember.innerHTML = "<font color='red'>비회원 성명 : </font><b>"+document.getElementById("nonMemberName").value+"</b> / <font color='red'> 연락처 : </font><b>"+document.getElementById("nonMemberMobile").value+"</b>/ <font color='red'>생년월일 : </font><b>"+document.getElementById("nonMemberSSN").value+"</b>";
+ 	
+ 	//상담시간체크
+ 	startCounselTime();
+ }
+ 
+ //비회원 검색하고 나서 정보 입력하는거
+  function displayNonMemberInfo(userName,mobile,ssn)
+  {
+ 	divDisplayNonMember.innerHTML = "<font color='red'>비회원 성명 : </font><b>"+userName+"</b> / <font color='red'> 연락처 : </font><b>"+mobile+"</b>/ <font color='red'>생년월일 : </font><b>"+ssn+"</b>";
+  }
+  
+   //회원 검색하고 나서 정보 입력하는거
+  function displayMemberInfo(userName,mobile,ssn)
+  {
+ 	divDisplayNonMember.innerHTML = "<font color='red'>회원 성명 : </font><b>"+userName+"</b> / <font color='red'> 연락처 : </font><b>"+mobile+"</b>/ <font color='red'>생년월일 : </font><b>"+ssn+"</b>";
+  }
+
+  
+  //블랙리스트 체크 
+  function setBlackList(check,value)
+  {
+  	if(check == true)
+  	{
+  		var r = confirm('해당 회원을 블랙리스트로 등록하시겠습니까?');
+  		if(r == true)
+  		{
+  			document.getElementById("txtBlackList").value = value;
+  		}
+  		else
+  		{
+  			document.getElementById("rdBlacklist").checked = false;
+  		}
+  	}
+  	else
+  	{
+  		document.getElementById("txtBlackList").value = "";  		
+  	}
+  }
+  
+//Yes or No확인 창
+ function window.confirm(str)
+{
+    execScript('n = msgbox("'+str+'","4132")', "VbScript");
+    return(n == 6);
+}
+
+  
+  //예약시간대 체크
+   function setReservationTime(check,value)
+  {
+  	if(check == true)
+  	{
+  		document.getElementById("txtReservationTime").value = value;
+  	}
+  	else
+  	{
+  		document.getElementById("txtReservationTime").value = "";  		
+  	}
+  }
+  
+  //모서리가 둥근 테이블
+  function roundTable(objID) {
+       var obj = document.getElementById(objID);
+       var Parent, objTmp, Table, TBody, TR, TD;
+       var bdcolor, bgcolor, Space;
+       var trIDX, tdIDX, MAX;
+       var styleWidth, styleHeight;
+
+       // get parent node
+       Parent = obj.parentNode;
+       objTmp = document.createElement('SPAN');
+       Parent.insertBefore(objTmp, obj);
+       Parent.removeChild(obj);
+
+       // get attribute
+       bdcolor = obj.getAttribute('rborder');
+       bgcolor = obj.getAttribute('rbgcolor');
+       radius = parseInt(obj.getAttribute('radius'));
+       if (radius == null || radius < 1) radius = 1;
+       else if (radius > 6) radius = 6;
+
+       MAX = radius * 2 + 1;
+       
+       /*
+              create table {{
+       */
+       Table = document.createElement('TABLE');
+       TBody = document.createElement('TBODY');
+
+       Table.cellSpacing = 0;
+       Table.cellPadding = 0;
+
+       for (trIDX=0; trIDX < MAX; trIDX++) {
+              TR = document.createElement('TR');
+              Space = Math.abs(trIDX - parseInt(radius));
+              for (tdIDX=0; tdIDX < MAX; tdIDX++) {
+                     TD = document.createElement('TD');
+                     
+                     styleWidth = '1px'; styleHeight = '1px';
+                     if (tdIDX == 0 || tdIDX == MAX - 1) styleHeight = null;
+                     else if (trIDX == 0 || trIDX == MAX - 1) styleWidth = null;
+                     else if (radius > 2) {
+                            if (Math.abs(tdIDX - radius) == 1) styleWidth = '2px';
+                            if (Math.abs(trIDX - radius) == 1) styleHeight = '2px';
+                     }
+
+                     if (styleWidth != null) TD.style.width = styleWidth;
+                     if (styleHeight != null) TD.style.height = styleHeight;
+
+                     if (Space == tdIDX || Space == MAX - tdIDX - 1) TD.style.backgroundColor = bdcolor;
+                     else if (tdIDX > Space && Space < MAX - tdIDX - 1)  TD.style.backgroundColor = bgcolor;
+                     
+                     if (Space == 0 && tdIDX == radius) TD.appendChild(obj);
+                     TR.appendChild(TD);
+              }
+              TBody.appendChild(TR);
+       }
+
+       /*
+              }}
+       */
+
+       Table.appendChild(TBody);
+       
+       // insert table and remove original table
+       Parent.insertBefore(Table, objTmp);
+}
+
+
+
+ //스크롤 관련 컨트롤
+ $(document).ready(function() {
+ 	
+	//Get the height of the first item
+	$('#mask').css({'height':$('#panel-1').height()});	
+	
+	//Calculate the total width - sum of all sub-panels width
+	//Width is generated according to the width of #mask * total of sub-panels
+	$('#panel').width(parseInt($('#mask').width() * $('#panel div').length));
+	
+	//Set the sub-panel width according to the #mask width (width of #mask and sub-panel must be same)
+	$('#panel div').width($('#mask').width());
+	
+	//Get all the links with rel as panel
+	$('a[rel=panel]').click(function () {
+	
+		//Get the height of the sub-panel
+		var panelheight = $($(this).attr('href')).height();
+		
+		//Set class for the selected item
+		$('a[rel=panel]').removeClass('selected');
+		$(this).addClass('selected');
+		
+		//Resize the height
+		$('#mask').animate({'height':panelheight},{queue:false, duration:500});			
+		
+		//Scroll to the correct panel, the panel id is grabbed from the href attribute of the anchor
+		$('#mask').scrollTo($(this).attr('href'), 800);		
+		
+		//Discard the link default behavior
+		return false;
+	});
+});
+
+
+//초기화
+function init(info)
+{
+	
+	if(info!="")
+	{
+		document.getElementById("txtQuery").value = '';
+		document.getElementById("txtQuery").focus();
+	}
+	else
+	{
+		document.getElementById("userInfo").focus();
+	}
+	
+	//시계 작동
+	realtimeClock();
+	
+}
+
+function getMemInfo(value)
+{
+	if(value == "")
+	{
+		alert('회원정보를 입력 해 주세요');
+		document.getElementById("userInfo").focus();
+		return;
+	}
+	var url = "popMemInfo.html?userInfo="+value;
+	
+	var win = window.open(url,'WinMemInfo','width=600,height=400');
+}
+
+
+// 시계
+var tmpTime = "";
+function realtimeClock() {
+  document.getElementById("txtCounselTime").value = getTimeStamp();	
+  tmpTime = setTimeout("realtimeClock()", 1000);
+}
+
+
+function getTimeStamp() { // 24시간제
+  var d = new Date();
+
+  var s =
+  
+    leadingZeros(d.getFullYear(), 4) + '-' +
+    leadingZeros(d.getMonth() + 1, 2) + '-' +
+    leadingZeros(d.getDate(), 2) + ' ' +
+
+    leadingZeros(d.getHours(), 2) + ':' +
+    leadingZeros(d.getMinutes(), 2) + ':' +
+    leadingZeros(d.getSeconds(), 2);
+
+  return s;
+}
+
+
+function leadingZeros(n, digits) {
+  var zero = '';
+  n = n.toString();
+
+  if (n.length < digits) {
+    for (i = 0; i < digits - n.length; i++)
+      zero += '0';
+  }
+  return zero + n;
+}
+
+
+
+//초시계
+startday = new Date(); 
+clockStart = startday.getTime(); 
+
+function initStopwatch() { 
+var myTime = new Date(); 
+return((myTime.getTime() - clockStart)/1000); 
+} 
+
+var sumTimeCnt = 0;
+
+function getSecs() { 
+var tSecs = Math.round(initStopwatch()); 
+var iSecs = tSecs % 60; 
+var iMins = Math.round((tSecs-30)/60);   
+var sSecs ="" + ((iSecs > 9) ? iSecs : "0" + iSecs); 
+var sMins ="" + ((iMins > 9) ? iMins : "0" + iMins); 
+
+document.getElementById('txtSumCounselTime').value = sMins+":"+sSecs; 
+sumTimeCnt = tSecs;
+
+
+window.setTimeout('getSecs()',1000); 
+} 
+
+//시계는 멈추고, 초시계는 증가시킨다
+function startCounselTime()
+{
+	clearTimeout(tmpTime);
+	setTimeout('getSecs()',1);
+}
+
+//메모 수정하기
+function goModify(mode,idx)
+{
+		var url = "modHistory.html?idx="+idx;
+		var win = window.open(url,'','location=no, directories=no,resizable=no,status=no,toolbar=no,menubar=no, width=350,height=300,left=0, top=0, scrollbars=no');
+}
+
+
+
+function setCounselInfo(mode) //in,out,happy
+{
+//	alert(mode);
+	
+	if(mode == 'in' || mode == 'happy')
+	{
+		document.getElementById("tdBtnInCome").style.display = "inline";
+		document.getElementById("tdBtnOutCome").style.display = "none";
+	}
+	else
+	{
+		document.getElementById("tdBtnOutCome").style.display = "inline";
+		document.getElementById("tdBtnInCome").style.display = "none";
+	}
+}
+
+
+-->
+</script>
+<!-- 스타일시트 링크 -->
+<link rel="stylesheet" href="table.css" type="text/css" />
+ <link href="/css/502style.css" type="text/css" rel="stylesheet">
+ 
+ 
+<!-- 스타일시트  -->
+<style>
+body {
+	padding:0;
+	margin:0 20px;
+	background:#FFFFFF;
+	font:12px arial;
+}
+
+#scroller-header a {
+	text-decoration:none; 
+	color:#867863; 
+	padding:0 2px;
+}
+
+#scroller-header a:hover {
+	text-decoration:none; 
+	color:#4b412f
+}
+
+a.selected {
+	text-decoration:underline !important; 
+	color:#4b412f !important;
+}
+
+#scroller-header {
+	width:677px;
+	height:24px;
+	padding:35px 0 0 15px;
+	font-weight:700;
+}
+
+#scroller-body {
+
+	width:677px;
+	padding-bottom:30px;
+}
+
+#mask {
+	width:650px;
+	overflow:hidden;
+	margin:0 auto;
+}
+
+#panel {
+
+}
+
+#panel div {
+float:left;
+
+}
+
+/* Extra styling for each panel*/
+
+#panel ul {
+list-style:none;
+margin:0 5px;
+padding:0;
+}
+
+	#panel ul li {
+		padding:5px;
+		color:#557482;
+		border-bottom:1px dotted #ccc;
+	}
+
+	#panel ul li.last {
+		border-bottom:none !important;
+	}
+
+#panel-1 {
+}
+
+#panel-2 {
+}
+
+#panel-3 {
+}
+
+.search
+{
+	font-size:15px;
+	font-weight:bold;
+	text-align:right;
+	background-color:f9dede;
+}
+
+.time
+{
+	font-size:18px;
+	font-weight:bold;
+	text-align:right;
+	border-style:none;	
+}
+
+</style>
+
+</head>
+<body onload="init('<?=$idx?>');">
+<!-- 비회원정보입력 시작-->
+<div id="divNonMember" style="width:455px;height:510px;top:30px;left:530px;position:absolute;display:none;">
+<table width="450px" height="500px" cellpadding="0" cellspacing="0" border="0"  id="ta1" radius="3" rborder="#0099FF" rbgcolor="#FFFFFF">
+<tr><td colspan="2" align="right"><img src="images/btnClose.gif" style="cursor:hand;" onclick="showDivNonMemberInfo('close');"></td></tr>
+<tr>
+<th width="150px"  height="30px">이름</th>
+<td>
+<input type="text" name="txtNonMemberName" id="txtNonMemberName" style="width:150px;height:25px;" value="비회원_<?=date('YmdHis')?>">
+</td>
+</tr>
+<tr><td colspan="2" height="1"></td></tr>
+<tr>
+<th height="30px">연락처</th>
+<td>
+<input type="text" name="txtNonMemberMobile1" id="txtNonMemberMobile1" style="width:50px;height:25px;" maxlength="3">
+-
+<input type="text" name="txtNonMemberMobile2" id="txtNonMemberMobile2" style="width:50px;height:25px;" maxlength="4">
+-
+<input type="text" name="txtNonMemberMobile3" id="txtNonMemberMobile3" style="width:50px;height:25px;" maxlength="4">
+</td>
+</tr>
+<tr><td colspan="2" height="1"></td></tr>
+<tr>
+<th height="30px">주민번호앞자리</th>
+<td>
+<input type="text" name="txtNonMemberSSN" id="txtNonMemberSSN" style="width:150px;height:25px;" maxlength="6">
+</td>
+</tr>
+<tr><td colspan="2" align="center">
+<img src="images/_btnNonMember.gif" border="0" style="cursor:hand;" onmouseover="this.src = 'images/btnNonMember.gif'" onmouseout="this.src = 'images/_btnNonMember.gif'" onclick="setNonMemberInfo();" >
+</td></tr>
+</table>
+<script>roundTable("ta1");</script>
+</div>
+<!-- 비회원정보입력 끝-->
+
+
+<table cellpadding="0" cellspacing="0" width="1400">
+<tr>
+<td width="800px">
+<table cellpadding="0" cellspacing="0" width="100%" border="0">
+<tr>
+<td width="80px" align="left" valign="top"><img src="images/btnLeft_01.gif"></td><!-- 상담시간 -->
+<td width="205px" align="left"><input type="text" name="txtCounselTime" id="txtCounselTime" style="width:200px;height:21px;font-weight:bold;border-style:none;padding-top:2px;"  readonly></td>
+<td>
+	<table cellpadding="0" cellspacing="0">
+	<tr>
+		<td width="80px" align="left" valign="bottom"><img src="images/btnLeft_09.gif"></td>
+		<td align="left"><input type="text" name="txtSumCounselTime" id="txtSumCounselTime" style="width:100px;height:21px;font-weight:bold;border-style:none;text-align:right;color:FF33CC;padding-top:2px;"  readonly></td>
+	</tr>
+	</table>
+</td>
+</tr>
+<tr>
+<td width="80px" align="left" valign="middle"><img src="images/btnLeft_02.gif"></td><!-- 회원정보 -->
+<td width="205px"><input type="text" name="userInfo" id="userInfo" style="width:200px;height:21px;font-weight:bold;border-style:solid;border-type:thin;border-width:1px;border-color:skyblue" onkeypress="if(event.keyCode==13){getMemInfo(document.getElementById('userInfo').value);}"></td>
+<td align="left" valign="middle" style="padding-left:10px">
+<img src="images/btnSearch.gif" border="0" style="cursor:hand;" onmouseover="this.src = 'images/_btnSearch.gif'" onmouseout="this.src = 'images/btnSearch.gif'" onclick="getMemInfo(document.getElementById('userInfo').value);" >
+</td>
+<td>
+<img src="images/btnNonMemberShow.gif" border="0" style="cursor:hand;" onmouseover="this.src = 'images/_btnNonMemberShow.gif'" onmouseout="this.src = 'images/btnNonMemberShow.gif'" onclick="showDivNonMemberInfo('show');" >
+</td>
+</tr>
+</table>
+</td>
+<td colspan="5">
+<div id="divDisplayNonMember" name="divDisplayNonMember"></div>
+</td>
+</tr>
+<tr>
+	<td width="800px">
+		<table cellpadding="0" cellspacing="0" border="0" width="100%">
+		<tr valign="top">
+			<td width="80px" align="left" valign="middle"><img src="images/btnLeft_03.gif"></td><!-- 회원정보 -->
+			<td>
+			<table cellpadding="0" cellspacing="0" border="0">
+			<tr>
+				<td><input type="text" name="txtQuery" id="txtQuery" style="width:200px;height:21px;font-weight:bold;border-style:solid;border-type:thin;border-width:1px;border-color:skyblue" onfocus="this.value='';" onkeypress="if(event.keyCode==13){invCounselResult.setQuery(this.value);}"></td>
+				<td align="left" valign="middle"  style="padding-left:11px">				
+				<img src="images/btnCounselkindSubmit.gif" border="0" style="cursor:hand;" onmouseover="this.src = 'images/_btnCounselkindSubmit.gif'" onmouseout="this.src = 'images/btnCounselkindSubmit.gif'" onclick="invCounselResult.setQuery(document.getElementById('txtQuery').value);" >
+				</td>
+			</tr>			
+			</table>
+			</td>
+		</tr>		
+		
+		
+		<tr valign="top">
+			<td height="550px" align="left" valign="top" style="padding-top : 50px">			
+			<img src="images/btnLeft_04.gif"></td>
+			<td>
+			<iframe name="invCounselResult" src="scroll_index2.html" width="100%" height="550px" frameborder="0"></iframe>
+			</td>
+		</tr>
+		<tr valign="bottom">
+			<td ></td>
+			<td valign="bottom" align="left">
+			<img src="images/title_counselHistory.gif" border="0"><br>	
+			<table cellpadding="0" cellspacing="0" border="0" width="100%" class="table_basic">
+			<tr align="center">
+			<th width="150px">상담일시</th><th width="100px" align="center">상담코드</th><th>메모</th><th width="60px">상담자</th>
+			</tr>	
+			<?php
+			if($mode == "Member" || $mode == "")
+			{
+				if($idx)
+				{
+					$sql = "select B.recentDate,B.counselKind,B.counselKindDetail,B.memo,B.processResult,B.idx,A.userName,A.userNickname from Member A inner join TM_info B on A.idx = B.adminIdx where B.userIdx=$idx order by B.idx desc limit 0,4";		
+					$tmpRs = mysql_query($sql);
+					$rowCnt = mysql_num_rows($tmpRs);
+					$bgColor = "FFFFFF";
+					if($rowCnt>0)
+					{
+						while ($rs = mysql_fetch_array($tmpRs)) 
+						{
+							$recentDate = $rs[recentDate];
+							$counselKind = $rs[counselKind];
+							$memo = $rs[memo];
+							$adminName = $rs[userName];
+							$adminNickName = $rs[userNickname];
+							$arrKind = explode("^",$counselKind);
+							$arrKindDetail = explode("^",$rs[counselKindDetail]);
+							$counselKindCode = "";
+							$counselKindDetail = "";
+							
+							for($i = 0 ; $i<sizeof($arrKind); $i++)
+							{
+								$counselKindCode  = $counselKindCode." ".$arrKind[$i];
+								$counselKindDetail  = $counselKindDetail." ".$arrKindDetail[$i];
+							}
+							
+							switch ($rs[processResult])
+							{
+								case "Complete":
+									$bgColor = "FFFFFF";
+									break;
+								case "Transfer":
+									$bgColor = "dbe9fc";
+									break;
+								case "Fail":
+									$bgColor = "ffe2a5";
+									break;
+							}
+							
+							
+							
+						?>
+						<tr align="center" bgcolor="<?=$bgColor?>">
+						<td><?=$recentDate?></td><td><?=$counselKindCode?><br>[<?=$counselKindDetail?>]</td>
+						<td align="left">
+						<a href="#" onclick="goModify('mod',<?=$rs[idx]?>)"><?=$memo?></a>
+						
+						</td>
+						
+						<td><?=$adminNickName?></td>
+						</tr>
+						<?php
+						//echo "<script type='text/javascript'>displayMemberInfo('$nonMemberName','$nonMemberMobile','$nonMemberSSN')</script>'";
+						}
+					}
+				}
+				else 
+				{
+					echo "<tr><td colspan='10' align='center'>이력이 없습니다.</td></tr>";
+				}
+			}
+			else if($mode == "NonMember") //비회원
+			{
+				if($idx)
+				{
+					$sql = "select B.recentDate,B.counselKind,B.counselKindDetail,B.memo,A.userName,A.userNickname,B.nonMemberName,B.nonMemberMobile,B.nonMemberSSN from Member A inner join TM_info_NonMember B on A.idx = B.adminIdx where nonMemberName =  '$idx' and nonMemberSSN = '$SSN' order by B.idx desc limit 0,4";		
+		//			echo $sql;
+					$tmpRs = mysql_query($sql);
+					$rowCnt = mysql_num_rows($tmpRs);
+					if($rowCnt>0)
+					{
+						while ($rs = mysql_fetch_array($tmpRs)) 
+						{
+							$recentDate = $rs[recentDate];
+							$counselKind = $rs[counselKind];
+							$memo = $rs[memo];
+							$adminName = $rs[userName];
+							$adminNickName = $rs[userNickname];
+							$arrKind = explode("^",$counselKind);
+							$arrKindDetail = explode("^",$rs[counselKindDetail]);
+							$counselKindCode = "";
+							$counselKindDetail = "";
+							$nonMemberName = $rs[nonMemberName];
+							$nonMemberMobile = $rs[nonMemberMobile];
+							$nonMemberSSN = $rs[nonMemberSSN];
+							
+							for($i = 0 ; $i<sizeof($arrKind); $i++)
+							{
+								$counselKindCode  = $counselKindCode." ".$arrKind[$i];
+								$counselKindDetail  = $counselKindDetail." ".$arrKindDetail[$i];
+							}
+						?>
+						<tr align="center">
+						<td><?=$recentDate?></td><td><?=$counselKindCode?><br>[<?=$counselKindDetail?>]</td><td align="left"><?=$memo?></td><td><?=$adminNickName?></td>
+						</tr>
+						<?php
+						}
+						
+						//여기에다가 비회원 연락처 / 번호를 표출 하는 로직을 넣는다.
+						echo "<script type='text/javascript'>displayNonMemberInfo('$nonMemberName','$nonMemberMobile','$nonMemberSSN')</script>'";
+					}
+				}
+				else 
+				{
+					echo "<tr><td colspan='10' align='center'>이력이 없습니다.</td></tr>";
+				}
+			}
+			else 
+			{
+			
+			}
+			?>
+			</table>
+			</td>
+		</tr>
+		<tr>
+		<td colspan="10" height="10"></td>
+		</tr>
+		<tr>
+		<td colspan="10" height="1" bgcolor="AAAAAA"></td>
+		</tr>
+		<tr>
+			<td align="left" valign="bottom"><img src="images/btnLeft_06.gif"></td></td>
+			<td>
+			 <table border="0">
+			    <tr>
+			    <td width="80px"><input type="radio" name="rdStatus" value="Complete" checked onclick="setProcessResult(this.value);">처리</td>
+			    <td width="80px"><input type="radio" name="rdStatus" value="Fail" onclick="setProcessResult(this.value);">미처리</td>
+			    <td width="80px"><input type="radio" name="rdStatus" value="Transfer" onclick="setProcessResult(this.value);">이관</td>
+			    <td width="80px" align="center">메모</td>
+			    <td><textarea name="txtMemo" id="txtMemo" style="width:400px;height:21px;background-color:#D0F18F;"  onkeypress="if(event.keyCode==13){chkForm();}"></textarea></td>
+			    </tr>
+			  </table>
+			</td>
+		</tr>
+		<tr>
+			<td align="left" valign="bottom"><img src="images/btnLeft_07.gif"></td></td>
+			<td>
+			 <table border="0">
+			    <tr>
+			    <td>
+			    <input type="checkbox" name="rdBlacklist" id="rdBlacklist" value="B" onclick="setBlackList(this.checked,this.value);">블랙리스트 등록</td>
+			    </tr>
+			  </table>
+			</td>
+		</tr>
+		<tr>
+			<td align="left" valign="bottom"><img src="images/btnLeft_08.gif"></td></td>
+			<td>
+			<table border="0" width="100%"">
+			    <tr>
+			    <td width="250px">
+				<!-- 여기에 달력 iframe -->
+				<?php 				include_once $_SERVER['DOCUMENT_ROOT']."/lani/TM/calendar.html";				?>
+				</td>
+				<td width="100px" align="left">
+				<input type="radio" name="rdCounselTime" value="AM" onclick="setReservationTime(this.checked,this.value);">오전				
+				</td>
+				<td align="left">
+				<input type="radio" name="rdCounselTime" value="PM" onclick="setReservationTime(this.checked,this.value);">오후
+				</td>
+				<td>				
+				시간예약 : 
+				<select name="reserveHour" id="reserveHour">
+				<option  value="0">--</option>				
+				<?php
+				for($i=1 ; $i <= 12 ; $i++)
+				{
+				echo "<option  value='$i'>$i</option>";
+				}				
+				?>
+				</select>시
+				
+				<select name="reserveMin" id="reserveMin">
+				<option  value="0">--</option>				
+				<?php
+				for($i=0 ; $i < 55 ; $i = $i+5)
+				{
+					if($i==0)
+					{
+						$i = "00";
+						echo "<option  value='$i'>$i</option>";
+					}
+					else 
+					{
+						echo "<option  value='$i'>$i</option>";
+					}
+				}				
+				?>
+				</select>분
+				</td>
+			    </tr>
+			  </table>
+			
+			
+			
+			</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>			
+			<table id="tdBtnInCome">
+			<tr>
+			<td>
+				<img src="images/btnSubmit.gif" border="0" style="cursor:hand;" onmouseover="this.src = 'images/_btnSubmit.gif'" onmouseout="this.src = 'images/btnSubmit.gif'" onclick="chkForm('4');">
+			</td>
+			</tr>
+			</table>
+			
+			<table id="tdBtnOutCome" style="display:none;">
+			<tr>
+			<td>			
+			<input type="button" value="1차 통화" onclick="chkForm('1');">
+			&nbsp;&nbsp;
+			<input type="button" value="2차 통화" onclick="chkForm('2');">
+			&nbsp;&nbsp;
+			<input type="button" value="3차 통화" onclick="chkForm('3');">
+			&nbsp;&nbsp;
+			</td>
+			</tr>
+			</table>
+			
+			</td>
+		</tr>
+		</table>
+	</td><!-- 왼쪽 -->
+	<td width="2px" valign="top">
+		<table height="800px" width="100%">
+		<tr>
+		<td bgcolor="Black"></td>
+		</tr>
+		</table>
+	</td>
+	<td valign="left">
+	 <iframe name="invFrame" width="100%" height="800" src="member_view.php?idx=<?=$idx?>" frameborder="0"></iframe>
+	
+	</td> <!-- 오른쪽 -->
+
+</tr>
+
+</table>
+
+<form name="form1" method="POST" target="invFrame2">
+<input type="hidden" name="userIdx" id="userIdx" value="<?=$idx?>"> <!-- 회원번호 -->
+<input type="hidden" name="adminIdx" id="adminIdx"> <!-- 관리자 번호 -->
+<input type="hidden" name="recentDate" id="recentDate"> <!-- 상담일 -->
+<input type="hidden" name="reserveDate" id="reserveDate"> <!-- 상담예약일 -->
+<input type="hidden" name="recentEndDate" id="recentEndDate"> <!-- 상담종료일시 -->
+<input type="hidden" name="processResult" id="processResult" value="Complete"> <!-- 처리결과 -->
+<input type="hidden" name="memo" id="memo"> <!-- 메모 -->
+<input type="hidden" name="counselKind" id="counselKind"> <!-- 상담 코드 -->
+<input type="hidden" name="counselKindDetail" id="counselKindDetail"> <!-- 상담 코드 상세 -->
+<input type="hidden" name="counselTime" id="counselTime"> <!-- 상담일시 -->
+<input type="hidden" name="counselTimebyNumber" id="counselTimebyNumber"> <!-- 누적 상담시간 -->
+
+<!-- 비회원일 경우에 시작-->
+<input type="hidden" name="nonMemberName" id="nonMemberName" value="<?=$idx?>"> <!-- 비회원 이름 -->
+<input type="hidden" name="nonMemberMobile" id="nonMemberMobile" value="<?=$mobile?>"> <!-- 비회원 연락처 -->
+<input type="hidden" name="nonMemberSSN" id="nonMemberSSN" value="<?=$SSN?>"> <!-- 비회원 주민번호 앞자리 -->
+<input type="hidden" name="nonMemberFlag" id="nonMemberFlag" <?php if($mode == "NonMember"){echo " value='T'";} ?>> <!-- 회원 / 비회원 구분 -->
+<!-- 비회원일 경우에 종료-->
+
+<input type="hidden" name="txtBlackList" id="txtBlackList"> <!-- 블랙리스트 여부 -->
+<input type="hidden" name="txtReservationTime" id="txtReservationTime"> <!-- 오전 / 오후 구분 -->
+<input type="hidden" name="txtReserveHour" id="txtReserveHour"> <!-- 전화 예약 시간대 구분 -->
+<input type="hidden" name="txtReserveMin" id="txtReserveMin"> <!-- 전화 예약 시간대 구분 -->
+
+<input type="hidden" name="txtUserGrade" id="txtUserGrade"> <!-- 등급 -->
+
+
+
+</form>
+
+<iframe name="invFrame2" width="1000px" height="800px"></iframe>
+</body>
+</html>
+
+<?php
+if($idx!= "")
+{
+	//상담시간을 시작한다
+	echo "<script>startCounselTime();</script>";
+}
+?>

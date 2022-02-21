@@ -1,0 +1,214 @@
+<?php
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+/* 사용자가 검색한 키워드에 해당하는 종목을 가져와서 보여주는 기능 */
+
+//로그인 여부 조회
+if(!$_COOKIE['_CKE_USER_ID']){
+	popupMsg("로그인후 이용이 가능합니다.");
+	echo "<script> window.close(); </script>";
+	exit();
+}
+
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+
+
+//관리자인지 여부 가져오기
+$admin_level = $_COOKIE['_CKE_USER_LEVEL']; //0
+//20170818 유료회원 + 관리자는 차감 없도록 수정
+$meminfo=get_meminfo($_COOKIE['_CKE_USER_UID'],"gradeLevel");
+$gLevel = $meminfo[gradeLevel];
+//gLevel =1 이면 다 보인다.
+if($gLevel == 1){
+$admin_level = 0;
+}
+
+
+
+//암호화 되서 넘어온 검색 키워드
+//$searchKeyword = base64_decode($searchKeyword); 
+
+//회원 번호
+$memIdx = $_COOKIE["_CKE_USER_UID"]; 
+
+//키워드를 이용해서 검색한다. 
+//$sql = "select * from jongmokValue where (code like '%$searchKeyword' or name like '$searchKeyword%') and outFlag <> 'T' order by freeFlag DESC, type DESC, industry ASC, name ASC";
+$sql = "select * from jongmokValue where (code like '%$searchKeyword' or name like '$searchKeyword%') AND outFlag = 'F'  order by freeFlag DESC, type DESC, industry ASC, name ASC";
+$tmpRs = mysql_query($sql);
+if(mysql_num_rows($tmpRs))
+{
+	$tdHeight = 150 / mysql_num_rows($tmpRs);
+	if($tdHeight < 50)
+	{
+		$tdHeight = 20;
+	}
+}
+else{
+	$msg = "검색 결과가 없습니다. 종목명 또는 종목코드를 다시 입력 해 주세요.<br><br><br><br>관리종목, 거래정지 종목, 우선주등의 적정주가는 제공하지 않습니다. <br>";	
+}
+
+
+
+?>
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="css/table02.css">
+<script type="text/javascript">
+function chkMain(code,name,freeFlag,adminFlag,sameFlag)
+{ 
+	//종목코드, 종목명, 무료종목 여부, 관리자인지 여부, 동일 종목 재 검색인지 여부
+	var f = document.frm;	
+	var remainCnt = top.topFrame.document.getElementById("txtRemainCnt").value;	
+	
+	//alert(remainCnt);
+	
+	document.getElementById("sameFlag").value = sameFlag;
+	
+	
+			if(remainCnt > 0) //충전 금액이 있으면
+			{ 	
+						//sameFlag는 3가지이다. 
+						//1. 유료이면서 처음 조회 0 (
+						//2. 유료이면서 재 조회 (가격 변동 없음) 1
+						//3. 유료이면서 재 조회 (가격 변동 있음) 2
+				switch(sameFlag)
+				{
+					case '0':
+					var msg = name+" 종목은 유료입니다. \n\n충전 금액이 차감됩니다.";						
+					if(confirm(msg)){
+						f.submit();	
+					}
+					break;
+							
+					case '1':
+					f.submit();
+					break;
+							
+					case '2':
+					var msg = name+" 종목은 적정주가가 갱신 되었습니다.\n\n 재 조회 시 충전 금액이 차감됩니다.\n\n조회하시겠습니까?";
+					if(confirm(msg)){
+						f.submit();	
+					}
+					break;
+				}				
+				
+			}
+			else
+			{
+				//결제 금액이 없더라도, 기존에 봤던 종목이라면, 또 볼 수 있게 한다. 
+				if(sameFlag == 1){
+					f.submit();
+					return false;
+				}
+				var msg = "결제 후 이용 가능합니다. 결제하시겠습니까?";
+				if(confirm(msg))
+				{
+					goRecharge();					
+				}
+			}
+}
+
+
+function goSearch(code,name,freeFlag,adminFlag)
+{
+	var f = document.frm;		
+	document.getElementById("searchKeyword").value = code;
+	document.getElementById("freeFlag").value = freeFlag;
+	
+	
+	
+	
+	if(adminFlag==0 || adminFlag==4) //관리자 또는 전문가이면
+	{
+		f.submit();
+	}
+	else{
+		if(freeFlag == "T")
+		{ //무료 종목이면
+				f.submit();
+				
+		}else{ //유료 종목이면
+			
+			//동일 종목 검색여부 체크
+			document.getElementById("frmChkJongmok").src = "chkSameJongmok.php?jongmokCode="+code+"&name="+name+"&freeFlag="+freeFlag+"&adminFlag="+adminFlag;	//T:변동, F:동일
+		}
+	}
+	
+	
+}
+
+function goRecharge() //결제창 띄우기
+{
+	//top.parent.main01.contents.location.href='pay_test.php';
+	var win = window.open('pay.html','pay','width=470px,height=700px,top=0,left=300,location=no,menubar=no,status=no,toolbar=no')
+}
+</script>
+</head>
+<body leftmargin="50px">
+<img src="img/title01.gif">
+<table border="0" cellpadding="0" cellspacing="0" width="100%" class="table01">
+<tr class="thSearch01">
+<th width="150px" height="40px" class="white">종목명</th>
+<th width="100px" class="white">종목코드</th>
+<th width="100px" class="white">구분</th>
+<th width="100px" class="white">업종</th>
+<th class="white">적정주가 기준일</th>
+</tr>
+
+<tbody>
+<?php
+if($msg)
+{
+?>
+	<tr><th colspan="10" height="100px"><?=$msg?></td></tr></table>
+<?php
+	exit;
+}
+	$num = 0;
+	
+	while($rs = mysql_fetch_array($tmpRs))
+	{
+	if($rs["freeFlag"] == F){
+		$class = "odd";
+	}else {
+		$class="";
+	}
+	if($rs[freeFlag]=="T"){
+		$jongmokInfo = $rs[name]."<br><br>(무료 종목)";
+	}else{
+		$jongmokInfo = $rs[name]."<br><br>(유료 종목)";
+	}
+?>
+	<tr class="<?=$class?>" onclick="goSearch('<?=$rs[code]?>','<?=$rs[name]?>','<?=$rs[freeFlag]?>','<?=$admin_level?>')" style="cursor:hand">
+	<td height="<?=$tdHeight?>"><b><?=$jongmokInfo?></b></td>
+	<td><b><?=$rs["code"]?></b></td>
+	<td><b><?=$rs["type"]?></b></td>
+	<td><b><?=$rs["industry"]?></b></td>
+	<td><b><?=$rs["updateDate"]?></b></td>
+	</tr>
+<?php
+	$num++;
+	
+	}
+?>
+</tbody>
+</table>
+<table>
+
+<form name="frm" target="_self" action="searchResult.php" method="POST">
+<input type="hidden" name="searchKeyword" id="searchKeyword">
+<input type="hidden" name="searchKeywordOld" id="searchKeywordOld" value="<?=$searchKeyword?>">
+<input type="hidden" name="sameFlag" id="sameFlag" >
+<input type="hidden" name="freeFlag" id="freeFlag" >
+
+<iframe name="frmChkJongmok" id="frmChkJongmok" width="0" height="0"></iframe>
+</form>
+
+
+</body>
+</html>

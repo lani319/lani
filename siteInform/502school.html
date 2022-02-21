@@ -1,0 +1,127 @@
+<?php
+$imgPath = "/lani/siteInform/502school/images/";
+?>
+<html>
+<head>
+<title>mypage</title>
+<meta http-equiv="Content-Type" content="text/html; charset=euc-kr">
+<script type="text/javascript">
+function showLayer(id)
+{
+	
+	switch(id)
+	{
+		case 01:
+			document.getElementById("div01").style.display = "inline";	
+			document.getElementById("img01").src = "<?=$imgPath?>01.jpg";
+		break;
+
+		case 02:
+			document.getElementById("div01").style.display = "inline";	
+			document.getElementById("img01").src = "<?=$imgPath?>04.jpg";
+		break;
+		
+		case 03:
+			document.getElementById("div02").style.display = "inline";	
+			document.getElementById("img02").src = "<?=$imgPath?>03.jpg";
+		break;
+		
+		case 04:
+			document.getElementById("div03").style.display = "inline";	
+			document.getElementById("img03").src = "<?=$imgPath?>02_1.jpg";
+		break;
+		
+	}
+}
+function hideLayer(id)
+{
+	document.getElementById(id).style.display="none";
+}
+	
+
+
+</script>
+</head>
+<body bgcolor="#FFFFFF" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+<? include_once $_SERVER['DOCUMENT_ROOT']."/lani/siteInform/topMenu.php"; ?>
+<!-- Save for Web Slices (mypage.psd) -->
+<table id="__01" width="1027" height="299" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td colspan="2"><img src="http://502.co.kr/lani/siteInform/502school/images/502school_01.gif" width="1027" height="299" alt=""></td>
+	</tr>
+	<tr>
+		<td width="215" align="left" valign="top">
+			<table border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td width="215"><img src="http://502.co.kr/lani/siteInform/502school/images/502school_02.gif" width="215" height="47" alt=""></td>		
+			</tr>
+			<tr>
+				<td><img src="http://502.co.kr/lani/siteInform/502school/images/502school_03.gif" width="215" height="36" alt="" onmouseover="showLayer(01);"></td>		
+			</tr>
+			<tr>
+				<td><img src="http://502.co.kr/lani/siteInform/502school/images/502school_04.gif" width="215" height="28" alt="" ></td><td>
+			</tr>
+			<tr>
+				<td><img src="http://502.co.kr/lani/siteInform/502school/images/502school_05.gif" width="215" height="105" alt=""  onmouseover="showLayer(02);"></td><td>
+			</tr>
+			<tr>
+				<td height="549"><img src="http://502.co.kr/lani/siteInform/502school/images/502school_06.gif" width="215" height="549" alt="" ></td><td>
+			</tr>
+			</table>
+		</td>
+		<td align="left" valign="top">
+			<table border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td align="left" valign="top" colspan="2">
+					<div style="position:relative; left: 0px; top: 0px;">
+						<div><img src="http://502.co.kr/lani/siteInform/502school/images/502school_10.gif" width="812" height="318" alt=""></div>
+						<div id="div01" style="position:absolute;top:0px;left:0px;width:85px;height:50px;display:none;" onmouseout="hideLayer('div01');">
+							<table cellpadding="0" cellspacing="" bgcolor="FFFFFF" width="601px" height="166px" border="0">
+								<tr>
+									<td><img id="img01" src="<?=$imgPath?>mypage01.gif" border="0"  ></td>
+								</tr>
+							</table>
+						</div>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<div style="position:relative; left: 0px; top: 0px;">
+						<div><img src="http://502.co.kr/lani/siteInform/502school/images/502school_07.gif" width="611" height="187" alt=""  onmouseover="showLayer(03);"></div>
+						<div id="div02" style="position:absolute;top:0px;left:5px;width:85px;height:50px;display:none;" onmouseout="hideLayer('div02');">
+							<table cellpadding="0" cellspacing="" bgcolor="FFFFFF" width="601px" height="166px" border="0">
+								<tr>
+									<td><img id="img02" src="<?=$imgPath?>mypage01.gif" border="0"  ></td>
+								</tr>
+							</table>
+						</div>
+					</div>
+				</td>			
+				<td rowspan="2"><img src="http://502.co.kr/lani/siteInform/502school/images/502school_09.gif" width="201" height="447" alt=""></td>
+	
+			</tr>
+
+			<tr>
+				<td >
+					<div style="position:relative; left: 0px; top: 0px;">
+						<div><img src="http://502.co.kr/lani/siteInform/502school/images/502school_08.gif" width="611" height="260" alt=""  onmouseover="showLayer(04);"></div>
+						<div id="div03" style="position:absolute;top:0px;left:5px;width:85px;height:50px;display:none;" onmouseout="hideLayer('div03');">
+							<table cellpadding="0" cellspacing="" bgcolor="FFFFFF" width="601px" height="166px" border="0">
+								<tr>
+									<td><img id="img03" src="<?=$imgPath?>mypage01.gif" border="0"  ></td>
+								</tr>
+							</table>
+						</div>
+				</td>
+			</tr>
+			
+			</table>
+		</td>
+	</tr>
+	
+	
+</table>
+<!-- End Save for Web Slices -->
+</body>
+</html>

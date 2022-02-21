@@ -1,0 +1,298 @@
+<?php
+/* 헤더파일 인크루드 */
+include_once $_SERVER['DOCUMENT_ROOT']."/admin/header9.php";
+ob_start();
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/coin_lib.php";
+
+/* post/ get */
+/* ################################################################## */
+
+
+if(!$rtnurl){
+	$rtnurl="/index.html";
+}
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+
+$startDate = $startYear."-".$startMonth."-".$startDay;
+$endDate = $endYear."-".$endMonth."-".$endDay;
+
+if($startYear == "")
+{
+	
+	
+	$startYear = date("Y");
+	$startMonth = date("m");
+	$startDay = date("d")-1;
+	
+	$endYear = date("Y");
+	$endMonth = date("m");
+	$endDay = date("d");
+	
+	$startDate = $startYear."-".$startMonth."-".$startDay;
+	$endDate = $endYear."-".$endMonth."-".$endDay;
+}
+
+$sql = "SELECT loginDate,loginHour,COUNT(loginHour) AS cnt FROM login_history WHERE loginDate >= '$startDate' AND loginDate <= '$endDate'
+GROUP BY loginDate,loginHour ORDER BY loginDate ASC ,loginHour ASC";
+
+//echo $sql;
+
+$tmpRs = mysql_query($sql);
+
+$cnt = 0;
+$cnt2 = 0;
+
+$sumCnt1 = 0;
+$sumCnt2 = 0;
+
+
+
+function getHour($num)
+{
+	switch ($num)
+	{
+		case 0:
+			return "00~01";
+		break;
+		case 1:
+			return "01~02";
+		break;
+		case 2:
+			return "02~03";
+		break;
+		case 3:
+			return "03~04";
+		break;
+		case 4:
+			return "04~05";
+		break;
+		case 5:
+			return "05~06";
+		break;
+		case 6:
+			return "06~07";
+		break;
+		case 7:
+			return "07~08";
+		break;
+		case 8:
+			return "08~09";
+		break;
+		case 9:
+			return "09~10";
+		break;
+		case 10:
+			return "10~11";
+		break;
+		case 11:
+			return "11~12";
+		break;
+		case 12:
+			return "12~13";
+		break;
+		case 13:
+			return "13~14";
+		break;
+		case 14:
+			return "14~15";
+		break;
+		case 15:
+			return "15~16";
+		break;
+		case 16:
+			return "16~17";
+		break;
+		case 17:
+			return "17~18";
+		break;
+		case 18:
+			return "18~19";
+		break;
+		case 19:
+			return "19~20";
+		break;
+		case 20:
+			return "20~21";
+		break;
+		case 21:
+			return "21~22";
+		break;
+		case 22:
+			return "22~23";
+		break;
+		case 23:
+			return "23~24";
+		break;
+	}
+}
+
+?>
+
+<script>
+function goSearch()
+{
+	var f = document.form1;
+	f.action  = "access.html";
+	f.submit();
+}
+</script>
+<link rel="stylesheet" type="text/css" href="/css/502style.css">
+<table cellpadding="0" cellspacing="0" border="0" width="600">
+<tr><td colspan="10" height="50" >
+*해당 날짜에 최초 로그인 한 시간 입니다. <br>
+*2010년 7월23일 08시30분 부터 적용 되었습니다.
+</td></tr>
+<tr><td colspan="10" height="50" >
+<form name="form1" method="POST">
+<select name="startYear">
+<option value="">--</option>
+<option value="2010" <?php if($startYear==2010){echo "selected ";}?>>2010</option>
+<option value="2011" <?php if($startYear==2011){echo "selected ";}?>>2011</option>
+<option value="2012" <?php if($startYear==2012){echo "selected ";}?>>2012</option>
+<option value="2013" <?php if($startYear==2013){echo "selected ";}?>>2013</option>
+<option value="2014" <?php if($startYear==2014){echo "selected ";}?>>2014</option>
+<option value="2015" <?php if($startYear==2015){echo "selected ";}?>>2015</option>
+</select>년
+<select name="startMonth">
+<option value="">--</option>
+<?php
+for($i=1;$i<=12;$i++)
+{
+	if($startMonth == $i)
+	{
+		echo "<option value='$i' selected }>$i</option>";	
+	}
+	else 
+	{
+		echo "<option value='$i' >$i</option>";
+	}
+	
+}
+?></select>월
+<select name="startDay">
+<option value="">--</option>
+<?php
+for($i=1;$i<=31;$i++)
+{
+	if($startDay == $i)
+	{
+		echo "<option value='$i' selected }>$i</option>";	
+	}
+	else 
+	{
+		echo "<option value='$i' >$i</option>";
+	}
+}
+?></select>일
+
+~ 
+
+<select name="endYear">
+<option value="">--</option>
+<option value="2010" <?php if($startYear==2010){echo "selected ";}?>>2010</option>
+<option value="2011" <?php if($startYear==2011){echo "selected ";}?>>2011</option>
+<option value="2012" <?php if($startYear==2012){echo "selected ";}?>>2012</option>
+<option value="2013" <?php if($startYear==2013){echo "selected ";}?>>2013</option>
+<option value="2014" <?php if($startYear==2014){echo "selected ";}?>>2014</option>
+<option value="2015" <?php if($startYear==2015){echo "selected ";}?>>2015</option> 
+</select>년
+<select name="endMonth">
+<option value="">--</option>
+<?php
+for($i=1;$i<=12;$i++)
+{
+	if($endMonth == $i)
+	{
+		echo "<option value='$i' selected }>$i</option>";	
+	}
+	else 
+	{
+		echo "<option value='$i' >$i</option>";
+	}
+}
+?></select>월
+<select name="endDay">
+<option value="">--</option>
+<?php
+for($i=1;$i<=31;$i++)
+{
+	if($endDay == $i)
+	{
+		echo "<option value='$i' selected }>$i</option>";	
+	}
+	else 
+	{
+		echo "<option value='$i' >$i</option>";
+	}
+}
+?></select>일
+<a href="#" onclick="goSearch()">[ 조 회 ]</a>
+</form>
+
+</td></tr>
+<tr>
+<td width="200" align="center">날짜</td>
+<td width="200" align="center">시간대</td>
+<td align="center">로그인 카운트 </td>
+</tr>
+<tr><td colspan="10" height="1" bgcolor="skyblue"></td></tr>
+<?php
+$oldDate = "";
+$sumTotal = 0;
+while($rs = mysql_fetch_array($tmpRs))
+{
+	$hour = getHour($rs[loginHour]);
+	
+	
+	if($oldDate == "")
+	{
+		
+		$oldDate = $rs[loginDate];
+		echo "<tr><td colspan='10' height='10' bgcolor='skyblue'>$oldDate</td></tr>";
+		echo "<tr><td width='200' align='center'>$rs[loginDate]</td><td width='200' align='center'>$hour</td><td align='center'>$rs[cnt]</td></tr>";
+		echo "<tr><td colspan='10' height='1' bgcolor='skyblue'></td></tr>";
+		
+	}	
+	else if($oldDate!="" and $oldDate != $rs[loginDate])
+	{
+		
+		
+		$oldDate = $rs[loginDate];
+		echo "<tr><td width='400' align='center' colspan='2' bgcolor='AAAAAA' style:'color:FFFFFF;font-weight:bold;'>TOTAL</td><td align='center' bgcolor='AAAAAA' style:'color:FFFFFF;font-weight:bold;'>".number_format($sumCnt1)."</td></tr>";		
+		echo "<tr><td colspan='10' height='10' bgcolor='skyblue'>$oldDate</td></tr>";
+		echo "<tr><td width='200' align='center'>$rs[loginDate]</td><td width='200' align='center'>$hour</td><td align='center'>$rs[cnt]</td></tr>";
+		echo "<tr><td colspan='10' height='1' bgcolor='skyblue'></td></tr>";
+		
+		$sumCnt1 = 0;
+	}
+	else 
+	{
+		
+		echo "<tr><td width='200' align='center'>$rs[loginDate]</td><td width='200' align='center'>$hour</td><td align='center'>$rs[cnt]</td></tr>";
+		echo "<tr><td colspan='10' height='1' bgcolor='skyblue'></td></tr>";
+	}
+	
+	$sumCnt1 = $sumCnt1 + $rs[cnt];
+	$sumTotal = $sumTotal + $rs[cnt];
+	
+}
+echo "<tr><td width='400' align='center' colspan='2' bgcolor='AAAAAA' style:'color:FFFFFF;font-weight:bold;'>TOTAL</td><td align='center' bgcolor='AAAAAA' style:'color:FFFFFF;font-weight:bold;'>".number_format($sumCnt1)."</td></tr>";		
+echo "<tr><td width='400' align='center' colspan='2' bgcolor='FFFF99' style:'color:000000;font-weight:bold;'>기간합계</td><td align='center' bgcolor='FFFF99' style:'color:FF3399;font-weight:bold;'>".number_format($sumTotal)."</td></tr>";
+?>
+<tr><td colspan="10" height="1" bgcolor="skyblue"></td></tr>
+<tr><td colspan="10" height="1" bgcolor="skyblue"></td></tr>
+
+</table>
+
+<?php
+
+$rs = "";
+$rs2 = "";
+
+?> 

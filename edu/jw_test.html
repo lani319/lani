@@ -1,0 +1,435 @@
+<?php
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+
+//$_COOKIE["_CKE_USER_ID"] = "ayh319";
+
+if(!$_COOKIE["_CKE_USER_ID"])
+{
+	echo "로그인해!!";
+	exit;
+}
+
+if($currentMovie == "")
+{
+	$currentMovie = 1;
+}
+
+$sql = "select idx,subject,level,regDate from First_education_movie where idx=".$currentMovie;
+$tmpRs = mysql_query($sql);
+$rs = mysql_fetch_array($tmpRs);
+
+$movieIdx = $rs[idx];
+$movieSubject = $rs[subject];
+$movieLevel = $rs[level];
+$movieRegdate = $rs[regDate];
+
+
+$sql = "select * from First_education_info where userIdx='".$_COOKIE["_CKE_USER_UID"]."' order by regDate desc limit 0,1";
+$sql = "select * from First_education_info where userIdx='39115'";
+//echo $sql;
+//echo "<br>";
+
+
+$tmpRs = mysql_query($sql);
+$rs = mysql_fetch_array($tmpRs);
+
+$strURL = " test.html ";
+$strTbl = " First_education_info ";
+
+echo "현재 강의 ".$currentMovie;
+echo "<br>";
+
+
+/*
+idx			사용자 인덱스
+userIdx		사용자고유번호
+currentMovie	현재보고있는영상 번호
+latestMovie	가장 최근에 끝까지 본 영상 번호
+lastVisitTime	가장 최근에 끝까지 본 영상의 종료 시각
+currentLevel	현재 회원의 등급(교육등급) / 숫자
+*/
+
+if($rs[idx]!="")
+{
+	$userIdx = $rs[userIdx];
+	$currentMovie2 = $currentMovie; //GET으로 넘어온 값
+	$latestMovie = $rs[latestMovie]; //A movie clip which is last shown.
+	$lastVisitTime = $rs[lastVisitTime]; //recently visit time 
+	$currentLevel = $rs[currentLevel]; //current vod level
+	
+	$currentLevel = getMemberPoint($strTbl);
+	echo "Level ->".$currentLevel;
+
+	$point = 0;
+	$gap =  $latestMovie - $currentMovie2;
+	
+	setVisitCnt($currentMovie);
+	
+	//회원 등급이 영상을 봐도 되는지 체크한다. currentlevel이 영상에서 설정한 값 보다 작으면 볼 수 없다
+	
+	if($currentLevel < $movieLevel) //현재 Level이 영상을 볼 수 있는 Level 보다 낮다
+	{
+		
+		$nextPage = 1;
+		$msg = "고객님은 영상을 볼 수 있는 권한이 없습니다. $movieLevel 포인트 이상이 되어야 볼 수 있습니다.";
+		$url = "test.html?currentMovie=1";
+		redirectEdu($url,$msg);
+		exit;
+	}
+	
+	//지금 보는 영상을 이미 본건지 체크한다
+	if($currentMovie2 == 1 &&  $latestMovie == 0) //처음 보는거, 
+	{
+		//최근 재생 영상 update, 재생
+		//echo "첫번째 영상 재생할께!!";
+	}
+	else  //처음이 아닐때
+	{
+		if($latestMovie == 0)
+		{
+			//1번 영상 안 봤자나!!
+			$nextPage = 1;
+			$msg = "1번 강의를 먼저 시청하셔야 합니다.";
+			$url = "$strURL?currentMovie=$nextPage";
+			redirectEdu($url,$msg);
+			exit;
+		}
+		else 
+		{	
+			if($gap < -1) //가장 최근에 끝까지 본 영상이, 바로 전 영상이 아니면..
+			{
+				//$latestMovie+1 재생해!!	
+				$nextPage = ($latestMovie+1);
+				$msg = ($latestMovie+1)."번 강의를 먼저 시청하셔야 합니다.";
+				$url = "$strURL?currentMovie=$nextPage";
+				redirectEdu($url,$msg);
+				exit;
+			}
+		}
+	}
+}
+else 
+{
+	
+	$sql = "insert into First_education_info(userIdx,currentMovie,latestMovie,lastVisittime,currentLevel,regDate) values('".$_COOKIE["_CKE_USER_UID"]."',0,0,now(),1,now())";
+	mysql_query($sql);	
+	$nextPage = 1;
+	$msg = "선물교육에 참여 해 주셔서 감사합니다. 첫번째 강의를 재생합니다.";
+	$url = "$strURL?currentMovie=$nextPage";
+	redirectEdu($url,$msg);
+	exit;
+}
+
+
+
+function redirectEdu($url,$msg)
+{
+	echo "<script>alert('$msg');location.href='$url';</script>";
+	
+}
+
+function setVisitCnt($movieidx)
+{
+	$sql ="update First_education_info set visitCnt$movieidx = (visitCnt$movieidx+1) where userIdx='".$_COOKIE["_CKE_USER_UID"]."'";
+	mysql_query($sql);
+	return "T";
+}
+
+
+function getMemberPoint($URL)
+{
+	$sql = "select * from $URL where userIdx='".$_COOKIE["_CKE_USER_UID"]."'";
+		
+	$tmpRs = mysql_query($sql);
+	$rs = mysql_fetch_array($tmpRs);
+	
+	//방문한 회수
+	$arrVisitCnt[0] = $rs[visitCnt1];
+	$arrVisitCnt[1] = $rs[visitCnt2];
+	$arrVisitCnt[2] = $rs[visitCnt3];
+	$arrVisitCnt[3] = $rs[visitCnt4];
+	$arrVisitCnt[4] = $rs[visitCnt5];
+	$arrVisitCnt[5] = $rs[visitCnt6];
+	$arrVisitCnt[6] = $rs[visitCnt7];
+	$arrVisitCnt[7] = $rs[visitCnt8];
+	$arrVisitCnt[8] = $rs[visitCnt9];
+	$arrVisitCnt[9] = $rs[visitCnt10];
+	
+	//본 회수
+	$arrShowCnt[0] = $rs[showCnt1];
+	$arrShowCnt[1] = $rs[showCnt2];
+	$arrShowCnt[2] = $rs[showCnt3];
+	$arrShowCnt[3] = $rs[showCnt4];
+	$arrShowCnt[4] = $rs[showCnt5];
+	$arrShowCnt[5] = $rs[showCnt6];
+	$arrShowCnt[6] = $rs[showCnt7];
+	$arrShowCnt[7] = $rs[showCnt8];
+	$arrShowCnt[8] = $rs[showCnt9];
+	$arrShowCnt[9] = $rs[showCnt10];
+/*	
+	for($i=0 ; $i<sizeof($arrVisitCnt); $i++)
+	{
+		echo "Visit$i : ".$arrVisitCnt[$i]."<br>";
+	}
+*/
+
+	$mPoint = 0;
+	
+	for($i=0 ; $i<sizeof($arrShowCnt); $i++)
+	{
+		if($arrShowCnt[$i] <3 && $arrShowCnt[$i] >0)
+		{
+			$mPoint = $mPoint + $arrShowCnt[$i]*5;
+		}
+		else if($arrShowCnt[$i] >=3)
+		{
+			$mPoint = $mPoint + 10;
+		}
+	}
+	
+	return $mPoint;
+}
+
+
+?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+ <HEAD>
+  <TITLE> New Document </TITLE>
+  <META NAME="Generator" CONTENT="EditPlus">
+  <META NAME="Author" CONTENT="">
+  <META NAME="Keywords" CONTENT="">
+  <META NAME="Description" CONTENT="">
+<link rel="stylesheet" type="text/css" href="/css/502style.css">
+<script language="JavaScript">
+	function startCheckPlayer() 
+	{
+		window.setInterval("checkPlayerStatus()",100);
+	}
+	function checkPlayerStatus() 
+	{
+		document.formular2.clipPosition.value = parseInt(document.MediaPlayer.currentPosition);
+		document.formular2.playerStatus.value = document.MediaPlayer.PlayState;
+		document.formular2.percPos.value = parseInt(document.MediaPlayer.currentPosition / document.MediaPlayer.duration*100);
+
+		if(document.formular2.percPos.value == 10)
+		{			
+			document.getElementById("latestMovie").value = "<?=$currentMovie2?>";
+			document.getElementById("memberLevel").value = "<?=$currentLevel+$point?>";
+			document.MediaPlayer.Stop();
+			//alert('재생이 완료 되었습니다.');
+			//document.form1.submit();
+			return;
+		}
+	}
+	
+	function moveNext(idx,currentMemberIdx,nextMovieLevel)
+	{
+		if(currentMemberIdx < nextMovieLevel)
+		{
+			alert('권한이 없습니다.');
+			return;
+		}
+		else
+		{
+			location.href = "test.html?currentMovie="+idx;
+		}
+	}
+	
+	
+	function chkComment()
+	{
+		var f = document.form2;		
+		if(f.txtCommnet.value.length > 100)
+		{
+			alert('100자 이내로 입력 하셔야 합니다.');
+			return;
+		}
+		document.getElementById("commentMode").value = "submit";
+		
+		f.submit();
+	}
+	
+	function chkCommentLentgh(value)
+	{
+		if(value.length > 100)
+		{
+			alert('100자 이내로 입력 하셔야 합니다.');
+			return;
+		}
+		else
+		{
+			document.getElementById("txtLength").value = value.length+" / 100";
+		}
+	}
+
+
+</script>
+
+
+
+<script type='text/javascript' src='/lani/edu/jwplayer/swfobject.js'></script> 
+
+<script type='text/javascript'>
+var so = new SWFObject('/lani/edu/jwplayer/player.swf','mpl','640','480','9');
+so.addParam('allowfullscreen','true');
+so.addParam('allowscriptaccess','always');
+so.addParam('wmode','opaque');
+so.addVariable('file','http://content.longtailvideo.com/videos/flvplayer.flv');
+so.addVariable('backcolor','000000');
+so.addVariable('frontcolor','FFFFFF');
+so.addVariable('lightcolor','FFFFFF');
+so.addVariable('playlist','right');
+so.addVariable('autostart','true');
+so.write('mediaspace');</script>
+ </HEAD>
+
+<BODY>
+<form name="form1" action="education_ok.php">
+<input type="hidden" name="currentMovie" id="currentMovie" value="<?=$currentMovie2?>">
+<input type="hidden" name="latestMovie" id="latestMovie">
+<input type="text" name="memberLevel" id="memberLevel" value="<?=$currentLevel?>">
+</form>
+<table width=770px border=1 cellpadding=0 cellspacing=0 align=center>
+<tr>
+<td width="500px">
+이미지(그래프)
+</td>
+<td>
+현재 레벨 : <?=$currentLevel?>
+<br>
+
+</td>
+</tr>
+</table>
+<table width=770px border=0 cellpadding=0 cellspacing=0 align=center>
+<tr>
+<td width="500" bgcolor="Gray">
+	<table align="center" width="100%" cellpadding="0" border="0">
+	<tr>
+	<td width="100%" align="center">
+	<OBJECT ID="MediaPlayer" width=480 height=272
+	classid="CLSID:22D6F312-B0F6-11D0-94AB-0080C74C7E95"
+	CODEBASE="http://activex.microsoft.com/activex/controls/mplayer/
+	en/nsmp2inf.cab#Version=6,4,5,715"
+	standby="Loading Microsoft Windows Media Player components..."
+	type="application/x-oleobject">
+	<PARAM NAME="AutoStart" VALUE="True">
+	<PARAM NAME="FileName" VALUE="mms://www.502.co.kr/lani/edu/media/test.WMV">
+	<PARAM NAME="ShowControls" VALUE="False">
+	<PARAM NAME="ShowStatusBar" VALUE="False">
+	<EMBED type="application/x-mplayer2" 
+	pluginspage="http://www.microsoft.com/Windows/MediaPlayer/"
+	SRC="mms://www.502.co.kr/lani/edu/media/test.WMV"
+	name="MediaPlayer"
+	width=640
+	height=480
+	autostart=1
+	showcontrols=0>
+	</EMBED>
+	</OBJECT>
+
+	<br>
+	<a href="#" onclick="document.MediaPlayer.Play()">Play</a>
+	<a href="#" onclick="document.MediaPlayer.Pause()">Pause</a>
+	<a href="#" onclick="document.MediaPlayer.Stop()">Stop</a><br>
+	<br>
+	<form action="" name="formular2"><font size="-1">
+	<input type="hidden" name="clipPosition" size="10" readonly> <br>
+	<input type="hidden" name="clipLength" size="10" readonly><br>
+	<input type="hidden" name="percPos" size="3" readonly><br>
+	<input type="hidden" name="playerStatus" size="3" readonly>
+	</font></form>
+	</td></tr>
+	</table>
+</td>
+<td bgcolor="Teal">
+<div id="divPL" style="width:270px;height:400px;overflow:auto;">
+<?php
+$sql = "select * from First_education_movie";
+$tmpRs = mysql_query($sql);
+
+while($rs = mysql_fetch_array($tmpRs))
+{
+	$imgPath = "img/".$rs[image_name];
+?>
+	<table cellpadding="0" cellspacing="0" border="0" width="100%">
+		<tr>
+		<td>
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			  <tr>
+			    <td rowspan="3"><a href=# onClick="moveNext('<?=$rs[idx]?>','<?=$currentLevel?>','<?=$rs[level]?>')"><img src='<?=$imgPath%>' border=0></a></td>
+			    <td><?=$rs[subject]?></td>
+			  </tr>
+			  <tr>
+			    <td>설명</td>
+			  </tr>
+			  <tr>
+			    <td><?=$rs[level]?></td>
+			  </tr>
+			  <tr><td height="3" rowspan="4"></td></tr>
+			</table>
+		</td>
+		</tr>
+	</table>
+<?php
+}
+?>
+</div>
+</td>
+</tr>
+<tr>
+<td>
+
+<div id='mediaspace'>This text will be replaced</div> 
+</td>
+</tr>
+<tr>
+<td>
+<object classid='clsid:D27CDB6E-AE6D-11cf-96B8-444553540000' width='640' height='480' id='single1' name='single1'>
+<param name='movie' value='player.swf'>
+<param name='allowfullscreen' value='true'>
+<param name='allowscriptaccess' value='always'>
+<param name='wmode' value='transparent'>
+<param name='flashvars' value='file=http://content.longtailvideo.com/videos/flvplayer.flv&backcolor=000000&frontcolor=FFFFFF&lightcolor=FFFFFF&playlist=right&autostart=true'>
+<embedtype='application/x-shockwave-flash'id='single2'name='single2'src='/lani/edu/jwplayer/player.swf'width='640'height='480'bgcolor='undefined'allowscriptaccess='always'allowfullscreen='true'wmode='transparent'flashvars='file=http://content.longtailvideo.com/videos/flvplayer.flv&backcolor=000000&frontcolor=FFFFFF&lightcolor=FFFFFF&playlist=right&autostart=true'/>
+</object>
+</td>
+</tr>
+<tr>
+<td colspan="2">
+
+댓글 들어가는 위치
+<Form name="form2" target="invComment" action="edu_comment.php" method="POST">
+<input type="hidden" name="commentMode" id="commentMode" value="">
+<input type="hidden" name="movieIdx" id="movieIdx" value="<?=$movieIdx?>">
+<table width=100% cellpadding="0" cellspacing="0" border="1">
+<tr>
+<Td width="150px" align="center" valign="center"><?=$_COOKIE["_CKE_USER_NICK_NAME"]?><br>[<?=$_COOKIE["_CKE_USER_ID"]?>]</Td>
+<td><textarea name="txtCommnet" id="txtComment"  style="width:600px;height:50px;" onkeydown="chkCommentLentgh(this.value);"></textarea>
+<br>
+<input type="text" name="txtLength" id="txtLength" size="10" >
+</td>
+<td><input type="button" name="btnComment" id="btnComment" value="댓글입력" onclick="chkComment();" style="width:100px;height:50px;font-weight:bold;color:FFFFFF;background-color:000000;"></td>
+</tr>
+</table>
+</Form>
+<iframe name="invComment" width="100%" height="800px" src="edu_comment.php?movieIdx=<?=$movieIdx?>" scrolling="auto" frameborder="0">
+</iframe>
+</td>
+</tr>
+</table>
+
+<script language="JavaScript">
+
+window.setTimeout("startCheckPlayer()",2500);
+</script>  
+ </BODY>
+ 
+</HTML>

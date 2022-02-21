@@ -1,0 +1,110 @@
+.table01 {
+	
+	border-collapse:collapse;
+	border:1px solid #FFCA5E;
+	FONT-FAMILY: ±¼¸²;
+	font-size: 1.2em;
+}
+caption {
+	font: 1.4em/1.4em Arial, Helvetica, sans-serif;
+	text-align: left;
+	text-indent: 10px;
+	background: url(bg_caption.jpg) right top;
+	height: 45px;
+	color: #D2691E;
+	font-weight:bold;
+	FONT-FAMILY: ±¼¸²;
+}
+.caption01 {
+	font: 0.8em/0.8em Arial, Helvetica, sans-serif;
+	text-align: left;
+	text-indent: 10px;
+	background: url(bg_caption.jpg) right top;
+	height: 40px;
+	color: #D2691E;
+	font-weight:bold;
+	FONT-FAMILY: ±¼¸²;
+}
+thead th {
+	height: 20px;
+	color: #FFFFFF;
+	font-size: 1.2em;
+	font-weight: bold;
+	padding: 0px 0px;
+	margin: 0px 0px 0px;
+	text-align: center;
+	border-right: 1px solid #FCF1D4;
+	background:#333 url(http://www.502.co.kr/lani/jongmokValue/img/llsh.gif) repeat-x;
+	FONT-FAMILY: ±¼¸²;
+	
+}
+.thSearch01 {
+	height: 20px;
+	color: #FFFFFF;
+	font-size: 1.0em;
+	font-weight: bold;
+	padding: 0px 0px;
+	margin: 0px 0px 0px;
+	text-align: center;
+	border-right: 1px solid #FCF1D4;
+	background:#333 url(http://www.502.co.kr/lani/jongmokValue/img/llsh.gif) repeat-x;
+	FONT-FAMILY: ±¼¸²;
+	
+}
+.trUpDown {
+	height: 15px;
+	color: #000000;
+	font-size: 1.0em;
+	font-weight: bold;
+	padding: 0px 0px;
+	margin: 0px 0px 0px;
+	text-align: center;
+	border-right: 1px solid #FCF1D4;
+	background:#333 url(http://www.502.co.kr/lani/jongmokValue/img/llsh.gif) repeat-x;
+	FONT-FAMILY: ±¼¸²;
+	
+}
+.white {
+	color : #FFFFFF;
+	FONT-FAMILY: ±¼¸²;
+}
+tbody tr {
+	background: #FFFFFF;
+	FONT-FAMILY: ±¼¸²;
+}
+tbody tr.odd {
+	background: #FFF8E8;
+	FONT-FAMILY: ±¼¸²;
+}
+
+tbody th,td {
+	font-size: 0.8em;
+	line-height: 0.6em;	
+	color: #777777;
+	padding: 10px 7px;
+	border-top: 1px solid #FFCA5E;
+	border-right: 1px solid #DDDDDD;
+	text-align: center;
+	FONT-FAMILY: ±¼¸²;
+}
+a {
+	color: #777777;
+	font-weight: bold;
+	
+}
+a:hover {
+	color: #F8A704;
+	
+}
+tfoot th {
+	background: url(bg_total.jpg) repeat-x bottom;
+	color: #FFFFFF;
+	height: 30px;
+	FONT-FAMILY: ±¼¸²;
+}
+tfoot td {
+	background: url(bg_total.jpg) repeat-x bottom;
+	color: #FFFFFF;
+	height: 30px;
+	FONT-FAMILY: ±¼¸²;
+}

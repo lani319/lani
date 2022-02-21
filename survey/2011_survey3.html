@@ -1,0 +1,259 @@
+<html>
+<head>
+<script type="text/javascript">
+
+var cnt;
+var i;
+var j;
+var f;
+
+//응답변수
+var A1 = 0; 
+var A2 = 0;
+var A3 = 0;
+var A4 = 0;
+
+
+function checkForm()
+{
+	f = document.form1;
+	
+	if(A1 == 0)
+	{
+		alert('1번 문항에 응답 해 주세요');		
+		return;
+	}
+	else if(A2 == 0)
+	{
+		alert('2번 문항에 응답 해 주세요');		
+		return;
+	}
+	else if(A3 == 0)
+	{
+		alert('3번 문항에 응답 해 주세요');		
+		return;
+	}
+	else if(A4 == 0)
+	{
+		alert('4번 문항에 응답 해 주세요');		
+		return;
+	}	
+		
+		
+	if(A1 == 5)
+	{
+		A1 = document.getElementById("txtq1_6").value;
+	}
+	if(A2 == 5)
+	{
+		A2 = document.getElementById("txtq2_6").value;
+	}
+	if(A3 == 7)
+	{
+		A3 = document.getElementById("txtq3_9").value;
+	}
+	if(A4 == 5)
+	{
+		A4 = document.getElementById("txtq4_6").value;
+	}
+	
+	A5 = document.getElementById("txtComment").value;
+	
+	document.getElementById("txtDetail3").value = A1+"$"+A2+"$"+A3+"$"+A4+"$"+A5+"$";	
+	
+	
+	f.action = "2011_surveyFinal.html";
+	f.submit();
+	return;
+}
+function checkValue(name,value)
+{
+	switch(name)
+	{
+		case "rdq1":
+		A1 = value;		
+		if(value == 5)
+		{
+			document.getElementById("txtq1_6").style.display = "inline";
+		}
+		else
+		{
+			document.getElementById("txtq1_6").style.display = "none";
+			document.getElementById("txtq1_6").value = "불만족 사유를 입력 해 주세요";
+		}
+		break;
+		
+		case "rdq2":
+		A2 = value;		
+		if(value == 5)
+		{
+			document.getElementById("txtq2_6").style.display = "inline";
+		}
+		else
+		{
+			document.getElementById("txtq2_6").style.display = "none";
+			document.getElementById("txtq2_6").value = "불만족 사유를 입력 해 주세요";
+		}
+		break;
+		
+		case "rdq3":
+		A3 = value;
+		if(value == 7)
+		{
+			document.getElementById("txtq3_9").style.display = "inline";
+		}
+		else
+		{
+			if(value == 8)
+			{
+				document.getElementById("rdq4_6").checked = true;
+				A4 = 6;
+			}
+			document.getElementById("txtq3_9").style.display = "none";
+			document.getElementById("txtq3_9").value = "이용중인 사이트를 입력 해 주세요";
+		}
+		
+		break;
+		
+		case "rdq4":
+		A4 = value;
+		if(value == 5)
+		{
+			document.getElementById("txtq4_6").style.display = "inline";
+		}
+		else
+		{
+			if(value !=6)
+			{
+				document.getElementById("txtq4_6").style.display = "none";
+				document.getElementById("txtq4_6").value = "불만족 사유를 입력 해 주세요";
+			}
+		}
+		break;
+				
+		case "rdq5":
+		A5 = value;
+		break;
+	}
+}
+
+
+function chkInit()
+{
+	if(document.getElementById("txtDetail1").value == 0 || document.getElementById("txtDetail2").value == 0)
+	{
+		alert('일시적인 오류가 발생했습니다. 처음부터 다시 시도해 주세요.');
+		location.href = 'http://www.502.co.kr/lani/survey/2011_survey.html';
+		return;
+	}
+}
+
+</script>
+
+</head>
+<body onload="chkInit();" style="margin-left:0px;margin-top:0px">
+<form name="form1" method="POST">
+<table width="1020" height="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+<td height="209"><img src="img/top.jpg"></td>
+</tr>
+<tr>
+<td style="background-image:url(img/center.jpg);" >
+<table>
+<tr> <!-- 6번 문항 -->
+<td width="50px"></td>
+<td width="920px">
+	<img src="img/q11.jpg" border="0"><!--11. 홈페이지에서 제공하는 유무료 주식정보 서비스 내용에 대해 어떻게평가하십니까?--><br><br>
+	<input type="radio" name="rdq1" id="rdq1_1" value="1" onclick="checkValue(this.name,this.value);">	매우 만족
+	<input type="radio" name="rdq1" id="rdq1_2" value="2" onclick="checkValue(this.name,this.value);">	만족
+	<input type="radio" name="rdq1" id="rdq1_3" value="3" onclick="checkValue(this.name,this.value);">	보통
+	<input type="radio" name="rdq1" id="rdq1_4" value="4" onclick="checkValue(this.name,this.value);">	불만족
+	<input type="radio" name="rdq1" id="rdq1_5" value="5" onclick="checkValue(this.name,this.value);">	매우 불만족
+	<br>
+	<input type="text" name="txtq1_6" id="txtq1_6" size="50" value="불만족 사유 : " style="display:none;">
+</td>
+<td width="50px"></td>
+</tr>
+<tr><td height="30px" colspan="3"></td></tr>
+<tr> <!-- 7번 문항 -->
+<td width="50px"></td>
+<td width="920px">
+	<img src="img/q12.jpg" border="0"><!--12. 사이트의 메뉴구성이나 전체적인 레이아웃은 쉽고 편리하게 구성 되었습니까?--> <br><br>
+	<input type="radio" name="rdq2" id="rdq2_1" value="1" onclick="checkValue(this.name,this.value);">	매우 만족
+	<input type="radio" name="rdq2" id="rdq2_2" value="2" onclick="checkValue(this.name,this.value);">	만족
+	<input type="radio" name="rdq2" id="rdq2_3" value="3" onclick="checkValue(this.name,this.value);">	보통
+	<input type="radio" name="rdq2" id="rdq2_4" value="4" onclick="checkValue(this.name,this.value);">	불만족
+	<input type="radio" name="rdq2" id="rdq2_5" value="5" onclick="checkValue(this.name,this.value);">	매우 불만족
+	<br>
+	<input type="text" name="txtq2_6" id="txtq2_6" size="50" value="불만족 사유 : " style="display:none;">
+</td>
+<td width="50px"></td>
+</tr>
+<tr><td height="30px" colspan="3"></td></tr>
+<tr> <!-- 8번 문항 -->
+<td width="50px"></td>
+<td width="920px">
+	<img src="img/q13.jpg" border="0"><!--13. 동시에 이용중인 타 주식사이트가 있다면?--> <br><br>
+	<input type="radio" name="rdq3" id="rdq3_1" value="1" onclick="checkValue(this.name,this.value);">	팍스넷
+	<input type="radio" name="rdq3" id="rdq3_2" value="2" onclick="checkValue(this.name,this.value);">	싱크풀
+	<input type="radio" name="rdq3" id="rdq3_3" value="3" onclick="checkValue(this.name,this.value);">	하이리치
+	<input type="radio" name="rdq3" id="rdq3_4" value="4" onclick="checkValue(this.name,this.value);">	이토마토
+	<input type="radio" name="rdq3" id="rdq3_5" value="5" onclick="checkValue(this.name,this.value);">	와우넷(한경TV)
+	<input type="radio" name="rdq3" id="rdq3_6" value="6" onclick="checkValue(this.name,this.value);">	매드머니
+	<input type="radio" name="rdq3" id="rdq3_8" value="8" onclick="checkValue(this.name,this.value);">	502만 이용
+	<input type="radio" name="rdq3" id="rdq3_7" value="7" onclick="checkValue(this.name,this.value);">	기타(직접입력)
+	
+	<br>
+	<input type="text" name="txtq3_9" id="txtq3_9" size="50" value="이용중인 사이트 : " style="display:none;">
+</td>
+<td width="50px"></td>
+</tr>
+<tr><td height="30px" colspan="3"></td></tr>
+<tr> <!-- 9번 문항 -->
+<td width="50px"></td>
+<td width="920px">
+	<img src="img/q14.jpg" border="0"><!--14. 이용중인 타 주식사이트에서 제공하는 서비스에 대해 어떻게 평가하십니까?--><br><br>
+	<input type="radio" name="rdq4" id="rdq4_1" value="1" onclick="checkValue(this.name,this.value);"> 매우 만족
+	<input type="radio" name="rdq4" id="rdq4_2" value="2" onclick="checkValue(this.name,this.value);"> 만족	
+	<input type="radio" name="rdq4" id="rdq4_3" value="3" onclick="checkValue(this.name,this.value);"> 보통
+	<input type="radio" name="rdq4" id="rdq4_4" value="4" onclick="checkValue(this.name,this.value);"> 불만족
+	<input type="radio" name="rdq4" id="rdq4_5" value="5" onclick="checkValue(this.name,this.value);"> 매우 불만족
+	<input type="radio" name="rdq4" id="rdq4_6" value="6" onclick="checkValue(this.name,this.value);"> 502만이용
+	<br>
+	<input type="text" name="txtq4_6" id="txtq4_6" size="50" value="불만족 사유 : " style="display:none;">
+</td>
+<td width="50px"></td>
+</tr>
+<tr><td height="30px" colspan="3"></td></tr>
+<tr> <!-- 10번 문항 -->
+<td width="50px"></td>
+<td width="920px">
+	<img src="img/q15.jpg" border="0"><!--15. www.502.co.kr [평택촌놈]에 건의사항이 있다면 작성 부탁드립니다.--> <br><br>
+	<!--[사이트에 생겼으면 하는 기능, 게시판 또는 개선되었으면 하는 부분/ 전문가에게 바라는점]<br>-->
+	<textarea name="txtComment" id="txtComment" cols="100" rows="10"></textarea>
+	
+</td>
+<td width="50px"></td>
+</tr>
+<tr><td height="15px" colspan="3"></td></tr>
+
+<tr> <!-- 10번 문항 -->
+<td width="50px"></td>
+<td width="920px" align="center">
+<img src="img/bn_next.gif" onclick="checkForm();" style="cursor:hand">
+</td>
+<td width="50px"></td>
+</table>
+</td>
+</tr>
+<tr>
+<td height="110"><img src="img/bottom.jpg"></td>
+</tr>
+</table>
+
+<input type="hidden" name="txtDetail1" id="txtDetail1" size="50" value="<?=$txtDetail1?>"><br>
+<input type="hidden" name="txtDetail2" id="txtDetail2" size="50" value="<?=$txtDetail2?>"><br>
+<input type="hidden" name="txtDetail3" id="txtDetail3" size="50"><br>
+</form>
+</body>
+</html>

@@ -1,0 +1,319 @@
+<?
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+nsPopupMsg("종료되었습니다.","2");
+exit;
+
+$pay_contents_idx		= trim($_POST["pay_contents_idx"]);	//게시물 idx
+$srv_code				= trim($_POST["srv_code"]);			//전문가 코드
+
+$pay_contents_idx = 1;
+$srv_code = 12;
+/*
+echo $pay_contents_idx;
+echo "<br>";
+echo $srv_code;
+*/
+
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+
+//40명 넘었는지 체크
+$sql = "select count(idx) as total from 502School_ACE WHERE (state=1 or state=3 or state=12)";
+$tmpRs = mysql_query($sql);
+$rs = mysql_fetch_array($tmpRs);
+
+if($rs[total] > 10)
+{
+	echo "<script> alert('정원이 초과되었습니다. 고객센터로 문의 부탁드립니다.031-651-5023');self.close();</script>";
+	exit;
+}
+	
+?>
+<html>
+<head>
+<title>502스쿨 ACE 선물교육 신청</title>
+<meta http-equiv="Content-Type" content="text/html; charset=euc-kr" />
+<link rel="stylesheet" type="text/css" href="/css/502style.css">
+<SCRIPT LANGUAGE="JAVASCRIPT" SRC="/_js/cate_xml_script.js"></SCRIPT>
+<SCRIPT LANGUAGE="JAVASCRIPT" SRC="/_js/base_util_script.js"></SCRIPT>
+<SCRIPT LANGUAGE="JAVASCRIPT" SRC="/_js/web_script.js"></SCRIPT>
+<script language="JavaScript" src="/_js/Embed.js"></script>
+
+<script language="javascript" src="http://www.allthegate.com/plugin/AGSWallet.js"></script>
+<script language="JavaScript" src="/card/basic_script.js"></script> 
+
+<?
+if(!$_COOKIE['_CKE_USER_ID']){
+	popupMsg("로그인후 이용이 가능합니다.");
+	echo "<script> window.close(); </script>";
+	exit();
+}
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+
+
+//전문가 idx 복호화
+$expert_idx = usrCrypt(URLdecode($srv_code),0);
+
+$expert_idx = 12;
+
+$contents_name="502스쿨 유료교육 2차: ACE 선물 기법교육";
+$meminfo=get_meminfo($_COOKIE['_CKE_USER_UID'],"idx, mobile, phone, total_point");
+if(!$meminfo[idx]){
+	popupMsg(" 회원정보가 존재 하지 않습니다. \r\n 다시한번 로그인후 재시도 해주세요");
+	echo "<script> opener.location.href='/include/logout.php' </script>";
+	echo "<script> window.close(); </script>";
+	exit();
+}
+$mobile=explode("-",$meminfo[mobile]);
+$orderid=$_COOKIE['_CKE_USER_UID']."-".date("ymdHis");
+
+$service_price = 1500000;
+//$service_price = 1004;
+
+if($meminfo['mobile'] != '' && str_replace('-', '', $meminfo['mobile']) != ''){
+	$mobile = explode('-', $meminfo['mobile']);
+}
+else if($meminfo['phone'] != '' && str_replace('-', '', $meminfo['phone']) != ''){
+	$mobile = explode('-', $meminfo['phone']);
+}
+/*
+echo $expert_idx."<br>";
+echo $contents_name."<br>";
+echo $mobile."<br>";
+echo $orderid."<br>";
+echo $service_price1."<br>";
+echo $service_price2."<br>";
+*/
+?>
+
+</head>
+<body topmargin=0 leftmargin=0 onload="javascript:Enable_Flag(pay_form);">
+<img src="/img/pop/charge_contents_top.gif" width="400" height="38">
+<br>
+
+
+<SCRIPT>
+
+var user_point = <?=$meminfo[total_point] ?>;
+var contents_price = <?=$service_price?>;
+var max_settle_point = 0;
+var min_settle_point = 0;
+
+function pay_type_check(){
+	var form=document.pay_form;
+	if(form.pay_type[0].checked==true){
+		/*
+		document.getElementById("mobile_area").style.display="none";
+		document.getElementById("card_area").style.display="block";
+		*/
+	}else{
+		/*
+		document.getElementById("mobile_area").style.display="block";
+		document.getElementById("card_area").style.display="none";
+		*/
+	}
+}
+
+function pay_form_check(){
+	var form=document.pay_form;
+	var mobile_limit_price=100000;
+	var mobile_min_price=1000;
+	
+	if(form.username.value==""){
+		alert("결제자 이름을 입력 해주세요");
+		form.username.focus();
+		return false;
+	}
+	
+	if(form.mobile1.value=="" || form.mobile2.value=="" || form.mobile3.value==""){
+		alert("전화번호를 입력 해주세요");
+		form.mobile1.focus();
+		return false;
+	}
+
+	
+	if(form.pay_type[0].checked==true){ 
+		if(confirm("결제금액: "+form.Amt.value+"원 결제 하시겠습니까? ")){//무통장
+			form.action="/include/502school_bank_pay_ing.php";			
+			form.submit();
+		}
+	}
+	else if(form.pay_type[1].checked==true){
+		if(confirm("결제금액: "+form.Amt.value+"원 결제 하시겠습니까? " )){ //카드
+			form.action="/include/502school_AGS_pay_ing.php";
+			Pay(document.pay_form);
+		}
+	}
+	else{
+		if(confirm("결제금액: "+form.Amt.value+"원 결제 하시겠습니까? ")){ //ARS
+			form.action="/include/502school_ARS_pay_ing.php";
+			form.submit();
+			return true;
+		}
+	}
+}
+
+</SCRIPT>
+<table width="350" border="0" align="center" cellpadding="0" cellspacing="0" background="/img/pop/box350_bg.gif">
+  <tr>
+    <td><img src="/img/pop/box350_top.gif" width="350" height="8"></td>
+  </tr>
+  <tr>
+    <td><TABLE width=98% border=0 align="center" cellpadding=0 CELLSPACING=0 style="border-width:0px; border-color:rgb(204,204,204); border-style:solid;">
+      <FORM NAME="pay_form" METHOD="POST">
+        <INPUT TYPE="HIDDEN" name="price" value="<?=$service_price?>">
+        <INPUT TYPE="HIDDEN" name="conidx" value="<?=$pay_contents_idx?>">
+		<INPUT TYPE="HIDDEN" name="expert_idx" value="<?=$expert_idx?>">
+		<INPUT TYPE="HIDDEN" name="mem_idx" value="<?=$_COOKIE['_CKE_USER_UID']?>">
+		<INPUT TYPE="HIDDEN" name="sub_price">
+
+
+		<!-- 카드결제에 필요한 변수 시작 -->
+		<INPUT TYPE="HIDDEN" NAME="StoreId" value="<?=$_CARD_StoreId?>">
+		<INPUT TYPE="HIDDEN" NAME="StoreNm" value="평택촌놈">
+		<INPUT TYPE="HIDDEN" NAME="OrdNo" value="<?=$orderid?>">  <!-- stBoard테이블의 idx값 -->
+		<INPUT TYPE="HIDDEN" NAME="ProdNm" value="<?=$contents_name?>">
+		<INPUT TYPE="HIDDEN" NAME="Amt" value="<?=$service_price?>">
+		<INPUT TYPE="HIDDEN" NAME="MallUrl" value="http://www.502.co.kr">
+		<INPUT TYPE="HIDDEN" NAME="Remark" value="없음">
+		<INPUT TYPE="HIDDEN" NAME="Job" value="onlycard">
+		<INPUT TYPE="HIDDEN" NAME="UserId" value="<?=$_COOKIE['_CKE_USER_ID']?>">
+		<INPUT TYPE="HIDDEN" NAME="OrdNm" value="<?=$_COOKIE['_CKE_USER_NAME']?>">
+		<INPUT TYPE="HIDDEN" NAME="OrdPhone" value="<?=$rs[mobile]?>">
+		<INPUT TYPE="HIDDEN" NAME="OrdAddr" value="없음">
+		<INPUT TYPE="HIDDEN" NAME="RcpNm" value="<?=$_COOKIE['_CKE_USER_NAME']?>">
+		<INPUT TYPE="HIDDEN" NAME="RcpPhone" value="<?=$rs[mobile]?>">
+		<INPUT TYPE="HIDDEN" NAME="DlvAddr" value="없음">
+		<INPUT TYPE="HIDDEN" NAME="UserEmail" value="<?=$_COOKIE['_CKE_USER_EMAIL']?>">
+
+
+		<!-- 스크립트 및 플러그인에서 값을 설정하는 HIDDEN 필드  !!수정을 하시거나 삭제하지 마십시오-->
+
+		<!-- 각 결제 공통 사용 변수 -->
+		<input type=HIDDEN name=Flag value="">				<!-- 스크립트결제사용구분플래그 -->
+		<input type=HIDDEN name=AuthTy value="">			<!-- 결제형태 -->
+		<input type=HIDDEN name=SubTy value="">				<!-- 서브결제형태 -->
+
+		<!-- 신용카드 결제 사용 변수 -->
+		<input type=HIDDEN name=DeviId value="">			<!-- (신용카드공통)		단말기아이디 -->
+		<input type=HIDDEN name=QuotaInf value="0">			<!-- (신용카드공통)		일반할부개월설정변수 -->
+		<input type=HIDDEN name=NointInf value="NONE">		<!-- (신용카드공통)		무이자할부개월설정변수 -->
+		<input type=HIDDEN name=AuthYn value="">			<!-- (신용카드공통)		인증여부 -->
+		<input type=HIDDEN name=Instmt value="">			<!-- (신용카드공통)		할부개월수 -->
+		<input type=HIDDEN name=partial_mm value="">		<!-- (ISP사용)			일반할부기간 -->
+		<input type=HIDDEN name=noIntMonth value="">		<!-- (ISP사용)			무이자할부기간 -->
+		<input type=HIDDEN name=KVP_RESERVED1 value="">		<!-- (ISP사용)			RESERVED1 -->
+		<input type=HIDDEN name=KVP_RESERVED2 value="">		<!-- (ISP사용)			RESERVED2 -->
+		<input type=HIDDEN name=KVP_RESERVED3 value="">		<!-- (ISP사용)			RESERVED3 -->
+		<input type=HIDDEN name=KVP_CURRENCY value="">		<!-- (ISP사용)			통화코드 -->
+		<input type=HIDDEN name=KVP_CARDCODE value="">		<!-- (ISP사용)			카드사코드 -->
+		<input type=HIDDEN name=KVP_SESSIONKEY value="">	<!-- (ISP사용)			암호화코드 -->
+		<input type=HIDDEN name=KVP_ENCDATA value="">		<!-- (ISP사용)			암호화코드 -->
+		<input type=HIDDEN name=KVP_CONAME value="">		<!-- (ISP사용)			카드명 -->
+		<input type=HIDDEN name=KVP_NOINT value="">			<!-- (ISP사용)			무이자/일반여부(무이자=1, 일반=0) -->
+		<input type=HIDDEN name=KVP_QUOTA value="">			<!-- (ISP사용)			할부개월 -->
+		<input type=HIDDEN name=CardNo value="">			<!-- (안심클릭,일반사용)	카드번호 -->
+		<input type=HIDDEN name=MPI_CAVV value="">			<!-- (안심클릭,일반사용)	암호화코드 -->
+		<input type=HIDDEN name=MPI_ECI value="">			<!-- (안심클릭,일반사용)	암호화코드 -->
+		<input type=HIDDEN name=MPI_MD64 value="">			<!-- (안심클릭,일반사용)	암호화코드 -->
+		<input type=HIDDEN name=ExpMon value="">			<!-- (일반사용)			유효기간(월) -->
+		<input type=HIDDEN name=ExpYear value="">			<!-- (일반사용)			유효기간(년) -->
+		<input type=HIDDEN name=Passwd value="">			<!-- (일반사용)			비밀번호 -->
+		<input type=HIDDEN name=SocId value="">				<!-- (일반사용)			주민등록번호/사업자등록번호 -->
+
+		<!-- 계좌이체 결제 사용 변수 -->
+		<input type=HIDDEN name=ICHE_OUTBANKNAME value="">	<!-- 이체계좌은행명 -->
+		<input type=HIDDEN name=ICHE_OUTACCTNO value="">	<!-- 이체계좌예금주주민번호 -->
+		<input type=HIDDEN name=ICHE_OUTBANKMASTER value=""><!-- 이체계좌예금주 -->
+		<input type=HIDDEN name=ICHE_AMOUNT value="">		<!-- 이체금액 -->
+
+		<!-- 핸드폰 결제 사용 변수 -->
+		<input type=HIDDEN name=HP_SERVERINFO value="">		<!-- 서버정보 -->
+		<input type=HIDDEN name=HP_HANDPHONE value="">		<!-- 핸드폰번호 -->
+		<input type=HIDDEN name=HP_COMPANY value="">		<!-- 통신사명(SKT,KTF,LGT) -->
+		<input type=HIDDEN name=HP_IDEN value="">			<!-- 인증시사용 -->
+		<input type=HIDDEN name=HP_IPADDR value="">			<!-- 아이피정보 -->
+
+		<!-- 가상계좌 결제 사용 변수 -->
+		<input type=HIDDEN name=ZuminCode value="">			<!-- 가상계좌입금자주민번호 -->
+		<input type=HIDDEN name=VIRTUAL_CENTERCD value="">	<!-- 가상계좌은행코드 -->
+		<input type=HIDDEN name=VIRTUAL_DEPODT value="">	<!-- 가상계좌입금예정일 -->
+		<input type=HIDDEN name=VIRTUAL_NO value="">		<!-- 가상계좌번호 -->
+
+		<!-- 우리에스크로 결제 사용 변수 -->
+		<input type=HIDDEN name=mTId value="">				<!-- 에스크로주문번호 -->
+
+		<!-- 스크립트 및 플러그인에서 값을 설정하는 Hidden 필드  !!수정을 하시거나 삭제하지 마십시오-->
+		<!-- 카드결제에 필요한 변수 끝 -->
+
+        <TR height=26>
+          <TD WIDTH="83" align="center" class="darkbrown"><strong>신청자</strong></TD>
+          <TD width=8></TD>
+          <TD width="250"><INPUT TYPE="TEXT" name="username" value="<?=$_COOKIE['_CKE_USER_NAME']?>" class="input01" style="width:120"></TD>
+        </TR>
+        <tr>
+          <td bgcolor="#EAEAEA" height=1 colspan=3></td>
+        </tr>
+        <TR height=26>
+          <TD WIDTH="83" align="center" class="darkbrown"><strong>전화번호</strong></TD>
+          <TD width=8></TD>
+          <TD>
+		    <input name="mobile1" type="text" class="input01" maxlength="4" style="width: 50" onKeyPress="onlyNumber()" value="<?=$mobile[0]?>">
+			&nbsp;-&nbsp;
+            <input name="mobile2" type="text" class="input01" maxlength="4" style="width: 50" onKeyPress="onlyNumber()" value="<?=$mobile[1]?>">
+            &nbsp;-&nbsp;
+            <input name="mobile3" type="text" class="input01" maxlength="4" style="width: 50" onKeyPress="onlyNumber()" value="<?=$mobile[2]?>"></TD>
+        </TR>
+        <tr>
+          <td bgcolor="#EAEAEA" height=1 colspan=3></td>
+        </tr>
+        <TR height=26>
+          <TD align="center" WIDTH="83"><strong>결제방법</strong></TD>
+          <TD width=8></TD>
+          <TD>
+          <INPUT TYPE="RADIO" name="pay_type" value="0" checked>무통장결제
+          <INPUT TYPE="RADIO" name="pay_type" value="1">카드결제            
+            <INPUT TYPE="RADIO" name="pay_type" value="3">ARS카드결제</TD>
+        </TR>
+        <tr>
+          <td bgcolor="#EAEAEA" height=1 colspan=3></td>
+        </tr>
+        <tr height=26>
+          <td WIDTH="83" align="center" class="darkbrown"><strong>결제상품</strong></td>
+          <TD width=8></TD>
+          <TD><?=$contents_name?></TD>
+        </tr>
+        <tr>
+          <td bgcolor="#EAEAEA" height=1 colspan=3></td>
+        </tr>
+        <tr height=26>
+          <td WIDTH="83" align="center" class="darkbrown"><strong>결제금액</strong></td>
+          <TD width=8></TD>
+          <TD>
+          <input type="text" readonly size="15" name="txtPrice" id="txtPrice" value="<?=number_format($service_price);?>"> 원</TD>
+        </tr>
+	</TABLE></td>
+  </tr>
+  <tr>
+    <td><img src="/img/pop/box350_btm.gif" width="350" height="8"></td>
+  </tr>
+</table>
+<TABLE CELLSPACING=0 cellpadding=0 border=0 width=100%>
+<TR>
+	<TD align=center>&nbsp;</TD>
+</TR>
+<TR height=40 align=center>
+	<TD>
+		<IMG SRC="/images/btn/btn_pay_ok.gif" align="absmiddle" style="cursor:hand" border=0 onClick="pay_form_check()">&nbsp;&nbsp;<IMG SRC="/images/btn/btn_pay_cancel.gif" align="absmiddle" style="cursor:hand" border=0 onClick="window.close()">
+		
+	</TD>
+</TR>
+</TABLE>
+</Form>
+</body>
+</html>

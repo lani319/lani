@@ -1,0 +1,170 @@
+<?php
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+/*
+검색 결과를 보여주는 기능
+가로 150px
+최근 등록종목 테이블
+검색 상위종목 테이블
+*/
+
+//관리자인지 여부 가져오기
+//$admin_level = $_502ADMIN_LEVEL[$_COOKIE['_CKE_USER_ID']];
+$admin_level = $_COOKIE['_CKE_USER_LEVEL'];
+//echo "관 : " . $admin_level;
+
+if(!$_COOKIE['_CKE_USER_ID']){
+	popupMsg("로그인후 이용이 가능합니다.");
+	echo "<script> window.close(); </script>";
+	exit();
+}
+
+$memIdx = $_COOKIE["_CKE_USER_UID"]; //회원 인덱스
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+
+
+//최근 갱신 탑100 가져오기
+$sql1 = "select IF (LENGTH(name) > 14, LEFT(name,14), name) AS name,updateDate from jongmokValue order by updateDate desc,idx DESC limit 0,5";
+$tmpRs1 = mysql_query($sql1);
+
+
+//조회수 탑100 가져오기
+//코스피
+$sql2 = "select IF (LENGTH(name) > 14, LEFT(name,14), name) AS name,code from jongmokValue where type='KOSPI' and freeFlag='F' order by cnt DESC,idx ASC limit 0,5";
+$tmpRs2 = mysql_query($sql2);
+
+//코스닥
+$sql3 = "select IF (LENGTH(name) > 14, LEFT(name,14), name) AS name,code from jongmokValue where type='KOSDAQ' and freeFlag='F' order by cnt DESC,idx ASC limit 0,5";
+$tmpRs3 = mysql_query($sql3);
+
+//최근 조회종목 탑3
+$sql4 = "
+SELECT IF (LENGTH(A.name) > 14, LEFT(A.name,14), A.name) AS name,date(B.searchDate) as searchDate
+
+FROM jongmokValue A INNER JOIN jongmokValueHistory B ON A.code = B.code
+
+WHERE B.memIdx=$memIdx order by B.idx desc limit 0,3;
+";
+$tmpRs4 = mysql_query($sql4);
+?>
+
+
+
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="css/jongmokValueStyle.css">
+<script type="text/javascript">
+function goSearch(name)
+{
+	parent.parent.topFrame.document.getElementById("searchKeyword").value = name;
+	parent.parent.topFrame.goSearch();
+}
+function goHistory()
+{
+	top.parent.main01.contents.location.href='contents_06.html';
+}
+</script>
+</head>
+<body>
+<table width="200px" border="0">
+<tr>
+<td>
+<iframe name="frmremaincnt" src="remainCntCheck.php" frameborder="0" height="150px" width="200px" scrolling="No" vspace="0" hspace="0"></iframe>
+</td>
+</tr>
+<tr>
+<td>
+	<table width="100%" border="0" style="cursor:hand;" onclick="goHistory();" class="table01">
+		<tr class="trRight01"><td colspan="3" class="recentFont">최근 조회종목&nbsp;&nbsp;&nbsp;&nbsp;[more] </td></tr>
+		<?php
+		$num=1;
+		if(mysql_num_rows($tmpRs4) > 0){			
+		
+			while($rs4 = mysql_fetch_array($tmpRs4)) {
+				
+				
+			?>		
+			<tr><td><b><?=$rs4['name']?></b></a></td><td align="right"><b><?=$rs4['searchDate']?></b></td></tr>	
+			<?php
+			$num++;
+			}		
+		}
+		else {
+			?>
+			<tr><td colspan="5" height="40px" align="center">최근 조회 종목이 없습니다.</td></tr>	
+			<?php
+		}
+		?>
+	</table>
+</td>
+</tr>
+<tr><td height="5px"></td></tr>
+<tr>
+<td>
+	<table width="100%" border="0" >
+		<tr class="trRight"><td colspan="3" class="white">신규 갱신종목</td></tr>
+		<?php
+		$num=1;
+		while($rs1 = mysql_fetch_array($tmpRs1)) {
+		?>		
+		<tr><td><a href="#" onclick="goSearch('<?=$rs1['name']?>')"><b><?=$rs1['name']?></b></a></td><td><b><?=$rs1['updateDate']?></b></td></tr>
+		
+		<?php
+		$num++;
+		}		
+		?>
+		
+	</table>
+</td>
+</tr>
+<tr><td height="5px"></td></tr>
+<tr>
+<td>
+	<table width="100%" border="0">
+		<tr class="trRight"><td colspan="3" class="white">KOSPI 검색 상위종목</td>		
+		</tr>		
+		<?php
+		$num = 1;
+		while($rs2 = mysql_fetch_array($tmpRs2))
+		{
+		?>
+		<tr>
+		<td><a href="#" onclick="goSearch('<?=$rs2['name']?>')"><b><?=$rs2['name']?>(<?=$rs2['code']?>)</b></a></td></td>
+		</tr>
+		<tr><td height="1" colspan="10"></td></tr>
+		<?php
+		}
+		?>
+	</table>
+</td>
+</tr>
+<tr><td height="5px"></td></tr>
+<tr>
+<td>
+	<table width="100%" border="0">
+		<tr class="trRight"><td colspan="3" class="white">KOSDAQ 검색 상위종목</td>		
+		</tr>
+		<?php
+		$num = 1;
+		while($rs3 = mysql_fetch_array($tmpRs3))
+		{
+		?>
+		<tr>
+		<td><a href="#" onclick="goSearch('<?=$rs3['name']?>')"><b><?=$rs3['name']?>(<?=$rs3['code']?>)</b></a></td></td>
+		</tr>
+		<tr><td height="1" colspan="10"></td></tr>
+		<?php
+		}
+		?>
+	</table>
+</td>
+</tr>
+</table>
+
+</body>
+</html>

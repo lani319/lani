@@ -1,0 +1,104 @@
+<?php
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+
+?>
+
+<?php
+//회원정보
+$sql = "select * from chargeInfo order by idx DESC limit 500";
+$tmpRs = mysql_query($sql);
+?>
+<table cellpadding=1 cellspacing=1 border=1>
+<tr>
+<td>idx</td>
+<td>uidx</td>
+<td>buy_no</td>
+<td>settletype</td>
+<td>service_type</td>
+<td>price</td>
+<td>reprice</td>
+<td>startdate</td>
+<td>enddate</td>
+<td>months</td>
+<td>b_name</td>
+<td>bank</td>
+<td>c_name</td>
+<td>card</td>
+<td>state</td>
+<td>signdate</td>
+<td>paydate</td>
+<td>expert_idx</td>
+<td>options</td>
+<td>weeks_use</td>
+<td>multiple_service</td>
+<td>m_name</td>
+<td>mobile</td>
+<td>leading_broadcast</td>
+<td>over_settle_check</td>
+<td>over_settle_idx</td>
+<td>freeFlag</td>
+<td>isEvent</td>
+<td>eventPrice</td>
+<td>couponIdx</td>
+<td>isUsePoint</td>
+<td>couponUsedPrice</td>
+<td>couponOriPrice</td>
+<td>gd_idx</td>
+</tr>
+<?php
+
+while($rs = mysql_fetch_array($tmpRs))
+{
+	?>
+<tr>
+<td><?=$rs[idx]?></td>
+<td><?=$rs[uidx]?></td>
+<td><?=$rs[buy_no]?></td>
+<td><?=$rs[settletype]?></td>
+<td><?=$rs[service_type]?></td>
+<td><?=$rs[price]?></td>
+<td><?=$rs[reprice]?></td>
+<td><?=$rs[startdate]?></td>
+<td><?=$rs[enddate]?></td>
+<td><?=$rs[months]?></td>
+<td><?=$rs[b_name]?></td>
+<td><?=$rs[bank]?></td>
+<td><?=$rs[c_name]?></td>
+<td><?=$rs[card]?></td>
+<td><?=$rs[state]?></td>
+<td><?=$rs[signdate]?></td>
+<td><?=$rs[paydate]?></td>
+<td><?=$rs[expert_idx]?></td>
+<td><?=$rs[options]?></td>
+<td><?=$rs[weeks_use]?></td>
+<td><?=$rs[multiple_service]?></td>
+<td><?=$rs[m_name]?></td>
+<td><?=$rs[mobile]?></td>
+<td><?=$rs[leading_broadcast]?></td>
+<td><?=$rs[over_settle_check]?></td>
+<td><?=$rs[over_settle_idx]?></td>
+<td><?=$rs[freeFlag]?></td>
+<td><?=$rs[isEvent]?></td>
+<td><?=$rs[eventPrice]?></td>
+<td><?=$rs[couponIdx]?></td>
+<td><?=$rs[isUsePoint]?></td>
+<td><?=$rs[couponUsedPrice]?></td>
+<td><?=$rs[couponOriPrice]?></td>
+<td><?=$rs[gd_idx]?></td>
+
+</tr>
+	
+	<?php
+}
+?>
+
+
+
+
+

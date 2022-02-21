@@ -1,0 +1,217 @@
+<?php
+	$imgPath = "/lani/siteInform/profile/";
+	$bgcolor = "#861050";
+	$bgcolor2 = "#d7d7d7";
+?>
+<html>
+<head>
+
+<style type="text/css">
+body
+{
+	background-color:<?=$bgcolor2?>;
+}
+</style>
+
+
+<title>www.502.co.kr 웹사이트 개편 안내 </title>
+<meta http-equiv="Content-Type" content="text/html; charset=euc-kr">
+
+<script type="text/javascript">
+function showLayer(id)
+{
+	switch (id)
+	{
+		case "div01":		
+			document.getElementById("div01").style.display="inline";			
+			document.getElementById("div02").style.display="none";			
+			document.getElementById("div03").style.display="none";			
+			document.getElementById("div04").style.display="none";			
+			document.getElementById("div05").style.display="none";			
+		break;
+		case "div02":
+			document.getElementById("div01").style.display="none";			
+			document.getElementById("div02").style.display="inline";			
+			document.getElementById("div03").style.display="none";			
+			document.getElementById("div04").style.display="none";			
+			document.getElementById("div05").style.display="none";			
+
+		break;
+		case "div03":
+			document.getElementById("div01").style.display="none";			
+			document.getElementById("div02").style.display="none";			
+			document.getElementById("div03").style.display="inline";			
+			document.getElementById("div04").style.display="none";			
+			document.getElementById("div05").style.display="none";			
+
+		break;
+		case "div04":
+			document.getElementById("div01").style.display="none";			
+			document.getElementById("div02").style.display="none";			
+			document.getElementById("div03").style.display="none";			
+			document.getElementById("div04").style.display="inline";			
+			document.getElementById("div05").style.display="none";			
+
+		break;
+		case "div05":
+			document.getElementById("div01").style.display="none";			
+			document.getElementById("div02").style.display="none";			
+			document.getElementById("div03").style.display="none";			
+			document.getElementById("div04").style.display="none";			
+			document.getElementById("div05").style.display="inline";			
+
+		break;
+		
+	}
+	
+}
+function hideLayer(id)
+{
+	document.getElementById(id).style.display="none";
+}
+	
+
+</script>
+</head>
+<body bgcolor="#FFFFFF" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+<? include_once $_SERVER['DOCUMENT_ROOT']."/lani/siteInform/topMenu.php"; ?>
+<!-- Save for Web Slices (01 전문가코너.psd) -->
+<table id="__01" width="1027" height="1432" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td>
+			<img src="images/profile_01.gif" width="192" height="347" alt=""></td>
+		<td>
+			<img src="images/profile_02.gif" width="606" height="347" alt=""></td>
+		<td>
+			<img src="images/profile_03.gif" width="229" height="347" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/profile_04.gif" width="192" height="418" alt=""></td>
+		<td>
+		<div style="position:relative;" onmouseover="showLayer('div01');" onmouseout="hideLayer('div01');");"><img src="images/profile_05.gif" width="606" height="418" alt=""><div id="div01" style="position:absolute;top:0px;left:2px;width:601px;height:383px;display:none;">
+				<table cellpadding="0" cellspacing="" bgcolor="FFFFFF" width="601px" height="383px">
+				<tr>
+				<td >
+				<img src="<?=$imgPath?>profile01.gif">
+				</td>
+				</tr>
+				</table>
+				</div></div>
+			</td>
+		<td>
+			<img src="images/profile_06.gif" width="229" height="418" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/profile_07.gif" width="192" height="35" alt=""></td>
+		<td>
+			<img src="images/profile_08.gif" width="606" height="35" alt=""></td>
+		<td>
+			<img src="images/profile_09.gif" width="229" height="35" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/profile_10.gif" width="192" height="166" alt=""></td>
+		<td>
+				<div style="position:relative; " onmouseover="showLayer('div02');" onmouseout="hideLayer('div02');"><img src="images/profile_11.gif" width="606" height="166" alt=""><div  id="div02" style="position:absolute;top:3px;left:2px;width:600px;height:350px;display:none;">
+				<table cellpadding="0" cellspacing="" bgcolor="FFFFFF" width="500px" height="100px">
+				<tr>
+				<td >
+				<img src="<?=$imgPath?>profile02.gif">
+				</td>
+				</tr>
+				</table>
+				</div></div>
+				
+			</td>
+		<td>
+			<img src="images/profile_12.gif" width="229" height="166" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/profile_13.gif" width="192" height="14" alt=""></td>
+		<td>
+			<img src="images/profile_14.gif" width="606" height="14" alt=""></td>
+		<td>
+			<img src="images/profile_15.gif" width="229" height="14" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/profile_16.gif" width="192" height="135" alt=""></td>
+		<td>
+		<div style="position:relative; " onmouseover="showLayer('div03');" onmouseout="hideLayer('div03');"><img src="images/profile_17.gif" width="606" height="135" alt=""><div  id="div03" style="position:absolute;top:3px;left:2px;width:600px;height:350px;display:none;">
+				<table cellpadding="0" cellspacing="" bgcolor="FFFFFF" width="500px" height="80px">
+				<tr>
+				<td >
+				<img src="<?=$imgPath?>profile03.gif">
+				</td>
+				</tr>
+				</table>
+				</div></div>
+			</td>
+		<td>
+			<img src="images/profile_18.gif" width="229" height="135" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/profile_19.gif" width="192" height="19" alt=""></td>
+		<td>
+			<img src="images/profile_20.gif" width="606" height="19" alt=""></td>
+		<td>
+			<img src="images/profile_21.gif" width="229" height="19" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/profile_22.gif" width="192" height="104" alt=""></td>
+		<td>
+		<div style="position:relative; " onmouseover="showLayer('div04');" onmouseout="hideLayer('div04');"><img src="images/profile_23.gif" width="606" height="104" alt=""><div  id="div04" style="position:absolute;top:3px;left:2px;width:600px;height:350px;display:none;">
+				<table cellpadding="0" cellspacing="" bgcolor="FFFFFF" width="500px" height="55px">
+				<tr>
+				<td >
+				<img src="<?=$imgPath?>profile04.gif">
+				</td>
+				</tr>
+				</table>
+				</div></div>
+			</td>
+		<td>
+			<img src="images/profile_24.gif" width="229" height="104" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/profile_25.gif" width="192" height="11" alt=""></td>
+		<td>
+			<img src="images/profile_26.gif" width="606" height="11" alt=""></td>
+		<td>
+			<img src="images/profile_27.gif" width="229" height="11" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/profile_28.gif" width="192" height="110" alt=""></td>
+		<td>
+		<div style="position:relative; " onmouseover="showLayer('div05');" onmouseout="hideLayer('div05');"><img src="images/profile_29.gif" width="606" height="110" alt=""><div id="div05" style="position:absolute;top:3px;left:2px;width:600px;height:350px;display:none;">
+				<table cellpadding="0" cellspacing="" bgcolor="FFFFFF" width="500px" height="60px">
+				<tr>
+				<td >
+				<img src="<?=$imgPath?>profile05.gif">
+				</td>
+				</tr>
+				</table>
+				</div></div>
+			</td>
+		<td>
+			<img src="images/profile_30.gif" width="229" height="110" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/profile_31.gif" width="192" height="73" alt=""></td>
+		<td>
+			<img src="images/profile_32.gif" width="606" height="73" alt=""></td>
+		<td>
+			<img src="images/profile_33.gif" width="229" height="73" alt=""></td>
+	</tr>
+</table>
+<!-- End Save for Web Slices -->
+</body>
+</html>

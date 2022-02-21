@@ -1,0 +1,26 @@
+<!-- 20130911 종목 적정주가 고르기 -->
+
+<link rel="stylesheet" type="text/css" href="/css/502style.css">
+<form name="form1" method="POST" action="valueCheck.php" target="invFrame">
+<body>
+	현재가(원)  <input type="text" size="20" tabindex="1" name="v1">
+	<br>
+	시가총액(억)  <input type="text" size="20" tabindex="2" name="v2">
+	<br>
+	자본총계(억)  <input type="text" size="20" tabindex="3" name="v3">
+	<br>
+	구분
+	<select name="v4"  tabindex="4">
+		<option value="1.5">코스피</option>
+		<option value="2.5">코스닥</option>
+	</select>
+	
+	<br>	
+	<input type="submit" value="계       산"  tabindex="5" size="15">
+	</form>
+</body>
+
+<iframe name="invFrame" src="valueCheck.php" frameborder="0">
+
+
+</iframe>

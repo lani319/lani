@@ -1,0 +1,152 @@
+<html>
+<head>
+<script type="text/javascript">
+function popID()
+{
+	var win = window.open("2011_surveyPopID.html","popID","toolbar=0,menubar=0,location=0,directories=0,status=0,scrollbars=0,resizable=0,width=500,height=320,top=50,left=50");
+	
+}
+
+function checkForm()
+{
+	var f1 = document.getElementById("txtDetail1");
+	var f2 = document.getElementById("txtDetail1");
+	var f3 = document.getElementById("txtDetail1");
+	
+	if(f1.value == "" || f2.value == "" || f3.value == "")
+	{
+		alert("설문 입력 과정에서 오류가 발생했습니다. 처음부터 다시 해 주세요");
+		location.href = '2011_survey.html';
+		return;
+	}
+	
+	if(document.getElementById("txtMemId").value == "")
+	{
+		alert("아이디를 입력 해 주세요"); 
+		document.getElementById("txtMemId").focus();
+		return;
+	}
+	if(document.getElementById("txtMemName").value == "")
+	{
+		alert("성명을 입력 해 주세요");
+		document.getElementById("txtMemName").focus();
+		return;
+	}
+	if(document.getElementById("txtMemSSN").value == "")
+	{
+		alert("주민등록번호 앞번호 6자리를 입력 해 주세요");
+		document.getElementById("txtMemSSN").focus();
+		return;
+	}
+	if(document.getElementById("txtMemMobile1").value == "" || document.getElementById("txtMemMobile2").value == "" || document.getElementById("txtMemMobile3").value == "")
+	{
+		alert("경품 당첨시 연락 받으실 연락처를 입력 해 주세요");
+		return;
+	}
+	
+	var f = document.form1;
+	f.target = "invFrame";
+	f.action = "surveyRegOk.php";
+	f.submit();
+}
+
+
+function chkInit()
+{
+	if(document.getElementById("txtDetail1").value == 0 || document.getElementById("txtDetail2").value == 0 || document.getElementById("txtDetail3").value == 0)
+	{
+		alert('일시적인 오류가 발생했습니다. 처음부터 다시 시도해 주세요.');
+		location.href = 'http://www.502.co.kr/lani/survey/2011_survey.html';
+		return;
+	}
+}
+
+</script>
+
+</head>
+<body onload="chkInit();" style="margin-left:0px;margin-top:0px">
+<form name="form1" method="POST">
+<table width="1020" height="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+<td height="209"><img src="img/top.jpg"></td>
+</tr>
+<tr>
+<td style="background-image:url(img/center.jpg);" >
+<table>
+<tr>
+<td width="50px"></td>
+<td width="920px">
+<img src="img/titleFinal.jpg" border="0">
+<br>
+	<table cellpadding="0" cellspacing="0" border="0" width="100%">
+	<tr>
+	<td width="50px"></td>
+	<td align="left" width="200px" height="50px">
+	<img src="img/mID.jpg"><!--	502사이트 아이디 :-->
+	</td>
+	<td align="left"><input type="text" name="txtMemId" id="txtMemId" size="20" value="<?=$_COOKIE[_CKE_USER_ID]?>">&nbsp;&nbsp;&nbsp;<input type="button" value="ID찾기" style="width:80px" onclick="popID();"></td>
+	<td width="50px"></td>
+	</tr>
+	<tr><td></td><td colspan="2" background="img/line.gif"></td><td></td></tr>
+	<tr>
+	<td width="50px"></td>
+	<td align="left" width="200px" height="50px">
+	<img src="img/mName.jpg">
+	<!--	성 명 : -->
+	</td>
+	<td align="left">
+	<input type="text" name="txtMemName" id="txtMemName" size="20" value="<?=$_COOKIE[_CKE_USER_NAME]?>">
+	예) 홍길동
+	</td>
+	<td width="50px"></td>
+	</tr>	
+	<tr><td></td><td colspan="2" background="img/line.gif"></td><td></td></tr>
+	<tr>
+	<td width="50px"></td>
+	<td align="left" width="200px" height="50px"><img src="img/mSsn.jpg"><!--주민등록번호 앞자리 :--> </td>
+	<td align="left">
+	<input type="text" name="txtMemSSN" id="txtMemSSN" size="20" maxlength="6">
+	 예) 550315
+	</td>
+	<td width="50px"></td>
+	</tr>
+	<tr><td></td><td colspan="2" background="img/line.gif"></td><td></td></tr>
+	<tr>
+	<td width="50px"></td>
+	<td align="left" width="200px" height="50px"><img src="img/mContact.jpg"><!--연 락 처 : --></td>
+	<td align="left">
+	<input type="text" name="txtMemMobile1" id="txtMemMobile1" size="4" maxlength="3">
+	-
+	<input type="text" name="txtMemMobile2" id="txtMemMobile2" size="4" maxlength="4">
+	-
+	<input type="text" name="txtMemMobile3" id="txtMemMobile3" size="4" maxlength="4"> 예) 010-1234-5678
+	
+	</td>
+	<td width="50px"></td>
+	</tr>
+	<tr><td></td><td colspan="2" background="img/line.gif"></td><td></td></tr>
+	</table>
+</td>
+<td width="50px"></td>
+</tr>
+<tr> <!-- 10번 문항 -->
+<td width="50px"></td>
+<td width="920px" align="center" height="100">
+<img src="img/bn_pollok.gif" onclick="checkForm();" style="cursor:hand">
+</td>
+<td width="50px"></td>
+</table>
+</td>
+</tr>
+<tr>
+<td height="110"><img src="img/bottom.jpg"></td>
+</tr>
+</table>
+
+<input type="hidden" name="txtDetail1" id="txtDetail1" size="50" value="<?=$txtDetail1?>"><br>
+<input type="hidden" name="txtDetail2" id="txtDetail2" size="50" value="<?=$txtDetail2?>"><br>
+<input type="hidden" name="txtDetail3" id="txtDetail3" size="50" value="<?=$txtDetail3?>"><br>
+</form>
+<iframe name="invFrame" width="0" height="0" frameborder="0"></iframe>
+</body>
+</html>

@@ -1,0 +1,7 @@
+table { border-collapse: collapse; }  
+
+table.table_basic{}  
+
+table.table_basic th{background-color:#f2f2f2;border:1px solid #e4e4e4;font-weight:normal;}  
+
+table.table_basic td{padding:0 0 0 0px;border:1px solid #e4e4e4;} 

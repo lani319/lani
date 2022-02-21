@@ -1,0 +1,271 @@
+<?
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+/**********************************************************************************************
+*
+* 파일명 : AGS_pay_result.php
+* 작성일자 : 2006/08/03
+*
+* 소켓결제결과를 처리합니다.
+*
+* Copyright 2005-2006 AEGISHYOSUNG.Co.,Ltd. All rights reserved.
+*
+**********************************************************************************************/
+
+//공통사용
+$AuthTy 		= trim( $_POST["AuthTy"] );				//결제형태
+$SubTy 			= trim( $_POST["SubTy"] );				//서브결제형태
+$rStoreId 		= trim( $_POST["rStoreId"] );			//업체ID
+$rAmt 			= trim( $_POST["rAmt"] );				//거래금액*
+$rOrdNo 		= trim( $_POST["rOrdNo"] );				//주문번호
+$rProdNm 		= trim( $_POST["rProdNm"] );			//상품명
+$rOrdNm			= trim( $_POST["rOrdNm"] );				//주문자명*
+
+//소켓통신결제(신용카드,핸드폰,일반가상계좌)시 사용
+$rSuccYn 		= trim( $_POST["rSuccYn"] );			//성공여부
+$rResMsg 		= trim( $_POST["rResMsg"] );			//실패사유
+$rApprTm 		= trim( $_POST["rApprTm"] );			//승인시각
+
+//신용카드공통
+$rBusiCd 		= trim( $_POST["rBusiCd"] );			//전문코드
+$rApprNo 		= trim( $_POST["rApprNo"] );			//승인번호
+$rCardCd 		= trim( $_POST["rCardCd"] );			//카드사코드
+
+//신용카드(안심,일반)
+$rCardNm 		= trim( $_POST["rCardNm"] );			//카드사명
+$rMembNo 		= trim( $_POST["rMembNo"] );			//가맹점번호
+$rAquiCd 		= trim( $_POST["rAquiCd"] );			//매입사코드
+$rAquiNm 		= trim( $_POST["rAquiNm"] );			//매입사명
+$rBillNo 		= trim( $_POST["rBillNo"] );			//전표번호
+
+//신용카드(ISP)
+$rDealNo 		= trim( $_POST["rDealNo"] );			//거래고유번호
+
+//계좌이체
+$ICHE_OUTBANKNAME	= trim( $_POST["ICHE_OUTBANKNAME"] );	//이체계좌은행명
+$ICHE_OUTACCTNO 	= trim( $_POST["ICHE_OUTACCTNO"] );		//이체계좌번호
+$ICHE_OUTBANKMASTER = trim( $_POST["ICHE_OUTBANKMASTER"] );	//이체계좌소유주
+$ICHE_AMOUNT 		= trim( $_POST["ICHE_AMOUNT"] );		//이체금액
+
+//핸드폰
+$rHP_TID 		= trim( $_POST["rHP_TID"] );			//핸드폰결제TID
+$rHP_DATE 		= trim( $_POST["rHP_DATE"] );			//핸드폰결제날짜
+$rHP_HANDPHONE 	= trim( $_POST["rHP_HANDPHONE"] );		//핸드폰결제핸드폰번호
+$rHP_COMPANY 	= trim( $_POST["rHP_COMPANY"] );		//핸드폰결제통신사명(SKT,KTF,LGT)
+
+//가상계좌
+$rVirNo 		= trim( $_POST["rVirNo"] );				//가상계좌번호 가상계좌추가
+$VIRTUAL_CENTERCD = trim( $_POST["VIRTUAL_CENTERCD"] );	//가상계좌 입금은행코드
+
+//우리에스크로
+$mTId 		= trim( $_POST["mTId"] );					//에스크로 주문번호
+
+//기타
+$rOrdPhone		= trim( $_POST["rOrdPhone"] );		//주문자연락처
+$rbookVolume	= trim( $_POST["rbookVolume"] );	//수량
+$rzipcode		= trim( $_POST["rzipcode"] );		//우편번호
+$raddress		= trim( $_POST["raddress"] );		//주소
+
+$jokmok	= trim($_POST["jokmok"]);	//닉네임
+
+
+if($AuthTy == "card"){
+	if($SubTy == "isp"){
+		$card_method="신용카드결제-안전결제(ISP)";
+	}else if($SubTy == "visa3d"){
+		$card_method="신용카드결제-안심클릭";
+	}else if($SubTy == "normal"){
+		$card_method="신용카드결제-일반결제";
+	}
+}
+
+$limit_date=mktime($pay_time[0],$pay_time[1],$pay_time[2],$pay_date[1],$pay_date[2],$pay_date[0] + 2);
+?>
+<INPUT TYPE="HIDDEN" NAME="price" value="<?=$price?>">
+<INPUT TYPE="HIDDEN" NAME="buy_no" value="<?=$buy_no?>">
+<INPUT TYPE="HIDDEN" NAME="jokmok" value="<?=$jokmok?>">
+<input type="hidden" name="bank" value="<?=$bank?>">
+<INPUT TYPE="HIDDEN" name="b_name" value="<?=$b_name?>">
+<html>
+<head>
+<title>적정주가 결제결과</title>
+<meta http-equiv="Content-Type" content="text/html; charset=euc-kr" />
+<link rel="stylesheet" type="text/css" href="/css/502style.css">
+<SCRIPT LANGUAGE="JAVASCRIPT" SRC="/_js/cate_xml_script.js"></SCRIPT>
+<SCRIPT LANGUAGE="JAVASCRIPT" SRC="/_js/base_util_script.js"></SCRIPT>
+<SCRIPT LANGUAGE="JAVASCRIPT" SRC="/_js/web_script.js"></SCRIPT>
+<script language="JavaScript" src="/_js/Embed.js"></script>
+<SCRIPT language="JavaScript" type="text/javascript">
+<!-- Overture Korea
+// Event Type ID: 1
+// Segment Type ID: 1
+if (typeof(window.ysm_customData) != 'object') window.ysm_customData = new Object();
+window.ysm_customData.segment_1FOR7M8U21978A = "event=1,transId=,currency=,amount=";
+// -->
+</SCRIPT>
+</head>
+<body topmargin=0 leftmargin=0>
+<br>
+
+<script>
+function show_receipt() 
+{
+	if("<?=$rSuccYn?>"== "y" && "<?=$AuthTy?>"=="card"){
+		url="http://www.allthegate.com/customer/receiptLast3.jsp"
+		url=url+"?sRetailer_id="+sRetailer_id.value;
+		url=url+"&approve="+approve.value;
+		url=url+"&send_no="+send_no.value;
+		
+		window.open(url, "window","toolbar=no,location=no,directories=no,status=,menubar=no,scrollbars=no,resizable=no,width=420,height=700,top=0,left=150");
+	}else{
+		alert("해당하는 결제내역이 없습니다");
+	}
+}
+</script>
+<SCRIPT language="JavaScript" type="text/javascript">
+<!-- Overture Korea
+// Event Type ID: 1
+// Segment Type ID: 1
+if (typeof(window.ysm_customData) != 'object') window.ysm_customData = new Object();
+window.ysm_customData.segment_1FOR7M8U21978A = "event=1,transId=,currency=,amount=";
+// -->
+</SCRIPT>
+</head>
+<img src="/img/pop/charge_contents_top.gif" width="400" height="38">
+<br>
+<table width="281" border="0" align="center" cellpadding="0" cellspacing="0" background="/img/pop/box01_bg.gif">
+  <tr>
+    <td><img src="/img/pop/box01_top.gif" width="281" height="6"></td>
+  </tr>
+  <tr>
+    <td>
+		<TABLE width=95% border=0 align="center" cellpadding=0 CELLSPACING=0 style="border-width:0px; border-color:rgb(204,204,204); border-style:solid;">
+			<TR height=26>
+				<TD WIDTH="73" height="22" align="center" class="darkbrown"><strong>결제자</strong></TD>
+				<TD width=3 height="22"></TD>
+				<TD width="191" height="22">&nbsp;<?=$rOrdNm ?></TD>
+			</tr>
+<? 
+if($rSuccYn=="y"){ 
+?>
+			<TR height=26>
+				<TD WIDTH="73" height="22" align="center" class="darkbrown"><strong>결제형태</strong></TD>
+				<TD></TD>
+				<td>&nbsp;<?=$card_method?></td>
+			</tr>
+			<tr class="darkbrown">
+				<td height=1 colspan=3> </td>
+			</tr>
+			  
+<?		
+	if($AuthTy == "card" && ($SubTy == "visa3d" || $SubTy == "normal") ) { 
+?>
+			<TR height=26>
+				<TD WIDTH="73" height="22" align="center" class="darkbrown"><strong>카드사명</strong></TD>
+				<TD></TD>
+				<td>&nbsp;<?=$rCardNm?></td>
+			</tr>
+			<tr class="darkbrown">
+				<td height=1 colspan=3> </td>
+			</tr>
+<?		
+	} 
+?>
+			<TR height=26>
+				<TD WIDTH="73" height="22" align="center" class="darkbrown"><strong>서비스명</strong></TD>
+				<TD></TD>
+				<td>&nbsp;<?=$_JONGMOK_PRESENT[$jokmok]?></td>
+			</tr>
+			<tr class="darkbrown">
+				<td height=1 colspan=3> </td>
+			</tr>
+
+			<TR height=26>
+				<TD WIDTH="73" height="22" align="center" class="darkbrown"><strong>금 액</strong></TD>
+				<TD></TD>
+				<td>&nbsp;<?=number_format($rAmt)?> 원</td>
+			</tr>
+			<tr class="darkbrown">
+				<td height=1 colspan=3> </td>
+			</tr>		
+<?		
+	if($AuthTy == "card" ) {
+?>
+			<TR height=26>
+				<TD WIDTH="73" height="22" align="center" class="darkbrown"><strong>영수증 출력</strong></TD>
+				<!--영수증출력을위해서보내주는값-------------------->
+				<input type=hidden name=sRetailer_id value="<?=$rStoreId?>"><!--상점아이디-->
+				<input type=hidden name=approve value="<?=$rApprNo?>"><!---승인번호-->
+				<input type=hidden name=send_no value="<?=$rOrdNo?>"><!--주문번호-->
+				<!--영수증출력을위해서보내주는값-------------------->
+				<TD></TD>
+				<td>&nbsp;<IMG SRC="/images/btn/btn_pop_print.gif" align="absmiddle" style="cursor:hand" border=0 onClick="javascript:show_receipt();"></td>
+			</tr>
+<?		
+	} 						  
+}else{ 
+?>
+			<TR height=26>
+				<TD WIDTH="73" height="22" align="center" class="darkbrown"><strong>결제형태</strong></TD>
+				<TD></TD>
+				<td>&nbsp;<?=$card_method?></td>
+			</tr>
+
+			<TR height=26>
+				<TD WIDTH="73" height="22" align="center" class="darkbrown"><strong>서비스명</strong></TD>
+				<TD></TD>
+				<td>&nbsp;<?=$_JONGMOK_PRESENT[$jokmok]?></td>
+			</tr>
+
+			<TR height=26>
+				<TD WIDTH="73" height="22" align="center" class="darkbrown"><strong>오류 메시지</strong></TD>
+				<TD></TD>
+				<td>&nbsp;<?=$rResMsg?></td>
+			</tr>							
+<? 
+} 
+?>			 
+		</table>
+	</td>
+  </tr>
+  <tr>
+    <td><img src="/img/pop/box01_btm.gif" width="281" height="6"></td>
+  </tr>
+</table>
+<table width="100" height="7" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tr>
+    <td> </td>
+  </tr>
+</table>
+<table cellspacing=0 cellpadding=0 border=0 width=100%>
+<tr>
+	<td align=center>
+		<TABLE CELLSPACING=0 cellpadding=0 border=0 width=85%>
+		<TR>
+			<TD class="brown">결제내역은 [<a href="/mypage/02.html" target="_blank">마이페이지</a>]에서 다시 확인하실수<br>
+		  있습니다.</TD>
+		</TR>
+	  </TABLE>	</TD>
+</tr>
+<tr height=35>
+	<td align=center><img src='/img/sub/btn_bd_close.gif' align=absmiddle onClick="window.close();" style="cursor:hand"></td>
+</tr>
+</table>
+<script>
+opener.location.reload();
+
+function winResize(){
+	window.resizeTo(320, document.body.scrollHeight + 80);
+}
+
+window.onload = function(){
+	 winResize();
+	 window.setTimeout("winResize();", 500);
+	 window.setTimeout("winResize();", 1000);
+}
+var openwin = window.open("AGS_progress.html","popup","width=300,height=160");
+openwin.close();
+</script>
+</body>
+</html>
+
+	

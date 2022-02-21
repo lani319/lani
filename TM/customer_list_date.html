@@ -1,0 +1,383 @@
+<?php
+
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/db.connect.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_config/sys.config.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/base_lib.php";
+include_once $_SERVER['DOCUMENT_ROOT']."/_libs/common_lib.php";
+
+
+/* DB Connection */
+$DB = DBConn($_HOST_NAME, $_USER_NAME, $_PASSWORD, $_DB);
+
+
+/* 총 게시물수 구하기 */
+if(!$page){ $page = 1 ; }
+$pagePerNum = 100; // 한 페이지당 레코드 갯수
+$indexPerPage = 10; // 한페이지에 표시될 인덱스 갯수
+$searchSet ="&admin=$admin&search=$search&blackList=$blackList&selYear=$selYear&selMonth=$selMonth&selDay=$selDay";	
+	
+//검색 조건 시작
+	/* 날짜별로 검색 결과 가져오기*/
+$addWhere1 = "where Left(B.recentDate,4) = '$selYear'";
+if($selMonth !="0")
+{
+	$addWhere1 = "where Left(B.recentDate,7) = '$selYear-$selMonth' ";
+	if($selDay != "0")	
+	{
+		$addWhere1 = "where Left(B.recentDate,10) = '$selYear-$selMonth-$selDay' ";
+	}
+}
+if($_COOKIE['_CKE_USER_ID'] == "ayh319" || $_COOKIE['_CKE_USER_ID'] == "tndls5" || $_COOKIE['_CKE_USER_ID'] == "jinsuk930")
+{		
+}
+else  //상담원 본인것만 보기
+{
+	$addWhere1 .= " and B.adminIdx = '$admin'";
+}
+	
+if($search) //처리상태
+{
+	$addWhere1 .= " and B.processResult = '$search'";	
+}
+
+if($blackList) //블랙리스트 - 독립적으로 운용
+{
+	$addWhere1 = " where B.blackList = '$blackList'";
+}
+
+if($selAdmin)
+{
+	$addWhere1 .= " and B.adminIdx = '$selAdmin'";	
+}
+
+if($selCode)
+{
+	switch ($selCode)
+	{
+		case "1a":
+			$addWhere1 .= " and B.counselKind like '%1a%'";	
+			break;
+		case "1b":
+			$addWhere1 .= " and (B.counselKind like '%1ba%' or B.counselKind like '%1bb%' or B.counselKind like '%1bc%')";	
+			break;
+		case "1bd":
+			$addWhere1 .= " and B.counselKind like '%1bd%'";	
+			break;	
+		case "3":
+			$addWhere1 .= " and (B.counselKind like '%3a%' or B.counselKind like '%3b%' or B.counselKind like '%3c%')";	
+			break;	
+	}
+}
+
+//검색 조건 종료		
+		
+		
+	
+		$admin = $_COOKIE['_CKE_USER_UID'];
+	
+		if($_COOKIE['_CKE_USER_ID'] == "ayh319" || $_COOKIE['_CKE_USER_ID'] == "tndls5" || $_COOKIE['_CKE_USER_ID'] == "jinsuk930")
+	{
+		$sql = "SELECT count(B.idx) as cnt FROM Member A INNER JOIN TM_info B ON A.Idx = B.userIdx $addWhere1 ";
+		$sql .= " UNION ALL ";
+		$sql .= " SELECT count(B.idx) as cnt ";
+		$sql .= " FROM TM_info_NonMember B $addWhere1 ";
+//		echo $sql;
+	}
+	else //전체 회원 다 출력
+	{
+		$sql = "SELECT count(B.idx) as cnt FROM Member A INNER JOIN TM_info B ON A.Idx = B.userIdx $addWhere1 ";
+		$sql .= " and B.adminIdx=$admin";
+		$sql .= " UNION ALL ";
+		$sql .= " SELECT count(B.idx) as cnt ";
+		$sql .= " FROM TM_info_NonMember B $addWhere1 ";
+		$sql .= " and B.adminIdx=$admin";
+//		echo $sql;
+	}
+	
+//	echo $sql;
+		
+	$tmpRs = mysql_query($sql);
+	$totalCount = 0;
+	while($rs = mysql_fetch_array($tmpRs))
+	{
+		$totalCount = $totalCount+$rs[cnt];
+	}
+	
+	
+	$totalPage = ceil($totalCount/$pagePerNum) ;
+	$start = $pagePerNum*($page-1);
+	
+	//회원 카운트 종료	
+	
+	
+	$rowStart = $totalCount - $start;
+		
+
+		
+//회원 상담 결과 출력
+
+	if($_COOKIE['_CKE_USER_ID'] == "ayh319" || $_COOKIE['_CKE_USER_ID'] == "tndls5" || $_COOKIE['_CKE_USER_ID'] == "jinsuk930")
+	{
+		$sql = "SELECT A.userID,A.userName,A.userNickname,A.mobile,B.* FROM Member A INNER JOIN TM_info B ON A.Idx = B.userIdx $addWhere1 ";
+		$sql .= " UNION ALL ";
+		$sql .= " SELECT nonMemberSSN,nonMemberName,nonMemberName,nonMemberMobile,idx,userIdx,adminIdx,recentDate,reserveDate,recentCode,memo,recentEndDate,processResult,counselKind,counselKindDetail,counselTime,counselTimebyNumber,blackList,reservationTime,reservationCallFlag ";
+		$sql .= " FROM TM_info_NonMember B $addWhere1 ";
+		$sql .= " ORDER BY recentDate DESC ";
+		$sql .= " Limit $start,$pagePerNum";
+//		echo $sql;
+	}
+	else //전체 회원 다 출력
+	{
+		$sql = "SELECT A.userID,A.userName,A.userNickname,A.mobile,B.* FROM Member A INNER JOIN TM_info B ON A.Idx = B.userIdx $addWhere1 ";
+		$sql .= " and B.adminIdx=$admin";
+		$sql .= " UNION ALL ";
+		$sql .= " SELECT nonMemberSSN,nonMemberName,nonMemberName,nonMemberMobile,idx,userIdx,adminIdx,recentDate,reserveDate,recentCode,memo,recentEndDate,processResult,counselKind,counselKindDetail,counselTime,counselTimebyNumber,blackList,reservationTime,reservationCallFlag ";
+		$sql .= " FROM TM_info_NonMember B $addWhere1 ";
+		$sql .= " and B.adminIdx=$admin";
+		$sql .= " ORDER BY recentDate DESC ";
+		$sql .= " Limit $start,$pagePerNum";
+		
+//		echo $sql;
+	}
+		
+//echo "<br><br><br><br><br>";
+
+//echo $sql;
+
+$tmpRs = mysql_query($sql);
+$rowCnt = mysql_num_rows($tmpRs);
+$totalRow = $rowCnt;
+$rowCnt = $rowCnt*$page;
+
+
+
+
+function getAdminName($adminCode)
+{
+	$sql = "select userName,userNickname from Member where idx=$adminCode";
+	$tmpRs = mysql_query($sql);
+	$rs = mysql_fetch_array($tmpRs);
+	
+	return $rs[userNickname]."($rs[userName])";
+}
+
+
+
+if($selYear!="00")
+{
+	$strMsg = $selYear."년 ";
+}
+
+if($selMonth!="00")
+{
+	$strMsg .= $selMonth."월 ";
+}
+
+if($selDay!="00")
+{
+	$strMsg .= $selDay."일 ";
+}
+$strMsg = "<font color='blue'>".$strMsg."</font>&nbsp;&nbsp;&nbsp;&nbsp;<font color='red'>".$totalCount."건</font>";
+?>
+<HTML>
+<TITLE>텔레마케팅 날짜 별 검색</TITLE>
+<HEAD>
+
+<script type="text/javascript">
+function goOpen(idx,mode,ssn,mobile)
+{
+	var url = "_counsel.html?idx="+idx;
+	if(idx == 'null')
+	{
+		url = "_counsel.html";
+	}
+	if(mode=="NonMember")
+	{
+		url = "_counsel.html?idx="+idx+"&mode="+mode+"&SSN="+ssn+"&mobile="+mobile;		
+	}
+	
+	var x = window.screen.width-20;	
+	 var y = window.screen.height-100;
+ 	var win = window.open(url,"_new","menubar=no, toolbar=no, location=no, status=no, resizable=1, top=0,left=0, scrollbars=yes,width=" + x + ", height=" + y);
+
+} 
+
+function goSearch()
+{	
+	
+	var search = document.getElementById("selProcessResult").value;
+	var blackList = document.getElementById("selBlackList").value;
+	
+	var year = document.getElementById("selYear").value;
+	var month = document.getElementById("selMonth").value;
+	var day = document.getElementById("selDay").value;
+	
+	var selAdmin = document.getElementById("selAdmin").value;
+	
+	var selCode = document.getElementById("selCode").value;
+	
+	month = changeNumber(month); //1자리에 0 추가
+	day = changeNumber(day);
+	
+	var url = "customer_list_date.html?search="+search+"&blackList="+blackList+"&admin=<?=$admin?>&selYear="+year+"&selMonth="+month+"&selDay="+day+"&selAdmin="+selAdmin+"&selCode="+selCode;
+	
+	location.href = url;
+}
+
+function getAllMemberList(value)
+{	
+	var url = "customer_list_date.html?mode="+value+"&admin=<?=$admin?>";;
+	
+	location.href = url;
+}
+
+//상담 히스토리 보기
+function goHistory(idx)
+{
+	var url = "showHistory.html?userIdx="+idx;
+	var win = window.open(url,'','location=no, directories=no,resizable=no,status=no,toolbar=no,menubar=no, width=1200,height=300,left=0, top=0, scrollbars=yes');
+}
+
+</script>
+
+<link rel="stylesheet" href="table.css" type="text/css" />
+<link rel="stylesheet" href="/css/502style.css" type="text/css" />
+
+</head>
+<body style="margin-left:20;margin-top:20;font-size:12px">
+<table width="1200" cellpadding="0" cellspacing="0" border="1" class="table_basic">
+<tr>
+<td colspan="20"><?php include_once $_SERVER['DOCUMENT_ROOT']."/lani/TM/TM_menu_top.html" ?></td>
+</tr>
+<tr>
+<td colspan="20" align="right" valign="middle">
+<font color="Blue">*이름을 선택하면 상세내역을 볼 수 있습니다.</font>
+&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="images/title_counselHistory.gif" border="0">
+<font color="red" size="3"><b><?=$strMsg?></b></font>
+</td>
+</tr>
+<tr align="center">
+<th width="40px" align="center" valign="bottom"><img src="images/top01.gif"></th>
+<th width="100px" align="center" valign="bottom"><img src="images/top02.gif"></th>
+<th width="100px" align="center" valign="bottom"><img src="images/top03.gif"></th>
+<th width="100px" align="center" valign="bottom"><img src="images/top04.gif"></th>
+<th width="100px" align="center" valign="bottom"><img src="images/top05.gif"></th>
+<th width="150px" align="center" valign="bottom"><img src="images/top06.gif"></th>
+<th align="center" valign="bottom"><img src="images/top07.gif"></th>
+<th width="100px" align="center" valign="bottom"><img src="images/top08.gif"></th>
+<td>
+<img src="images/btnWinOpen.gif" border="0" style="cursor:hand;" onclick="goOpen('null');" onmouseover="this.src = 'images/_btnWinOpen.gif'" onmouseout="this.src = 'images/btnWinOpen.gif'">
+</td>
+</tr>
+<tr><td colspan="10" height="1" bgcolor="FF33CC"></td></tr>
+<?php
+if($rowCnt == 0)
+{
+	echo "<tr><td colspan=10 align=center>등록 된 상담 기록이 없습니다.</td></tr>";
+}
+else 
+{
+	$cnt = 0;
+	while($rs = mysql_fetch_array($tmpRs))
+	{
+		//여기서 출력
+		//이름
+		//필명 (비회원은 생년월일)
+		//연락처
+		//최근상담일
+		//최근상담코드
+		//메모
+		//최근 상담 담당
+		
+		$userName = $rs[userName];		
+		$userNickname = $rs[userNickname];
+		$mobile = $rs[mobile];
+		
+		$adminNickName = getAdminName($rs[adminIdx]);
+			$arrKind = explode("^",$rs[counselKind]);
+			$arrKindDetail = explode("^",$rs[counselKindDetail]);
+			$counselKindCode = "";
+			$counselKindDetail = "";
+			$memo = $rs[memo];
+					
+			for($i = 0 ; $i<sizeof($arrKind); $i++)
+			{
+				$counselKindCode  = $counselKindCode." ".$arrKind[$i];
+				$counselKindDetail  = $counselKindDetail." ".$arrKindDetail[$i];
+			}
+					
+			
+				$userName = $rs[userName];
+				$userNickname = $rs[userNickname];
+				$mobile = $rs[mobile];
+			
+			$counselKindDetail = "[".$counselKindDetail."]";
+			$userIdx = $rs[userIdx];
+			
+			$userName = "<a href='#' onClick='goHistory($userIdx);'>$userName</a>";
+			
+			$bgColor = "";
+			
+			
+				switch ($rs[processResult])
+				{
+					case "Complete":
+					$bgColor = "FFFFFF";
+					break;
+					
+					case "Transfer":
+					$bgColor = "dbe9fc";
+					break;
+
+					case "Fail":
+					$bgColor = "ffe2a5";
+					break;
+				}
+			
+			
+	?>
+		
+	<tr align="center" bgcolor="<?=$bgColor?>">
+	<td width="40px"><?=$rowStart--?></td>
+	<td><?=$userName?></td>
+	<td width="100px"><?=$userNickname?></td>
+	<td width="100px"><?=$mobile?></td>
+	<td width="100px"><?=$rs[recentDate]?></td>
+	<td width="150px">	
+	<?=$counselKindCode?>
+	<br>
+	<?=$counselKindDetail?>
+	</td>
+	<td align="left" style="padding-left:10px"><?=$memo?></td>
+	<td width="100px"><?=$adminNickName?></td>
+	<td width="100px">
+	<?php
+	if($mode == "NonMember")
+	{
+	?>
+	<input type="button" value="선택" onclick="goOpen('<?=$userName?>','NonMember','<?=$userNickname?>','<?=$mobile?>')">
+	<?php
+	}
+	else 
+	{
+	?>
+	<input type="button" value="선택" onclick="goOpen('<?=$userIdx?>','','','')">
+	<?php
+	}
+	?>
+	
+	</td>
+	</tr>
+	<?php
+	$cnt++;
+	}
+}
+?>
+<tr><td colspan="10" align="center">
+<? if($totalCount) pagSet('page',$page,$totalPage,$indexPerPage,$pageURL,$searchSet,$optionSet); ?>
+[<?=$page?>/<?=$totalPage?>]
+</td></tr>
+</table>
+</body>
+</HTML>
